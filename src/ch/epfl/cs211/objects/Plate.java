@@ -2,14 +2,18 @@ package ch.epfl.cs211.objects;
 
 import processing.core.PApplet;
 import static java.lang.Math.*;
-import static ch.epfl.cs211.tools.AngleUtils.*;
+import static ch.epfl.cs211.tools.ValueUtils.*;
 
-/**
- * Created by Leandro on 08.03.2016.
- */
 public class Plate {
 
     private final static float MAX_ANGLE = (float)(PI/6.0);
+
+    /*  STEP_VALUE is the amount by which we increase / decrease
+        the angle when the mouse is dragged
+     */
+    private final static float STEP_VALUE = 0.005f;
+    private final static float MIN_STEP_VALUE = 0.01f;
+    private final static float MAX_STEP_VALUE = 0.05f;
 
     private int x, y, z;
     private float angleX, angleY, angleZ, angleStep;
@@ -36,23 +40,25 @@ public class Plate {
         parent.popMatrix();
     }
 
-    public void update(){
+    public void updateAngle(){
 
         int deltaX = parent.mouseX - parent.pmouseX;
         int deltaY = parent.mouseY - parent.pmouseY;
 
-        System.out.println("dX: "+deltaX+"dY: "+deltaY);
 
         if(deltaX < 0){
-            angleZ = minClampAngle(angleZ - angleStep, -MAX_ANGLE);
+            angleZ = minClamp(angleZ - angleStep, -MAX_ANGLE);
         }else if(deltaX > 0){
-            angleZ = maxClampAngle(angleZ + angleStep, MAX_ANGLE);
+            angleZ = maxClamp(angleZ + angleStep, MAX_ANGLE);
         }
         if(deltaY < 0){
-            angleX = maxClampAngle(angleX + angleStep, MAX_ANGLE);
+            angleX = maxClamp(angleX + angleStep, MAX_ANGLE);
         }else if(deltaY > 0){
-            angleX = minClampAngle(angleX - angleStep, -MAX_ANGLE);
+            angleX = minClamp(angleX - angleStep, -MAX_ANGLE);
         }
+    }
 
+    public void updateSensitivity(int count){
+        angleStep = clamp(angleStep + (count * STEP_VALUE), MIN_STEP_VALUE, MAX_STEP_VALUE);
     }
 }

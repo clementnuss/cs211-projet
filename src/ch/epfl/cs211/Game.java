@@ -2,6 +2,7 @@ package ch.epfl.cs211;
 
 import ch.epfl.cs211.objects.Plate;
 import processing.core.PApplet;
+import processing.event.MouseEvent;
 
 
 /**
@@ -29,15 +30,19 @@ public class Game extends PApplet {
     }
 
     public void draw() {
-        camera(width / 2, height / 2 - 50, 200, 250, 250, 0, 0, 1, 0);
-        directionalLight(50, 100, 125, 0, -1, 0);
+        camera(width / 2, height / 2 - 20, 200, 250, 250, 0, 0, 1, 0);
+        directionalLight(50, 100, 125, 0, 1, 0);
         ambientLight(102, 102, 102);
         background(200);
         p.display();
     }
 
     public void mouseDragged(){
-        p.update();
+        p.updateAngle();
+    }
+
+    public void mouseWheel(MouseEvent event){
+        p.updateSensitivity(event.getCount());
     }
 
 }
