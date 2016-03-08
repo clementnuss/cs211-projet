@@ -12,7 +12,7 @@ public class Assignment3 extends PApplet {
         PApplet.main(new String[]{"ch.epfl.cs211.Assignment3"});
     }
 
-    float depth = 999;
+    float depth = 1000;
     public void settings() {
         size(500, 500, P3D);
     }
