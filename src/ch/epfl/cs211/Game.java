@@ -36,4 +36,8 @@ public class Game extends PApplet {
         p.display();
     }
 
+    public void mouseDragged(){
+        p.update();
+    }
+
 }
