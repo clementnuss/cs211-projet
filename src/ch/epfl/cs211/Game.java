@@ -1,5 +1,6 @@
 package ch.epfl.cs211;
 
+import ch.epfl.cs211.objects.Plate;
 import processing.core.PApplet;
 
 
@@ -12,6 +13,8 @@ import processing.core.PApplet;
  */
 public class Game extends PApplet {
 
+    private Plate p;
+
     public static void main(String[] args) {
         PApplet.main(new String[]{"ch.epfl.cs211.Game"});
     }
@@ -22,7 +25,7 @@ public class Game extends PApplet {
 
     public void setup() {
         noStroke();
-        noLoop();
+        p = new Plate(width / 2, height / 2, 0, this);
     }
 
     public void draw() {
@@ -30,10 +33,7 @@ public class Game extends PApplet {
         directionalLight(50, 100, 125, 0, -1, 0);
         ambientLight(102, 102, 102);
         background(200);
-        pushMatrix();
-        translate(width / 2, height / 2, 0);
-        box(100,5,100);
-        popMatrix();
+        p.display();
     }
 
 }
