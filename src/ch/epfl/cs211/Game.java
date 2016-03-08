@@ -17,14 +17,23 @@ public class Game extends PApplet {
     }
 
     public void settings() {
-        size(800, 800, P3D);
+        size(500, 500, P3D);
     }
 
     public void setup() {
         noStroke();
+        noLoop();
     }
 
     public void draw() {
+        camera(width / 2, height / 2 - 50, 200, 250, 250, 0, 0, 1, 0);
+        directionalLight(50, 100, 125, 0, -1, 0);
+        ambientLight(102, 102, 102);
+        background(200);
+        pushMatrix();
+        translate(width / 2, height / 2, 0);
+        box(100,5,100);
+        popMatrix();
     }
 
 }
