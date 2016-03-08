@@ -1,6 +1,5 @@
 package ch.epfl.cs211.objects;
 
-
 import processing.core.PApplet;
 import static java.lang.Math.*;
 import static ch.epfl.cs211.tools.AngleUtils.*;
@@ -24,7 +23,7 @@ public class Plate {
         this.angleX = 0;
         this.angleY = 0;
         this.angleZ = 0;
-        this.angleStep = 1;
+        this.angleStep = 0.02f;
     }
 
     public void display(){
