@@ -29,7 +29,7 @@ public class Game extends PApplet {
     public void setup() {
         noStroke();
         plate = new Plate(width / 2, height / 2, 0, new Color(152, 202, 227),this);
-        hud = new HUD(25, 25, 120, 100, new Color(255, 166, 0), this);
+        hud = new HUD(25, 25, 200, 100, new Color(255, 166, 0), this);
     }
 
     public void draw() {
@@ -42,7 +42,8 @@ public class Game extends PApplet {
         camera();   //Resets the camera in order to display 2d text
         hud.display( "X: " +plate.getAngleX()+
                 "\nY: " + plate.getAngleY() +
-                "\nZ: " + plate.getAngleZ());
+                "\nZ: " + plate.getAngleZ() +
+                "\nSensitivity: " + plate.getAngleStep());
     }
 
     public void mouseDragged() {

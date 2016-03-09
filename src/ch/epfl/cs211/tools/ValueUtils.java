@@ -1,9 +1,13 @@
 package ch.epfl.cs211.tools;
 
+import java.text.DecimalFormat;
+
 /**
  * Created by Leandro on 08.03.2016.
  */
 public final class ValueUtils {
+
+    private final static DecimalFormat threeDForm = new DecimalFormat("#.###");
 
     /**
      * Limits the input to a given maximum value
@@ -39,4 +43,10 @@ public final class ValueUtils {
         else if(input < minValue) return minValue;
         else return input;
     }
+
+    public static float roundThreeDecimals(float d) {
+        return Float.valueOf(threeDForm.format(d));
+    }
+
+
 }

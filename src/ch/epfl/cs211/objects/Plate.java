@@ -63,7 +63,7 @@ public class Plate {
     }
 
     public void updateSensitivity(int count){
-        angleStep = clamp(angleStep + (count * STEP_VALUE), MIN_STEP_VALUE, MAX_STEP_VALUE);
+        angleStep = roundThreeDecimals(clamp(angleStep - (count * STEP_VALUE), MIN_STEP_VALUE, MAX_STEP_VALUE));
     }
 
     public float getAngleX() {
