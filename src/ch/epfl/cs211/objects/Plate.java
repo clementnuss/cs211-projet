@@ -1,5 +1,6 @@
 package ch.epfl.cs211.objects;
 
+import ch.epfl.cs211.tools.Color;
 import processing.core.PApplet;
 import static java.lang.Math.*;
 import static ch.epfl.cs211.tools.ValueUtils.*;
@@ -17,9 +18,10 @@ public class Plate {
 
     private int x, y, z;
     private float angleX, angleY, angleZ, angleStep;
+    private final Color color;
     private final PApplet parent;
 
-    public Plate(int x, int y, int z, PApplet p){
+    public Plate(int x, int y, int z, Color color, PApplet p){
         this.x = x;
         this.y = y;
         this.z = z;
@@ -28,6 +30,7 @@ public class Plate {
         this.angleY = 0;
         this.angleZ = 0;
         this.angleStep = 0.02f;
+        this.color = color;
     }
 
     public void display(){
@@ -36,6 +39,7 @@ public class Plate {
         parent.rotateX(angleX);
         parent.rotateZ(angleZ);
         parent.rotateY(angleY);
+        parent.fill(color.getV1(),color.getV2(), color.getV3(), color.getAlpha());
         parent.box(100, 5, 100);
         parent.popMatrix();
     }
@@ -60,5 +64,21 @@ public class Plate {
 
     public void updateSensitivity(int count){
         angleStep = clamp(angleStep + (count * STEP_VALUE), MIN_STEP_VALUE, MAX_STEP_VALUE);
+    }
+
+    public float getAngleX() {
+        return angleX;
+    }
+
+    public float getAngleY() {
+        return angleY;
+    }
+
+    public float getAngleZ() {
+        return angleZ;
+    }
+
+    public float getAngleStep() {
+        return angleStep;
     }
 }
