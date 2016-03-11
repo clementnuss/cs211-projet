@@ -28,12 +28,14 @@ public class Game extends PApplet {
 
     public void setup() {
         noStroke();
-        plate = new Plate(width / 2, height / 2, 0, new Color(152, 202, 227),this);
+        plate = new Plate(0, 0, 0, new Color(152, 202, 227),this);
         hud = new HUD(25, 25, 200, 100, new Color(255, 166, 0), this);
     }
 
     public void draw() {
-        camera(width / 2, height / 2 - 20, 200, 250, 250, 0, 0, 1, 0);
+        camera(plate.getX(), plate.getY(), plate.getZ()-200,
+                plate.getX(), plate.getY(), plate.getZ(),
+                0, -1.0f, 0);
         directionalLight(50, 100, 125, 0, 1, 0);
         ambientLight(102, 102, 102);
         background(200);

@@ -50,12 +50,12 @@ public class Plate {
         int deltaY = parent.mouseY - parent.pmouseY;
 
 
-        if(deltaX < 0){
+        if(deltaX > 0){
             angleZ = minClamp(angleZ - angleStep, -MAX_ANGLE);
-        }else if(deltaX > 0){
+        }else if(deltaX < 0){
             angleZ = maxClamp(angleZ + angleStep, MAX_ANGLE);
         }
-        if(deltaY < 0){
+        if(deltaY <0){
             angleX = maxClamp(angleX + angleStep, MAX_ANGLE);
         }else if(deltaY > 0){
             angleX = minClamp(angleX - angleStep, -MAX_ANGLE);
@@ -76,6 +76,18 @@ public class Plate {
 
     public float getAngleZ() {
         return angleZ;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public int getZ() {
+        return z;
     }
 
     public float getAngleStep() {
