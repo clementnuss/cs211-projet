@@ -1,5 +1,6 @@
 package ch.epfl.cs211;
 
+import ch.epfl.cs211.PhysicsEngine.Mover;
 import ch.epfl.cs211.objects.Plate;
 import ch.epfl.cs211.tools.Color;
 import ch.epfl.cs211.tools.HUD;
@@ -17,6 +18,7 @@ public class Game extends PApplet {
 
     private Plate plate;
     private HUD hud;
+    private Mover mover;
 
     public static void main(String[] args) {
         PApplet.main(new String[]{"ch.epfl.cs211.Game"});
@@ -30,6 +32,7 @@ public class Game extends PApplet {
         noStroke();
         plate = new Plate(0, 0, 0, new Color(152, 202, 227),this);
         hud = new HUD(25, 25, 200, 100, new Color(255, 166, 0), this);
+        mover = new Mover(this);
     }
 
     public void draw() {
@@ -46,6 +49,10 @@ public class Game extends PApplet {
                 "\nY: " + plate.getAngleY() +
                 "\nZ: " + plate.getAngleZ() +
                 "\nSensitivity: " + plate.getAngleStep());
+
+        mover.update();
+        mover.checkEdges();
+        mover.display();
     }
 
     public void mouseDragged() {
