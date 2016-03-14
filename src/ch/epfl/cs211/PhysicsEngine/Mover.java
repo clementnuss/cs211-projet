@@ -13,7 +13,7 @@ public class Mover {
     public Mover(PApplet p) {
         this.parent = p;
         location = new PVector(parent.width / 2, parent.height / 2);
-        velocity = new PVector(1, 1);
+        velocity = new PVector(1.5f, 1);
     }
 
     public void update() {
@@ -29,15 +29,11 @@ public class Mover {
     }
 
     public void checkEdges() {
-        if (location.x > parent.width) {
-            location.x = 0;
-        } else if (location.x < 0) {
-            location.x = parent.width;
+        if (location.x > parent.width || location.x < 0) {
+            velocity.x = velocity.x * -1;
         }
-        if (location.y > parent.height) {
-            location.y = 0;
-        } else if (location.y < 0) {
-            location.y = parent.height;
+        if (location.y > parent.height || location.y < 0) {
+            velocity.y = velocity.y * -1;
         }
     }
 }
