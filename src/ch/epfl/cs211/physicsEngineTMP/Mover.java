@@ -1,4 +1,4 @@
-package ch.epfl.cs211.PhysicsEngine;
+package ch.epfl.cs211.physicsEngineTMP;
 
 
 import ch.epfl.cs211.Game;
@@ -14,7 +14,10 @@ public class Mover {
 
     private final static PVector GRAVITY_VECTOR = new PVector(0,0.5f,0);
     private final static float GRAVITY_SCALAR = 9.81f;
-    private float x, y, z;
+    private float x;
+    private float y;
+
+    private float z;
     private final Plate plate;
     private final PApplet parent;
     private final float bound;
@@ -84,5 +87,18 @@ public class Mover {
             velocity.z = velocity.z * -1;
         }
     }
+
+    public float getZ() {
+        return z;
+    }
+
+    public float getX() {
+        return x;
+    }
+
+    public float getY() {
+        return y;
+    }
+
 }
 

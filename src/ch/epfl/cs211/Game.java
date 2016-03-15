@@ -1,11 +1,13 @@
 package ch.epfl.cs211;
 
 import ch.epfl.cs211.objects.Plate;
-import ch.epfl.cs211.PhysicsEngine.Mover;
+import ch.epfl.cs211.physicsEngineTMP.Mover;
 import ch.epfl.cs211.tools.Color;
 import ch.epfl.cs211.tools.HUD;
 import processing.core.PApplet;
 import processing.event.MouseEvent;
+
+import static ch.epfl.cs211.tools.ValueUtils.roundThreeDecimals;
 
 
 /**
@@ -13,29 +15,28 @@ import processing.event.MouseEvent;
  * <p>
  * Visual Computing project (CS211) - 2016
  * Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
- *
- *
+ * <p>
+ * <p>
  * PROCESSING 3D AXIS
- *
- *
- *            ¬ Z
- *           /
- *          /
- *         /
- *         -------------> X
- *        |
- *        |
- *        |
- *        |
- *        V  Y
- *
+ * <p>
+ * <p>
+ * ¬ Z
+ * /
+ * /
+ * /
+ * -------------> X
+ * |
+ * |
+ * |
+ * |
+ * V  Y
  */
 public class Game extends PApplet {
 
     public final static boolean DEBUG = true;
 
     private Plate plate;
-    private HUD hud;
+    private HUD hud, hudBall;
     private Mover mover;
 
     public static void main(String[] args) {
@@ -50,6 +51,7 @@ public class Game extends PApplet {
         noStroke();
         plate = new Plate(0, 0, 0, new Color(152, 202, 227), this);
         hud = new HUD(25, 25, 200, 100, new Color(255, 166, 0), this);
+        hudBall = new HUD(275, 25, 200, 100, new Color(255, 166, 0), this);
         mover = new Mover(0, 0, 0, plate, this);
     }
 
@@ -70,6 +72,14 @@ public class Game extends PApplet {
                 "\nY: " + plate.getAngleY() +
                 "\nZ: " + plate.getAngleZ() +
                 "\nSensitivity: " + plate.getAngleStep());
+
+        float phi = plate.getAngleZ();
+        float theta = -plate.getAngleX();
+
+        hudBall.display("Phi (angle Z)= " + roundThreeDecimals(phi) +
+                "\nTheta (angle X)= " + roundThreeDecimals(theta) +
+                "\n x-contribution= " + roundThreeDecimals(-tan(phi) * mover.getX()) +
+                "\n z-contribution= " + roundThreeDecimals(-tan(theta) * mover.getY()));
 
     }
 
