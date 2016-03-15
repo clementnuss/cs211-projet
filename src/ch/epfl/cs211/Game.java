@@ -32,6 +32,8 @@ import processing.event.MouseEvent;
  */
 public class Game extends PApplet {
 
+    public final static boolean DEBUG = true;
+
     private Plate plate;
     private HUD hud;
     private Mover mover;
@@ -59,6 +61,9 @@ public class Game extends PApplet {
         ambientLight(102, 102, 102);
         background(200);
         plate.display();
+        mover.update();
+        //mover.checkEdges();
+        mover.display();
 
         camera();   //Resets the camera in order to display 2d text
         hud.display("X: " + plate.getAngleX() +
@@ -66,9 +71,6 @@ public class Game extends PApplet {
                 "\nZ: " + plate.getAngleZ() +
                 "\nSensitivity: " + plate.getAngleStep());
 
-        mover.update();
-        mover.checkEdges();
-        mover.display();
     }
 
     public void mouseDragged() {
