@@ -47,11 +47,12 @@ public class Game extends PApplet {
     }
 
     public void setup() {
-        noStroke();
+        stroke(0);
+        strokeWeight(2);
         plate = new Plate(0, 0, 0, new Color(152, 202, 227), this);
         hud = new HUD(25, 25, 200, 100, new Color(255, 166, 0), this);
         hudBall = new HUD(275, 25, 200, 100, new Color(255, 166, 0), this);
-        mover = new Mover(0, 0, 0, plate, this);
+        mover = new Mover(plate, this);
     }
 
     public void draw() {
@@ -63,7 +64,7 @@ public class Game extends PApplet {
         background(200);
         plate.display();
         mover.update();
-        //mover.checkEdges();
+        mover.checkEdges();
         mover.display();
 
         camera();   //Resets the camera in order to display 2d text

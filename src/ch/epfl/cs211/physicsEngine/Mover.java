@@ -1,19 +1,18 @@
 package ch.epfl.cs211.physicsEngine;
 
 
-import ch.epfl.cs211.Game;
 import ch.epfl.cs211.objects.Plate;
 import processing.core.PApplet;
 import processing.core.PVector;
 
-import static ch.epfl.cs211.tools.ValueUtils.*;
+import static ch.epfl.cs211.tools.ValueUtils.clamp;
 import static processing.core.PApplet.sin;
-import static processing.core.PApplet.tan;
 
 public class Mover {
 
-    private final static PVector GRAVITY_VECTOR = new PVector(0,0.5f,0);
+    private final static PVector GRAVITY_VECTOR = new PVector(0, 0.5f, 0);
     private final static float GRAVITY_SCALAR = 0.05f;
+    private final static float SPHERE_RADIUS = 4f;
     private float x;
     private float y;
 
@@ -21,26 +20,24 @@ public class Mover {
     private final Plate plate;
     private final PApplet parent;
     private final float bound;
-    private PVector location;
     private PVector velocity;
     private PVector gravityForce;
 
 
-    public Mover(float x, float y, float z, Plate pl, PApplet p) {
+    public Mover(Plate pl, PApplet p) {
         this.plate = pl;
         this.parent = p;
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        location = new PVector(x,y,z);
-        velocity = new PVector(0,0,0);
-        gravityForce = new PVector(0,0,0);
-        bound = plate.getPlateWidth()/2;
+        this.x = plate.getX();
+        this.y = -(plate.getPlateThickness()/2f + SPHERE_RADIUS);
+        this.z = plate.getZ();
+        velocity = new PVector(0, 0, 0);
+        gravityForce = new PVector(0, 0, 0);
+        bound = plate.getPlateWidth() / 2 - SPHERE_RADIUS;
     }
 
     public void update() {
         gravityForce.x = sin(plate.getAngleZ()) * GRAVITY_SCALAR;
-        gravityForce.z = sin(plate.getAngleX()) * GRAVITY_SCALAR;
+        gravityForce.z = sin(-plate.getAngleX()) * GRAVITY_SCALAR;
 
         velocity.add(gravityForce);
 
@@ -58,25 +55,32 @@ public class Mover {
         float theta = -plate.getAngleX();
 
         x += velocity.x;
-        y = -(tan(phi)*x) - (tan(theta)*z);
         z += velocity.z;
     }
 
     public void display() {
         parent.pushMatrix();
-        parent.translate(x,y,z);
-        parent.sphere(10f);
+        parent.rotateX(plate.getAngleX());
+        parent.rotateY(plate.getAngleY());
+        parent.rotateZ(plate.getAngleZ());
+        parent.translate(x, y, z);
+        parent.sphere(SPHERE_RADIUS);
         parent.popMatrix();
 
     }
 
     public void checkEdges() {
-        if (location.x > bound || location.x < -bound) {
-            location.x = clamp(location.x, -bound, bound);
+        float upperBoundX = plate.getX() + bound;
+        float upperBoundZ = plate.getZ() + bound;
+        float lowerBoundX = plate.getX() - bound;
+        float lowerBoundZ = plate.getZ() - bound;
+
+        if (x > upperBoundX|| x < lowerBoundX) {
+            x = clamp(x, lowerBoundX, upperBoundX);
             velocity.x = velocity.x * -1;
         }
-        if (location.z > bound || location.z < -bound) {
-            location.z = clamp(location.z, -bound, bound);
+        if (z > plate.getZ()+bound || z < plate.getZ()-bound) {
+            z = clamp(z, -bound, bound);
             velocity.z = velocity.z * -1;
         }
     }
