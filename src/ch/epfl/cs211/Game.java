@@ -1,7 +1,7 @@
 package ch.epfl.cs211;
 
 import ch.epfl.cs211.objects.Plate;
-import ch.epfl.cs211.physicsEngine.Mover;
+import ch.epfl.cs211.PhysicsEngine.Mover;
 import ch.epfl.cs211.tools.Color;
 import ch.epfl.cs211.tools.HUD;
 import processing.core.PApplet;
