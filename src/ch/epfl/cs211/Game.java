@@ -56,7 +56,7 @@ public class Game extends PApplet {
     public void draw() {
         camera(plate.getX(), plate.getY(), plate.getZ() - 200,
                 plate.getX(), plate.getY(), plate.getZ(),
-                0, -1.0f, 0);
+                0, 1.0f, 0);
         directionalLight(50, 100, 125, 0, 1, 0);
         ambientLight(102, 102, 102);
         background(200);
