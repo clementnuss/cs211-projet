@@ -13,7 +13,7 @@ import static processing.core.PApplet.tan;
 public class Mover {
 
     private final static PVector GRAVITY_VECTOR = new PVector(0,0.5f,0);
-    private final static float GRAVITY_SCALAR = 9.81f;
+    private final static float GRAVITY_SCALAR = 0.05f;
     private float x;
     private float y;
 
@@ -30,7 +30,7 @@ public class Mover {
         this.plate = pl;
         this.parent = p;
         this.x = x;
-        this.y = y+100f;
+        this.y = y;
         this.z = z;
         location = new PVector(x,y,z);
         velocity = new PVector(0,0,0);
@@ -47,7 +47,7 @@ public class Mover {
         float normalForce = 1;
         float mu = 0.01f;
         float frictionMagnitude = normalForce * mu;
-        PVector friction = velocity;
+        PVector friction = velocity.copy();
         friction.mult(-1);
         friction.normalize();
         friction.mult(frictionMagnitude);
@@ -57,15 +57,8 @@ public class Mover {
         float phi = plate.getAngleZ();
         float theta = -plate.getAngleX();
 
-        if(Game.DEBUG){
-        System.out.println("Phi (angle Z)= "+phi+
-                            "\nTheta (angle X)= "+ theta+
-                            "\n x-contribution= "+ (-tan(phi)*x) +
-                            "\n z-contribution= "+(-tan(theta)*z));
-        }
-
         x += velocity.x;
-        y = (-tan(phi)*x) - (tan(theta)*z);
+        y = -(tan(phi)*x) - (tan(theta)*z);
         z += velocity.z;
     }
 

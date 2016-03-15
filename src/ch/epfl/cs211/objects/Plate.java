@@ -58,9 +58,9 @@ public class Plate {
             angleZ = maxClamp(angleZ + angleStep, MAX_ANGLE);
         }
         if(deltaY < 0){
-            angleX = maxClamp(angleX - angleStep, MAX_ANGLE);
+            angleX = minClamp(angleX - angleStep, -MAX_ANGLE);
         }else if(deltaY > 0){
-            angleX = minClamp(angleX + angleStep, -MAX_ANGLE);
+            angleX = maxClamp(angleX + angleStep, MAX_ANGLE);
         }
     }
 

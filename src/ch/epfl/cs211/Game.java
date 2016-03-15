@@ -33,7 +33,6 @@ import static ch.epfl.cs211.tools.ValueUtils.roundThreeDecimals;
  */
 public class Game extends PApplet {
 
-    public final static boolean DEBUG = true;
 
     private Plate plate;
     private HUD hud, hudBall;
