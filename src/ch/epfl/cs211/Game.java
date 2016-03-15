@@ -1,7 +1,7 @@
 package ch.epfl.cs211;
 
-import ch.epfl.cs211.physicsEngine.Mover;
 import ch.epfl.cs211.objects.Plate;
+import ch.epfl.cs211.physicsEngine.Mover;
 import ch.epfl.cs211.tools.Color;
 import ch.epfl.cs211.tools.HUD;
 import processing.core.PApplet;
@@ -13,6 +13,22 @@ import processing.event.MouseEvent;
  * <p>
  * Visual Computing project (CS211) - 2016
  * Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
+ *
+ *
+ * PROCESSING 3D AXIS
+ *
+ *
+ *            ¬ Z
+ *           /
+ *          /
+ *         /
+ *         -------------> X
+ *        |
+ *        |
+ *        |
+ *        |
+ *        V  Y
+ *
  */
 public class Game extends PApplet {
 
@@ -30,13 +46,13 @@ public class Game extends PApplet {
 
     public void setup() {
         noStroke();
-        plate = new Plate(0, 0, 0, new Color(152, 202, 227),this);
+        plate = new Plate(0, 0, 0, new Color(152, 202, 227), this);
         hud = new HUD(25, 25, 200, 100, new Color(255, 166, 0), this);
-        mover = new Mover(this);
+        mover = new Mover(0, 0, 0, plate, this);
     }
 
     public void draw() {
-        camera(plate.getX(), plate.getY(), plate.getZ()-200,
+        camera(plate.getX(), plate.getY(), plate.getZ() - 200,
                 plate.getX(), plate.getY(), plate.getZ(),
                 0, -1.0f, 0);
         directionalLight(50, 100, 125, 0, 1, 0);
@@ -45,7 +61,7 @@ public class Game extends PApplet {
         plate.display();
 
         camera();   //Resets the camera in order to display 2d text
-        hud.display( "X: " +plate.getAngleX()+
+        hud.display("X: " + plate.getAngleX() +
                 "\nY: " + plate.getAngleY() +
                 "\nZ: " + plate.getAngleZ() +
                 "\nSensitivity: " + plate.getAngleStep());

@@ -15,6 +15,8 @@ public class Plate {
     private final static float STEP_VALUE = 0.005f;
     private final static float MIN_STEP_VALUE = 0.01f;
     private final static float MAX_STEP_VALUE = 0.05f;
+    private final static float PLATE_THICKNESS = 5f;
+    private final static float PLATE_WIDTH = 100f;
 
     private int x, y, z;
     private float angleX, angleY, angleZ, angleStep;
@@ -40,7 +42,7 @@ public class Plate {
         parent.rotateZ(angleZ);
         parent.rotateY(angleY);
         parent.fill(color.getV1(),color.getV2(), color.getV3(), color.getAlpha());
-        parent.box(100, 5, 100);
+        parent.box(PLATE_WIDTH, PLATE_THICKNESS, PLATE_WIDTH);
         parent.popMatrix();
     }
 
@@ -93,4 +95,8 @@ public class Plate {
     public float getAngleStep() {
         return angleStep;
     }
+
+    public float getPlateThickness(){return PLATE_THICKNESS;}
+
+    public float getPlateWidth(){return PLATE_WIDTH;}
 }
