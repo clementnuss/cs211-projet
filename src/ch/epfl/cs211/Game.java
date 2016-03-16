@@ -31,6 +31,11 @@ import static ch.epfl.cs211.tools.ValueUtils.roundThreeDecimals;
  * |
  * V  Y
  */
+
+
+/**
+ * Classe singleton représentant l'application principale du jeu
+ */
 public class Game extends PApplet {
 
 
@@ -38,9 +43,15 @@ public class Game extends PApplet {
     private HUD hud, hudBall;
     private Mover mover;
 
+    public static final Game INSTANCE = new Game();
+
     public static void main(String[] args) {
-        PApplet.main(new String[]{"ch.epfl.cs211.Game"});
+
+        PApplet.runSketch(new String[]{"ch.epfl.cs211.Game"}, Game.INSTANCE);
+
     }
+
+    private Game(){}
 
     public void settings() {
         size(500, 500, P3D);
@@ -49,10 +60,10 @@ public class Game extends PApplet {
     public void setup() {
         stroke(0);
         strokeWeight(2);
-        plate = new Plate(0, 0, 0, new Color(152, 202, 227), this);
-        hud = new HUD(25, 25, 200, 100, new Color(255, 166, 0), this);
-        hudBall = new HUD(275, 25, 200, 100, new Color(255, 166, 0), this);
-        mover = new Mover(plate, this);
+        plate = new Plate(0, 0, 0, new Color(152, 202, 227));
+        hud = new HUD(25, 25, 200, 100, new Color(255, 166, 0));
+        hudBall = new HUD(275, 25, 200, 100, new Color(255, 166, 0));
+        mover = new Mover(plate);
     }
 
     public void draw() {

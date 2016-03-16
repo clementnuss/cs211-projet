@@ -1,8 +1,8 @@
 package ch.epfl.cs211.physicsEngine;
 
 
+import ch.epfl.cs211.Game;
 import ch.epfl.cs211.objects.Plate;
-import processing.core.PApplet;
 import processing.core.PVector;
 
 import static ch.epfl.cs211.tools.ValueUtils.clamp;
@@ -18,15 +18,13 @@ public class Mover {
 
     private float z;
     private final Plate plate;
-    private final PApplet parent;
     private final float bound;
     private PVector velocity;
     private PVector gravityForce;
 
 
-    public Mover(Plate pl, PApplet p) {
+    public Mover(Plate pl) {
         this.plate = pl;
-        this.parent = p;
         this.x = plate.getX();
         this.y = -(plate.getPlateThickness()/2f + SPHERE_RADIUS);
         this.z = plate.getZ();
@@ -59,13 +57,13 @@ public class Mover {
     }
 
     public void display() {
-        parent.pushMatrix();
-        parent.rotateX(plate.getAngleX());
-        parent.rotateY(plate.getAngleY());
-        parent.rotateZ(plate.getAngleZ());
-        parent.translate(x, y, z);
-        parent.sphere(SPHERE_RADIUS);
-        parent.popMatrix();
+        Game.INSTANCE.pushMatrix();
+        Game.INSTANCE.rotateX(plate.getAngleX());
+        Game.INSTANCE.rotateY(plate.getAngleY());
+        Game.INSTANCE.rotateZ(plate.getAngleZ());
+        Game.INSTANCE.translate(x, y, z);
+        Game.INSTANCE.sphere(SPHERE_RADIUS);
+        Game.INSTANCE.popMatrix();
 
     }
 

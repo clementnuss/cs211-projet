@@ -1,7 +1,8 @@
 package ch.epfl.cs211.objects;
 
+import ch.epfl.cs211.Game;
 import ch.epfl.cs211.tools.Color;
-import processing.core.PApplet;
+
 import static java.lang.Math.*;
 import static ch.epfl.cs211.tools.ValueUtils.*;
 
@@ -21,13 +22,11 @@ public class Plate {
     private int x, y, z;
     private float angleX, angleY, angleZ, angleStep;
     private final Color color;
-    private final PApplet parent;
 
-    public Plate(int x, int y, int z, Color color, PApplet p){
+    public Plate(int x, int y, int z, Color color){
         this.x = x;
         this.y = y;
         this.z = z;
-        this.parent = p;
         this.angleX = 0;
         this.angleY = 0;
         this.angleZ = 0;
@@ -36,20 +35,20 @@ public class Plate {
     }
 
     public void display(){
-        parent.pushMatrix();
-        parent.translate(x, y, z);
-        parent.rotateX(angleX);
-        parent.rotateZ(angleZ);
-        parent.rotateY(angleY);
-        parent.fill(color.getV1(),color.getV2(), color.getV3(), color.getAlpha());
-        parent.box(PLATE_WIDTH, PLATE_THICKNESS, PLATE_WIDTH);
-        parent.popMatrix();
+        Game.INSTANCE.pushMatrix();
+        Game.INSTANCE.translate(x, y, z);
+        Game.INSTANCE.rotateX(angleX);
+        Game.INSTANCE.rotateZ(angleZ);
+        Game.INSTANCE.rotateY(angleY);
+        Game.INSTANCE.fill(color.getV1(),color.getV2(), color.getV3(), color.getAlpha());
+        Game.INSTANCE.box(PLATE_WIDTH, PLATE_THICKNESS, PLATE_WIDTH);
+        Game.INSTANCE.popMatrix();
     }
 
     public void updateAngle(){
 
-        int deltaX = parent.mouseX - parent.pmouseX;
-        int deltaY = parent.mouseY - parent.pmouseY;
+        int deltaX = Game.INSTANCE.mouseX - Game.INSTANCE.pmouseX;
+        int deltaY = Game.INSTANCE.mouseY - Game.INSTANCE.pmouseY;
 
 
         if(deltaX > 0){
