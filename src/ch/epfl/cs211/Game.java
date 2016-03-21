@@ -1,5 +1,7 @@
 package ch.epfl.cs211;
 
+import ch.epfl.cs211.objects.ClosedCylinder;
+import ch.epfl.cs211.objects.OpenCylinder;
 import ch.epfl.cs211.objects.Plate;
 import ch.epfl.cs211.physicsEngine.Mover;
 import ch.epfl.cs211.tools.Color;
@@ -42,6 +44,8 @@ public class Game extends PApplet {
     private Plate plate;
     private HUD hud, hudBall;
     private Mover mover;
+    private OpenCylinder openCylinder;
+    private ClosedCylinder closedCylinder;
 
     public static final Game INSTANCE = new Game();
 
@@ -51,7 +55,8 @@ public class Game extends PApplet {
 
     }
 
-    private Game(){}
+    private Game() {
+    }
 
     public void settings() {
         size(500, 500, P3D);
@@ -64,6 +69,8 @@ public class Game extends PApplet {
         hud = new HUD(25, 25, 200, 100, new Color(255, 166, 0));
         hudBall = new HUD(275, 25, 200, 100, new Color(255, 166, 0));
         mover = new Mover(plate);
+        openCylinder = new OpenCylinder(50, 40, 40, new Color(150, 0, 0));
+        closedCylinder = new ClosedCylinder(20, 15, 30, new Color(150, 0, 0));
     }
 
     public void draw() {
@@ -78,6 +85,17 @@ public class Game extends PApplet {
         mover.checkEdges();
         mover.display();
 
+        pushMatrix();
+        rotateX(plate.getAngleX());
+        rotateY(plate.getAngleY());
+        rotateZ(plate.getAngleZ());
+        translate(0,-14,0);
+
+        closedCylinder.display();
+        popMatrix();
+
+        translate(mouseX, mouseY, 0);
+
         camera();   //Resets the camera in order to display 2d text
         hud.display("X: " + plate.getAngleX() +
                 "\nY: " + plate.getAngleY() +
@@ -86,6 +104,7 @@ public class Game extends PApplet {
 
         float phi = plate.getAngleZ();
         float theta = -plate.getAngleX();
+
 
         hudBall.display("Phi (angle Z)= " + roundThreeDecimals(phi) +
                 "\nTheta (angle X)= " + roundThreeDecimals(theta) +
