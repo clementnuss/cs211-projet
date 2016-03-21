@@ -26,6 +26,11 @@ public class HUD {
         this.color = color;
     }
 
+    /**
+     *  renders the given text on the HUD
+     *
+     * @param text  the text to be drawn in the HUD
+     */
     public void display(String text) {
         Game.INSTANCE.textSize(14);
         Game.INSTANCE.fill(color.getV1(),color.getV2(), color.getV3(), color.getAlpha());

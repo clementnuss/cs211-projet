@@ -3,7 +3,9 @@ package ch.epfl.cs211.tools;
 import java.text.DecimalFormat;
 
 /**
- * Created by Leandro on 08.03.2016.
+ *  Visual Computing project (CS211) - 2016
+ *  Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
+ *
  */
 public final class ValueUtils {
 
@@ -44,6 +46,11 @@ public final class ValueUtils {
         else return input;
     }
 
+    /**
+     *
+     * @param d decimal number to be rounded
+     * @return  The rounded number (with e-03 precision)
+     */
     public static float roundThreeDecimals(float d) {
         return Float.valueOf(threeDForm.format(d));
     }
