@@ -5,8 +5,8 @@ package ch.epfl.cs211.objects;
  */
 
 public enum GameModes {
-        Regular,
-        Shifted
+        REGULAR,
+        SHIFTED
 }
 
 

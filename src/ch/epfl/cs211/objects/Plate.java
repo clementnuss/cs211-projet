@@ -16,8 +16,8 @@ public class Plate {
     private final static float STEP_VALUE = 0.005f;
     private final static float MIN_STEP_VALUE = 0.01f;
     private final static float MAX_STEP_VALUE = 0.05f;
-    private final static float PLATE_THICKNESS = 5f;
-    private final static float PLATE_WIDTH = 100f;
+    public final static float PLATE_THICKNESS = 5f;
+    public final static float PLATE_WIDTH = 100f;
 
     private int x, y, z;
     private float angleX, angleY, angleZ, angleStep;
