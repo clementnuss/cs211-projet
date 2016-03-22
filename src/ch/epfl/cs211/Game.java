@@ -54,7 +54,7 @@ public class Game extends PApplet {
     private GameModes mode;
     private List<PVector> obstacleList;
     private final static float RECT_OFFSET = 150f;
-    private final static float SHIFT_TO_REG_RATIO = Plate.PLATE_WIDTH / RECT_OFFSET;
+    private final static float SHIFT_TO_REG_RATIO = Plate.PLATE_WIDTH / (2*RECT_OFFSET);
     private final static float OBSTACLE_SIZE = 25f;
 
     public static final Game INSTANCE = new Game();
@@ -80,7 +80,7 @@ public class Game extends PApplet {
         hudBall = new HUD(275, 25, 200, 100, new Color(255, 166, 0));
         mover = new Mover(plate);
         openCylinder = new OpenCylinder(50, 40, 40, new Color(150, 0, 0));
-        closedCylinder = new ClosedCylinder(Mover.CYLINDER_RADIUS, 10, 30, new Color(150, 0, 0), new PVector(-30,0,-30));
+        closedCylinder = new ClosedCylinder(Mover.CYLINDER_RADIUS, 10, 30, new Color(150, 0, 0));
         mode = GameModes.REGULAR;
         obstacleList = new ArrayList<>();
     }
@@ -110,6 +110,17 @@ public class Game extends PApplet {
         mover.checkCollisions(obstacleList);
         mover.display();
 
+
+        pushMatrix();
+        rotateX(plate.getAngleX());
+        rotateY(plate.getAngleY());
+        rotateZ(plate.getAngleZ());
+
+        for (PVector obst : obstacleList)
+            closedCylinder.display(obst);
+
+        popMatrix();
+
         translate(mouseX, mouseY, 0);
 
         camera();   //Resets the camera in order to display 2d text
@@ -137,7 +148,8 @@ public class Game extends PApplet {
         rect(width / 2 - RECT_OFFSET, height / 2 - RECT_OFFSET, 2 * RECT_OFFSET, 2 * RECT_OFFSET);
 
         for (PVector p : obstacleList) {
-            ellipse(p.x / SHIFT_TO_REG_RATIO, p.y / SHIFT_TO_REG_RATIO, OBSTACLE_SIZE, OBSTACLE_SIZE);
+            closedCylinder.display(p);
+            ellipse(p.x / SHIFT_TO_REG_RATIO, p.z / SHIFT_TO_REG_RATIO, OBSTACLE_SIZE, OBSTACLE_SIZE);
         }
         stroke(0,0,0);
         fill(0,0,0);
@@ -161,7 +173,7 @@ public class Game extends PApplet {
                        && (height / 2 - RECT_OFFSET + OBSTACLE_SIZE / 2) < mouseY
                                                                         && mouseY < (height / 2 + RECT_OFFSET - OBSTACLE_SIZE / 2)) {
                         obstacleList.add(
-                                new PVector(mouseX * SHIFT_TO_REG_RATIO, mouseY * SHIFT_TO_REG_RATIO, 0)
+                                new PVector((mouseX - width/2)* SHIFT_TO_REG_RATIO, 0, (mouseY - height/2)* SHIFT_TO_REG_RATIO)
                         );
                     }
                 }

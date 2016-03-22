@@ -13,10 +13,8 @@ public class ClosedCylinder {
 
 
     private final PShape closedCylinder;
-    private final PVector pos;
 
-    public ClosedCylinder(float cylRadius, float cylHeight, int cylResolution, Color color, PVector pos) {
-        this.pos = pos;
+    public ClosedCylinder(float cylRadius, float cylHeight, int cylResolution, Color color) {
 
         float angle;
         float[] x = new float[cylResolution + 1];
@@ -31,7 +29,7 @@ public class ClosedCylinder {
         for (int i = 0; i < cylResolution + 1; i++) {
             angle = (float) ((2 * PI) / cylResolution) * i;
             x[i] = (float) sin(angle) * cylRadius;
-            z[i] = (float) cos(angle)  *cylRadius;
+            z[i] = (float) cos(angle) * cylRadius;
         }
 
         for (int i = 0; i < cylResolution + 1; i++) {
@@ -51,14 +49,15 @@ public class ClosedCylinder {
         closedCylinder.addChild(bottomSurface, 0);
         closedCylinder.addChild(upSurface, 1);
 
-        closedCylinder.translate(pos.x, pos.y, pos.z);
     }
 
-    public void display() {
+    public void display(PVector pos) {
+        Game.INSTANCE.pushMatrix();
+        Game.INSTANCE.translate(pos.x, pos.y, pos.z);
+
+        System.out.println("x: " + pos.x + " y: " + pos.y + " z: " + pos.z);
         Game.INSTANCE.shape(closedCylinder);
+        Game.INSTANCE.popMatrix();
     }
 
-    public PVector getPos() {
-        return pos;
-    }
 }
