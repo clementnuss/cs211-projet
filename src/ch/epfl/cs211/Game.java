@@ -9,6 +9,7 @@ import ch.epfl.cs211.tools.HUD;
 import processing.core.PApplet;
 import processing.event.KeyEvent;
 import processing.event.MouseEvent;
+import ch.epfl.cs211.objects.GameModes;
 
 import static ch.epfl.cs211.tools.ValueUtils.roundThreeDecimals;
 
@@ -47,7 +48,7 @@ public class Game extends PApplet {
     private Mover mover;
     private OpenCylinder openCylinder;
     private ClosedCylinder closedCylinder;
-
+    private GameModes mode;
     public static final Game INSTANCE = new Game();
 
     public static void main(String[] args) {
@@ -72,45 +73,58 @@ public class Game extends PApplet {
         mover = new Mover(plate);
         openCylinder = new OpenCylinder(50, 40, 40, new Color(150, 0, 0));
         closedCylinder = new ClosedCylinder(20, 15, 30, new Color(150, 0, 0));
+        mode = GameModes.Regular;
     }
 
     public void draw() {
-        camera(plate.getX(), plate.getY(), plate.getZ() - 200,
-                plate.getX(), plate.getY(), plate.getZ(),
-                0, 1.0f, 0);
-        directionalLight(50, 100, 125, 0, 1, 0);
-        ambientLight(102, 102, 102);
-        background(200);
-        plate.display();
-        mover.update();
-        mover.checkCollisions(null);    // TODO: add cylinders list
-        mover.display();
 
-        pushMatrix();
-        rotateX(plate.getAngleX());
-        rotateY(plate.getAngleY());
-        rotateZ(plate.getAngleZ());
-        translate(0,-14,0);
+        switch(mode) {
+            case Regular:
+                camera(plate.getX(), plate.getY(), plate.getZ() - 200,
+                        plate.getX(), plate.getY(), plate.getZ(),
+                        0, 1.0f, 0);
+                directionalLight(50, 100, 125, 0, 1, 0);
+                ambientLight(102, 102, 102);
+                background(200);
+                plate.display();
+                mover.update();
+                mover.checkEdges();
+                mover.display();
 
-        closedCylinder.display();
-        popMatrix();
+                pushMatrix();
+                rotateX(plate.getAngleX());
+                rotateY(plate.getAngleY());
+                rotateZ(plate.getAngleZ());
+                translate(0,-14,0);
 
-        translate(mouseX, mouseY, 0);
+                closedCylinder.display();
+                popMatrix();
 
-        camera();   //Resets the camera in order to display 2d text
-        hud.display("X: " + plate.getAngleX() +
-                "\nY: " + plate.getAngleY() +
-                "\nZ: " + plate.getAngleZ() +
-                "\nSensitivity: " + plate.getAngleStep());
+                translate(mouseX, mouseY, 0);
 
-        float phi = plate.getAngleZ();
-        float theta = -plate.getAngleX();
+                camera();   //Resets the camera in order to display 2d text
+                hud.display("X: " + plate.getAngleX() +
+                        "\nY: " + plate.getAngleY() +
+                        "\nZ: " + plate.getAngleZ() +
+                        "\nSensitivity: " + plate.getAngleStep());
+
+                float phi = plate.getAngleZ();
+                float theta = -plate.getAngleX();
 
 
-        hudBall.display("Phi (angle Z)= " + roundThreeDecimals(phi) +
-                "\nTheta (angle X)= " + roundThreeDecimals(theta) +
-                "\n x-contribution= " + roundThreeDecimals(-tan(phi) * mover.getX()) +
-                "\n z-contribution= " + roundThreeDecimals(-tan(theta) * mover.getY()));
+                hudBall.display("Phi (angle Z)= " + roundThreeDecimals(phi) +
+                        "\nTheta (angle X)= " + roundThreeDecimals(theta) +
+                        "\n x-contribution= " + roundThreeDecimals(-tan(phi) * mover.getX()) +
+                        "\n z-contribution= " + roundThreeDecimals(-tan(theta) * mover.getY()));
+                break;
+
+            case Shifted:
+
+                break;
+
+
+        }
+
 
     }
 

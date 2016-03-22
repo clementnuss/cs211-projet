@@ -75,7 +75,7 @@ public class Mover {
         checkCylinders(cylinders);
     }
 
-    private void checkEdges() {
+    public void checkEdges() {
         float upperBoundX = plate.getX() + bound;
         float upperBoundZ = plate.getZ() + bound;
         float lowerBoundX = plate.getX() - bound;
