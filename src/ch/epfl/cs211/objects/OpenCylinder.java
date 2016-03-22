@@ -15,20 +15,20 @@ public class OpenCylinder {
 
         float angle;
         float[] x = new float[cylResolution + 1];
-        float[] y = new float[cylResolution + 1];
+        float[] z = new float[cylResolution + 1];
 
         for (int i = 0; i < x.length; i++) {
             angle = (float) ((2 * PI) / cylResolution) * i;
             x[i] = (float) sin(angle) * cylRadius;
-            y[i] = (float) cos(angle) * cylRadius;
+            z[i] = (float) cos(angle) * cylRadius;
         }
 
         cylinder = Game.INSTANCE.createShape();
         cylinder.beginShape(PShape.QUAD_STRIP);
 
         for (int i = 0; i < x.length; i++) {
-            cylinder.vertex(x[i], y[i], 0);
-            cylinder.vertex(x[i], y[i], cylHeight);
+            cylinder.vertex(x[i], 0, z[i]);
+            cylinder.vertex(x[i], -cylHeight, z[i]);
         }
         cylinder.fill(color.getV1(), color.getV2(), color.getV3(), color.getAlpha());
         cylinder.endShape();

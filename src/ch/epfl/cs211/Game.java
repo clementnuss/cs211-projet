@@ -80,9 +80,9 @@ public class Game extends PApplet {
         hudBall = new HUD(275, 25, 200, 100, new Color(255, 166, 0));
         mover = new Mover(plate);
         openCylinder = new OpenCylinder(50, 40, 40, new Color(150, 0, 0));
-        closedCylinder = new ClosedCylinder(20, 15, 30, new Color(150, 0, 0));
+        closedCylinder = new ClosedCylinder(Mover.CYLINDER_RADIUS, 10, 30, new Color(150, 0, 0), new PVector(-30,0,-30));
         mode = GameModes.REGULAR;
-        obstacleList = new ArrayList<PVector>();
+        obstacleList = new ArrayList<>();
     }
 
     public void draw() {
@@ -107,17 +107,8 @@ public class Game extends PApplet {
         background(200);
         plate.display();
         mover.update();
-        mover.checkEdges();
+        mover.checkCollisions(obstacleList);
         mover.display();
-
-        pushMatrix();
-        rotateX(plate.getAngleX());
-        rotateY(plate.getAngleY());
-        rotateZ(plate.getAngleZ());
-        translate(0, -14, 0);
-
-        closedCylinder.display();
-        popMatrix();
 
         translate(mouseX, mouseY, 0);
 

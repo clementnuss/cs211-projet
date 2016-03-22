@@ -15,11 +15,11 @@ public class Mover {
     private final static PVector GRAVITY_VECTOR = new PVector(0, 0.5f, 0);
     private final static float GRAVITY_SCALAR = 0.05f;
     private final static float SPHERE_RADIUS = 4f;
-    private final static float CYLINDER_RADIUS = 5f;
+    public final static float CYLINDER_RADIUS = 10f;
     private float x;
     private float y;
-
     private float z;
+
     private final Plate plate;
     private final float bound;
     private PVector velocity;
@@ -96,7 +96,7 @@ public class Mover {
         PVector ball = new PVector(x, y, z);
 
         for (PVector cyl : cylinders) {
-            if (cyl.dist(ball) <= CYLINDER_RADIUS) {
+            if (cyl.dist(ball) <= CYLINDER_RADIUS + SPHERE_RADIUS) {
                 PVector normal = ball.sub(cyl).normalize();
                 velocity = velocity.sub(normal.mult(2).mult(velocity.dot(normal)));
             }
