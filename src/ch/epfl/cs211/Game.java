@@ -82,7 +82,7 @@ public class Game extends PApplet {
         background(200);
         plate.display();
         mover.update();
-        mover.checkEdges();
+        mover.checkCollisions(null);    // TODO: add cylinders list
         mover.display();
 
         pushMatrix();

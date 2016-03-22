@@ -5,6 +5,8 @@ import ch.epfl.cs211.Game;
 import ch.epfl.cs211.objects.Plate;
 import processing.core.PVector;
 
+import java.util.List;
+
 import static ch.epfl.cs211.tools.ValueUtils.clamp;
 import static processing.core.PApplet.sin;
 
@@ -13,6 +15,7 @@ public class Mover {
     private final static PVector GRAVITY_VECTOR = new PVector(0, 0.5f, 0);
     private final static float GRAVITY_SCALAR = 0.05f;
     private final static float SPHERE_RADIUS = 4f;
+    private final static float CYLINDER_RADIUS = 5f;
     private float x;
     private float y;
 
@@ -26,7 +29,7 @@ public class Mover {
     public Mover(Plate pl) {
         this.plate = pl;
         this.x = plate.getX();
-        this.y = -(plate.getPlateThickness()/2f + SPHERE_RADIUS);
+        this.y = -(plate.getPlateThickness() / 2f + SPHERE_RADIUS);
         this.z = plate.getZ();
         velocity = new PVector(0, 0, 0);
         gravityForce = new PVector(0, 0, 0);
@@ -67,24 +70,37 @@ public class Mover {
 
     }
 
-    public void checkEdges() {
+    public void checkCollisions(List<PVector> cylinders) {
+        checkEdges();
+        checkCylinders(cylinders);
+    }
+
+    private void checkEdges() {
         float upperBoundX = plate.getX() + bound;
         float upperBoundZ = plate.getZ() + bound;
         float lowerBoundX = plate.getX() - bound;
         float lowerBoundZ = plate.getZ() - bound;
 
-        if (x > upperBoundX|| x < lowerBoundX) {
+        if (x > upperBoundX || x < lowerBoundX) {
             x = clamp(x, lowerBoundX, upperBoundX);
             velocity.x = velocity.x * -1;
         }
-        if (z > plate.getZ()+bound || z < plate.getZ()-bound) {
+        if (z > plate.getZ() + bound || z < plate.getZ() - bound) {
             z = clamp(z, -bound, bound);
             velocity.z = velocity.z * -1;
         }
     }
 
-    public float getZ() {
-        return z;
+    private void checkCylinders(List<PVector> cylinders) {
+
+        PVector ball = new PVector(x, y, z);
+
+        for (PVector cyl : cylinders) {
+            if (cyl.dist(ball) <= CYLINDER_RADIUS) {
+                PVector normal = ball.sub(cyl).normalize();
+                velocity = velocity.sub(normal.mult(2).mult(velocity.dot(normal)));
+            }
+        }
     }
 
     public float getX() {
@@ -94,6 +110,11 @@ public class Mover {
     public float getY() {
         return y;
     }
+
+    public float getZ() {
+        return z;
+    }
+
 
 }
 
