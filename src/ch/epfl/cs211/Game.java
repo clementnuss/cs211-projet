@@ -1,6 +1,7 @@
 package ch.epfl.cs211;
 
 import ch.epfl.cs211.objects.ClosedCylinder;
+import ch.epfl.cs211.objects.GameModes;
 import ch.epfl.cs211.objects.OpenCylinder;
 import ch.epfl.cs211.objects.Plate;
 import ch.epfl.cs211.physicsEngine.Mover;
@@ -10,7 +11,6 @@ import processing.core.PApplet;
 import processing.core.PVector;
 import processing.event.KeyEvent;
 import processing.event.MouseEvent;
-import ch.epfl.cs211.objects.GameModes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,18 +87,18 @@ public class Game extends PApplet {
 
     public void draw() {
 
-        switch(mode) {
+        switch (mode) {
             case REGULAR:
-                    drawRegularMode();
+                drawRegularMode();
                 break;
 
             case SHIFTED:
-                    drawShiftedMode();
+                drawShiftedMode();
                 break;
         }
     }
 
-    private void drawRegularMode(){
+    private void drawRegularMode() {
         camera(plate.getX(), plate.getY(), plate.getZ() - 200,
                 plate.getX(), plate.getY(), plate.getZ(),
                 0, 1.0f, 0);
@@ -114,7 +114,7 @@ public class Game extends PApplet {
         rotateX(plate.getAngleX());
         rotateY(plate.getAngleY());
         rotateZ(plate.getAngleZ());
-        translate(0,-14,0);
+        translate(0, -14, 0);
 
         closedCylinder.display();
         popMatrix();
@@ -137,18 +137,19 @@ public class Game extends PApplet {
                 "\n z-contribution= " + roundThreeDecimals(-tan(theta) * mover.getY()));
     }
 
-    private void drawShiftedMode(){
+    private void drawShiftedMode() {
         camera();   //Resets the camera in order to display 2d text
         background(200);
-        fill(100,100,100);
-        stroke(50,50,50);
+        fill(100, 100, 100);
+        stroke(150, 50, 50);
 
-        rect(width/2 - RECT_OFFSET, height/2 - RECT_OFFSET, 2 * RECT_OFFSET, 2 * RECT_OFFSET);
+        rect(width / 2 - RECT_OFFSET, height / 2 - RECT_OFFSET, 2 * RECT_OFFSET, 2 * RECT_OFFSET);
 
-        for(PVector p : obstacleList){
-            ellipse(p.x / SHIFT_TO_REG_RATIO, p.y / SHIFT_TO_REG_RATIO, OBSTACLE_SIZE,OBSTACLE_SIZE);
+        for (PVector p : obstacleList) {
+            ellipse(p.x / SHIFT_TO_REG_RATIO, p.y / SHIFT_TO_REG_RATIO, OBSTACLE_SIZE, OBSTACLE_SIZE);
         }
-
+        stroke(0,0,0);
+        fill(0,0,0);
     }
 
     public void mouseDragged() {
@@ -159,21 +160,26 @@ public class Game extends PApplet {
         plate.updateSensitivity(event.getCount());
     }
 
-    public void mouseClicked(MouseEvent event){
-        switch(event.getButton()){
+    public void mouseClicked(MouseEvent event) {
+        switch (event.getButton()) {
             case LEFT:
-                if(mode == GameModes.SHIFTED){
-
-                    obstacleList.add(
-                            new PVector(mouseX * SHIFT_TO_REG_RATIO, mouseY * SHIFT_TO_REG_RATIO, 0)
-                    );
+                if (mode == GameModes.SHIFTED) {
+                    //check if click occured above the plate and not outside boundaries
+                    if ((width / 2 - RECT_OFFSET + OBSTACLE_SIZE / 2)    < mouseX
+                                                                        && mouseX < (width / 2 + RECT_OFFSET - OBSTACLE_SIZE / 2)
+                       && (height / 2 - RECT_OFFSET + OBSTACLE_SIZE / 2) < mouseY
+                                                                        && mouseY < (height / 2 + RECT_OFFSET - OBSTACLE_SIZE / 2)) {
+                        obstacleList.add(
+                                new PVector(mouseX * SHIFT_TO_REG_RATIO, mouseY * SHIFT_TO_REG_RATIO, 0)
+                        );
+                    }
                 }
                 break;
         }
     }
 
-    public void keyPressed(KeyEvent event){
-        switch(event.getKeyCode()){
+    public void keyPressed(KeyEvent event) {
+        switch (event.getKeyCode()) {
             case SHIFT:
                 mode = GameModes.SHIFTED;
                 System.out.println("Game mode was changed!");
@@ -181,8 +187,8 @@ public class Game extends PApplet {
         }
     }
 
-    public void keyReleased(KeyEvent event){
-        switch(event.getKeyCode()){
+    public void keyReleased(KeyEvent event) {
+        switch (event.getKeyCode()) {
             case SHIFT:
                 mode = GameModes.REGULAR;
                 break;
