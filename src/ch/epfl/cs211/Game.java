@@ -40,6 +40,7 @@ import static ch.epfl.cs211.tools.ValueUtils.roundThreeDecimals;
  * V  Y
  */
 
+
 /**
  * Classe singleton représentant l'application principale du jeu
  */
@@ -69,7 +70,7 @@ public class Game extends PApplet {
     }
 
     public void settings() {
-        size(800, 600, P3D);
+        size(500, 500, P3D);
     }
 
     public void setup() {
@@ -80,9 +81,9 @@ public class Game extends PApplet {
         hudBall = new HUD(275, 25, 200, 100, new Color(255, 166, 0));
         mover = new Mover(plate);
         openCylinder = new OpenCylinder(50, 40, 40, new Color(150, 0, 0));
-        closedCylinder = new ClosedCylinder(20, 15, 30, new Color(150, 0, 0));
+        closedCylinder = new ClosedCylinder(Mover.CYLINDER_RADIUS, 10, 30, new Color(150, 0, 0), new PVector(-30,0,-30));
         mode = GameModes.REGULAR;
-        obstacleList = new ArrayList<PVector>();
+        obstacleList = new ArrayList<>();
     }
 
     public void draw() {
@@ -107,17 +108,8 @@ public class Game extends PApplet {
         background(200);
         plate.display();
         mover.update();
-        mover.checkEdges();
+        mover.checkCollisions(obstacleList);
         mover.display();
-
-        pushMatrix();
-        rotateX(plate.getAngleX());
-        rotateY(plate.getAngleY());
-        rotateZ(plate.getAngleZ());
-        translate(0,-14,0);
-
-        closedCylinder.display();
-        popMatrix();
 
         translate(mouseX, mouseY, 0);
 
@@ -173,7 +165,7 @@ public class Game extends PApplet {
     }
 
     public void keyPressed(KeyEvent event){
-        switch(event.getKeyCode()){
+        switch(event.getKey()){
             case SHIFT:
                 mode = GameModes.SHIFTED;
                 System.out.println("Game mode was changed!");
@@ -182,9 +174,8 @@ public class Game extends PApplet {
     }
 
     public void keyReleased(KeyEvent event){
-        switch(event.getKeyCode()){
+        switch(event.getKey()){
             case SHIFT:
-                mode = GameModes.REGULAR;
                 break;
         }
     }
