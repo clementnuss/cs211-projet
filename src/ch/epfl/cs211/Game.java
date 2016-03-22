@@ -28,9 +28,9 @@ import static ch.epfl.cs211.tools.ValueUtils.roundThreeDecimals;
  * PROCESSING 3D AXIS
  * <p>
  * <p>
- * ¬ Z
- * /
- * /
+ *       ¬ Z
+ *     /
+ *   /
  * /
  * -------------> X
  * |
@@ -173,7 +173,7 @@ public class Game extends PApplet {
                        && (height / 2 - RECT_OFFSET + OBSTACLE_SIZE / 2) < mouseY
                                                                         && mouseY < (height / 2 + RECT_OFFSET - OBSTACLE_SIZE / 2)) {
                         obstacleList.add(
-                                new PVector((mouseX - width/2)* SHIFT_TO_REG_RATIO, 0, (mouseY - height/2)* SHIFT_TO_REG_RATIO)
+                                new PVector(-(mouseX - width/2)* SHIFT_TO_REG_RATIO, 0, -(mouseY - height/2)* SHIFT_TO_REG_RATIO)
                         );
                     }
                 }
