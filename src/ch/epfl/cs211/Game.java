@@ -7,6 +7,7 @@ import ch.epfl.cs211.physicsEngine.Mover;
 import ch.epfl.cs211.tools.Color;
 import ch.epfl.cs211.tools.HUD;
 import processing.core.PApplet;
+import processing.event.KeyEvent;
 import processing.event.MouseEvent;
 
 import static ch.epfl.cs211.tools.ValueUtils.roundThreeDecimals;
@@ -119,6 +120,20 @@ public class Game extends PApplet {
 
     public void mouseWheel(MouseEvent event) {
         plate.updateSensitivity(event.getCount());
+    }
+
+    public void keyPressed(KeyEvent event){
+        switch(event.getKey()){
+            case SHIFT:
+                break;
+        }
+    }
+
+    public void keyReleased(KeyEvent event){
+        switch(event.getKey()){
+            case SHIFT:
+                break;
+        }
     }
 
 }
