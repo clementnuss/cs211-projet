@@ -10,6 +10,8 @@ public class Color {
     private final float v3;
     private final float alpha;
 
+    public final static Color BLUE = new Color(45, 0, 255, 255);
+
     /**
      *
      * @param v1    First color value (either the Red component or the Hue component)

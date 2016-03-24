@@ -16,11 +16,12 @@ public class Plate {
     private final static float STEP_VALUE = 0.005f;
     private final static float MIN_STEP_VALUE = 0.01f;
     private final static float MAX_STEP_VALUE = 0.05f;
-    public final static float PLATE_THICKNESS = 5f;
-    public final static float PLATE_WIDTH = 100f;
+    public final static float PLATE_THICKNESS = 20f;
+    public final static float PLATE_WIDTH = 500f;
 
     private int x, y, z;
     private float angleX, angleY, angleZ, angleStep;
+    private float savedAngleX, savedAngleY, savedAngleZ;
     private final Color color;
 
     public Plate(int x, int y, int z, Color color){
@@ -63,8 +64,38 @@ public class Plate {
         }
     }
 
+    public void setAngleX(float angleX) {
+        this.angleX = angleX;
+    }
+
+    public void setAngleZ(float angleZ) {
+        this.angleZ = angleZ;
+    }
+
+    public void setAngleY(float angleY) {
+        this.angleY = angleY;
+    }
+
     public void updateSensitivity(int count){
         angleStep = roundThreeDecimals(clamp(angleStep - (count * STEP_VALUE), MIN_STEP_VALUE, MAX_STEP_VALUE));
+    }
+
+    public void saveState(){
+        savedAngleX = angleX;
+        savedAngleY = angleY;
+        savedAngleZ = angleZ;
+    }
+
+    public float getSavedAngleZ() {
+        return savedAngleZ;
+    }
+
+    public float getSavedAngleY() {
+        return savedAngleY;
+    }
+
+    public float getSavedAngleX() {
+        return savedAngleX;
     }
 
     public float getAngleX() {

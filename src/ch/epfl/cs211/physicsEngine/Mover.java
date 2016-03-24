@@ -12,10 +12,9 @@ import static processing.core.PApplet.sin;
 
 public class Mover {
 
-    private final static PVector GRAVITY_VECTOR = new PVector(0, 0.5f, 0);
     private final static float GRAVITY_SCALAR = 0.05f;
-    private final static float SPHERE_RADIUS = 4f;
-    public final static float CYLINDER_RADIUS = 10f;
+    private final static float SPHERE_RADIUS = 20f;
+    public final static float CYLINDER_RADIUS = 25f;
     private float x;
     private float y;
     private float z;
@@ -60,6 +59,9 @@ public class Mover {
     }
 
     public void display() {
+        Game.INSTANCE.stroke(0,0,0);
+        Game.INSTANCE.fill(50,50,255);
+
         Game.INSTANCE.pushMatrix();
         Game.INSTANCE.rotateX(plate.getAngleX());
         Game.INSTANCE.rotateY(plate.getAngleY());

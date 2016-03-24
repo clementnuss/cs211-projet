@@ -53,8 +53,7 @@ public class Game extends PApplet {
     private ClosedCylinder closedCylinder;
     private GameModes mode;
     private List<PVector> obstacleList;
-    private final static float RECT_OFFSET = 150f;
-    private final static float SHIFT_TO_REG_RATIO = Plate.PLATE_WIDTH / (2*RECT_OFFSET);
+    private final static float PLATE_OFFSET = Plate.PLATE_WIDTH/2;
     private final static float OBSTACLE_SIZE = 25f;
 
     public static final Game INSTANCE = new Game();
@@ -87,6 +86,10 @@ public class Game extends PApplet {
 
     public void draw() {
 
+        background(200);
+        directionalLight(50, 100, 125, 0, 1, 0);
+        ambientLight(102, 102, 102);
+
         switch (mode) {
             case REGULAR:
                 drawRegularMode();
@@ -96,15 +99,29 @@ public class Game extends PApplet {
                 drawShiftedMode();
                 break;
         }
+
+        stroke(255,0,0);
+        fill(50,50,255);
+
+        pushMatrix();
+        rotateX(plate.getAngleX());
+        rotateY(plate.getAngleY());
+        rotateZ(plate.getAngleZ());
+        translate(plate.getX(), plate.getY(), plate.getZ());
+
+        for (PVector obst : obstacleList)
+            closedCylinder.display(obst);
+
+        popMatrix();
+
+        stroke(0,0,0);
     }
 
     private void drawRegularMode() {
-        camera(plate.getX(), plate.getY(), plate.getZ() - 200,
+        camera(plate.getX(), plate.getY()-100, plate.getZ() - 700,
                 plate.getX(), plate.getY(), plate.getZ(),
                 0, 1.0f, 0);
-        directionalLight(50, 100, 125, 0, 1, 0);
-        ambientLight(102, 102, 102);
-        background(200);
+
         plate.display();
         mover.update();
         mover.checkCollisions(obstacleList);
@@ -116,8 +133,6 @@ public class Game extends PApplet {
         rotateY(plate.getAngleY());
         rotateZ(plate.getAngleZ());
 
-        for (PVector obst : obstacleList)
-            closedCylinder.display(obst);
 
         popMatrix();
 
@@ -140,23 +155,28 @@ public class Game extends PApplet {
     }
 
     private void drawShiftedMode() {
-        camera();   //Resets the camera in order to display 2d text
-        background(200);
-        fill(100, 100, 100);
-        stroke(150, 50, 50);
 
-        rect(width / 2 - RECT_OFFSET, height / 2 - RECT_OFFSET, 2 * RECT_OFFSET, 2 * RECT_OFFSET);
+        camera(plate.getX(), plate.getY(), plate.getZ() - 10,
+                plate.getX(), plate.getY(), plate.getZ(),
+                0, 1.0f, 0);
 
-        for (PVector p : obstacleList) {
-            closedCylinder.display(p);
-            ellipse(p.x / SHIFT_TO_REG_RATIO, p.z / SHIFT_TO_REG_RATIO, OBSTACLE_SIZE, OBSTACLE_SIZE);
-        }
-        stroke(0,0,0);
-        fill(0,0,0);
+        ortho();
+        plate.saveState();
+        plate.setAngleX(PI/2);
+        plate.setAngleY(0);
+        plate.setAngleZ(0);
+
+        plate.display();
+        plate.setAngleX(plate.getSavedAngleX());
+        plate.setAngleY(plate.getSavedAngleY());
+        plate.setAngleZ(plate.getSavedAngleZ());
+
+        perspective();
+
     }
 
     public void mouseDragged() {
-        plate.updateAngle();
+        if(mode == GameModes.REGULAR) plate.updateAngle();
     }
 
     public void mouseWheel(MouseEvent event) {
@@ -168,12 +188,12 @@ public class Game extends PApplet {
             case LEFT:
                 if (mode == GameModes.SHIFTED) {
                     //check if click occured above the plate and not outside boundaries
-                    if ((width / 2 - RECT_OFFSET + OBSTACLE_SIZE / 2)    < mouseX
-                                                                        && mouseX < (width / 2 + RECT_OFFSET - OBSTACLE_SIZE / 2)
-                       && (height / 2 - RECT_OFFSET + OBSTACLE_SIZE / 2) < mouseY
-                                                                        && mouseY < (height / 2 + RECT_OFFSET - OBSTACLE_SIZE / 2)) {
+                    if ((width / 2 - PLATE_OFFSET + OBSTACLE_SIZE / 2)    < mouseX
+                                                                        && mouseX < (width / 2 + PLATE_OFFSET - OBSTACLE_SIZE / 2)
+                       && (height / 2 - PLATE_OFFSET + OBSTACLE_SIZE / 2) < mouseY
+                                                                        && mouseY < (height / 2 + PLATE_OFFSET - OBSTACLE_SIZE / 2)) {
                         obstacleList.add(
-                                new PVector(-(mouseX - width/2)* SHIFT_TO_REG_RATIO, 0, -(mouseY - height/2)* SHIFT_TO_REG_RATIO)
+                                new PVector(-(mouseX - width/2), 0, -(mouseY - height/2))
                         );
                     }
                 }
@@ -185,7 +205,6 @@ public class Game extends PApplet {
         switch (event.getKeyCode()) {
             case SHIFT:
                 mode = GameModes.SHIFTED;
-                System.out.println("Game mode was changed!");
                 break;
         }
     }
