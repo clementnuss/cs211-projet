@@ -11,11 +11,13 @@ import static java.lang.Math.sin;
 
 public class ClosedCylinder {
 
+    private final float cylinderOffset;
 
     private final PShape closedCylinder;
 
     public ClosedCylinder(float cylRadius, float cylHeight, int cylResolution, Color color) {
 
+        this.cylinderOffset = cylHeight / 2;
         float angle;
         float[] x = new float[cylResolution + 1];
         float[] z = new float[cylResolution + 1];
@@ -53,7 +55,7 @@ public class ClosedCylinder {
 
     public void display(PVector pos) {
         Game.INSTANCE.pushMatrix();
-        Game.INSTANCE.translate(pos.x, pos.y, pos.z);
+        Game.INSTANCE.translate(pos.x, pos.y + cylinderOffset, pos.z);
 
         Game.INSTANCE.shape(closedCylinder);
         Game.INSTANCE.popMatrix();

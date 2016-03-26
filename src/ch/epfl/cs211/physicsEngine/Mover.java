@@ -9,11 +9,12 @@ import java.util.List;
 
 import static ch.epfl.cs211.tools.ValueUtils.clamp;
 import static processing.core.PApplet.sin;
+import static processing.core.PApplet.sqrt;
 
 public class Mover {
 
     private final static float GRAVITY_SCALAR = 0.1f;
-    private final static float SPHERE_RADIUS = 20f;
+    public final static float SPHERE_RADIUS = 20f;
     public final static float CYLINDER_RADIUS = 25f;
     private final static float COLLISION_THRESHOLD = 1f;
 
@@ -77,7 +78,7 @@ public class Mover {
         checkCylinders(cylinders);
     }
 
-    public void checkEdges() {
+    private void checkEdges() {
         float upperBoundX = plate.getX() + bound;
         float upperBoundZ = plate.getZ() + bound;
         float lowerBoundX = plate.getX() - bound;
@@ -96,10 +97,25 @@ public class Mover {
     private void checkCylinders(List<PVector> cylinders) {
 
         PVector ball = pos.copy();
+        PVector nv = velocity.copy().normalize();
+
+        float minimumDistance = CYLINDER_RADIUS + SPHERE_RADIUS;
 
         for (PVector cyl : cylinders) {
             float distance = cyl.dist(pos);
-            if (distance < CYLINDER_RADIUS + SPHERE_RADIUS) {
+            if (distance < minimumDistance) {
+
+                PVector ballToCyl = PVector.sub(cyl, previousPos);
+                float projOnVelocity = PVector.dot(nv, ballToCyl);
+
+                float distanceOfProjSquared = ballToCyl.magSq() - (projOnVelocity * projOnVelocity);
+                float illegalCrossingLength = sqrt((minimumDistance*minimumDistance) - distanceOfProjSquared);
+
+                PVector correctedPos = PVector.mult(nv, projOnVelocity - illegalCrossingLength);
+
+                pos = PVector.add(previousPos, correctedPos);
+
+                /*
                 //The amount by which the ball entered the cylinder
                 float illegalCrossingDistance = CYLINDER_RADIUS + SPHERE_RADIUS - distance;
                 System.out.println("illegal crossing dist: " + illegalCrossingDistance);
@@ -111,10 +127,11 @@ public class Mover {
                 System.out.format("Correction is x: %.2f, y: %.2f, z: %.2f\n", correctedPos.x, correctedPos.y, correctedPos.z);
                 pos.add(correctedPos.x,0,correctedPos.z);
                 previousPos = pos.copy();
+                */
+                PVector collisionNormal = new PVector(pos.x - cyl.x, 0, pos.z - cyl.z).normalize();
+                PVector updatedVel = PVector.mult(collisionNormal, 1.9f * velocity.dot(collisionNormal));
+                velocity.sub(updatedVel.x,0,updatedVel.z);
 
-                PVector collisionNormal = pos.copy().sub(cyl).normalize();
-                PVector updatedVel = collisionNormal.copy().mult(1.9f).mult(velocity.copy().dot(collisionNormal));
-                velocity.sub(updatedVel.x,0,updatedVel.y);
             }
         }
     }
@@ -134,5 +151,7 @@ public class Mover {
     public PVector getPosition() {
         return pos;
     }
+
+    public PVector getVelocity() { return velocity; }
 }
 

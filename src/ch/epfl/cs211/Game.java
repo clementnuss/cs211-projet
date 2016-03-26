@@ -76,7 +76,7 @@ public class Game extends PApplet {
         strokeWeight(2);
         plate = new Plate(0, 0, 0, new Color(200, 200, 200));
         hud = new HUD(25, 25, 200, 100, new Color(255, 166, 0));
-        hudBall = new HUD(275, 25, 200, 100, new Color(255, 166, 0));
+        hudBall = new HUD(275, 25, 200, 300, new Color(255, 166, 0));
         hudMouse = new HUD(525, 25, 200, 100, new Color(255, 166, 0));
         mover = new Mover(plate);
         openCylinder = new OpenCylinder(50, 40, 40, new Color(150, 0, 0));
@@ -145,7 +145,10 @@ public class Game extends PApplet {
 
         hudBall.display("Ball x= " + roundThreeDecimals(mover.getX()) +
                 "\nBall y= " + roundThreeDecimals(mover.getY()) +
-                "\nBall z= " + roundThreeDecimals(mover.getZ()));
+                "\nBall z= " + roundThreeDecimals(mover.getZ()) +
+                "\nVel x= " + roundThreeDecimals(mover.getVelocity().x) +
+                        "\nVel y= " + roundThreeDecimals(mover.getVelocity().y) +
+                        "\nVel z= " + roundThreeDecimals(mover.getVelocity().z));
     }
 
     private void drawShiftedMode() {
@@ -159,8 +162,8 @@ public class Game extends PApplet {
         plate.setAngleX(PI/2);
         plate.setAngleY(0);
         plate.setAngleZ(0);
-
         plate.display();
+
         drawObstacles();
         plate.setAngleX(plate.getSavedAngleX());
         plate.setAngleY(plate.getSavedAngleY());
@@ -192,7 +195,7 @@ public class Game extends PApplet {
                        && (height / 2 - PLATE_OFFSET + OBSTACLE_SIZE / 2) < mouseY
                                                                         && mouseY < (height / 2 + PLATE_OFFSET - OBSTACLE_SIZE / 2)) {
                         obstacleList.add(
-                                new PVector(-(mouseX - width/2), 0, -(mouseY - height/2))
+                                new PVector(-(mouseX - width/2), -Plate.PLATE_THICKNESS/2 - Mover.SPHERE_RADIUS, -(mouseY - height/2))
                         );
                     }
                 }
