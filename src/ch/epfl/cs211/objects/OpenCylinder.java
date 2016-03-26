@@ -7,6 +7,7 @@ import processing.core.PShape;
 import static java.lang.Math.PI;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
+
 public class OpenCylinder {
 
     private final PShape cylinder;
@@ -25,12 +26,14 @@ public class OpenCylinder {
 
         cylinder = Game.INSTANCE.createShape();
         cylinder.beginShape(PShape.QUAD_STRIP);
+        cylinder.fill(color.getV1(), color.getV2(), color.getV3(), color.getAlpha());
+        cylinder.strokeWeight(1);
 
         for (int i = 0; i < x.length; i++) {
             cylinder.vertex(x[i], 0, z[i]);
             cylinder.vertex(x[i], -cylHeight, z[i]);
         }
-        cylinder.fill(color.getV1(), color.getV2(), color.getV3(), color.getAlpha());
+
         cylinder.endShape();
     }
 

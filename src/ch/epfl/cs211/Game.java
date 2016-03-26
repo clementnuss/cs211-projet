@@ -68,7 +68,7 @@ public class Game extends PApplet {
     }
 
     public void settings() {
-        size(800, 600, P3D);
+        size(1024, 576, P3D);
     }
 
     public void setup() {
@@ -79,8 +79,8 @@ public class Game extends PApplet {
         hudBall = new HUD(275, 25, 200, 300, new Color(255, 166, 0));
         hudMouse = new HUD(525, 25, 200, 100, new Color(255, 166, 0));
         mover = new Mover(plate);
-        openCylinder = new OpenCylinder(50, 40, 40, new Color(150, 0, 0));
-        closedCylinder = new ClosedCylinder(Mover.CYLINDER_RADIUS, 75, 30, new Color(150, 0, 0));
+        openCylinder = new OpenCylinder(50, 40, 40, new Color(255, 0, 0));
+        closedCylinder = new ClosedCylinder(Mover.CYLINDER_RADIUS, 75, 30, new Color(50, 255, 50));
         mode = GameModes.REGULAR;
         obstacleList = new ArrayList<>();
     }
@@ -195,7 +195,7 @@ public class Game extends PApplet {
                        && (height / 2 - PLATE_OFFSET + OBSTACLE_SIZE / 2) < mouseY
                                                                         && mouseY < (height / 2 + PLATE_OFFSET - OBSTACLE_SIZE / 2)) {
                         obstacleList.add(
-                                new PVector(-(mouseX - width/2), -Plate.PLATE_THICKNESS/2 - Mover.SPHERE_RADIUS, -(mouseY - height/2))
+                                new PVector(-(mouseX - width/2), -Plate.PLATE_THICKNESS/2, -(mouseY - height/2))
                         );
                     }
                 }

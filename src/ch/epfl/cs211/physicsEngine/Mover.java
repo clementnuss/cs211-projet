@@ -102,6 +102,7 @@ public class Mover {
         float minimumDistance = CYLINDER_RADIUS + SPHERE_RADIUS;
 
         for (PVector cyl : cylinders) {
+
             float distance = cyl.dist(pos);
             if (distance < minimumDistance) {
 
