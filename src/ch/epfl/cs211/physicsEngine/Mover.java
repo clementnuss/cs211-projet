@@ -3,6 +3,7 @@ package ch.epfl.cs211.physicsEngine;
 
 import ch.epfl.cs211.Game;
 import ch.epfl.cs211.objects.Plate;
+import ch.epfl.cs211.tools.Color;
 import processing.core.PVector;
 
 import java.util.List;
@@ -58,8 +59,9 @@ public class Mover {
     }
 
     public void display() {
-        Game.INSTANCE.stroke(255, 174, 0);
 
+        Game.INSTANCE.noStroke();
+        Game.INSTANCE.fill(Color.BALL_COLOR);
         Game.INSTANCE.pushMatrix();
         Game.INSTANCE.rotateX(plate.getAngleX());
         Game.INSTANCE.rotateY(plate.getAngleY());

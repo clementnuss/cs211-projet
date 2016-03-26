@@ -22,9 +22,9 @@ public class Plate {
     private int x, y, z;
     private float angleX, angleY, angleZ, angleStep;
     private float savedAngleX, savedAngleY, savedAngleZ;
-    private final Color color;
+    private final int color;
 
-    public Plate(int x, int y, int z, Color color){
+    public Plate(int x, int y, int z, int color){
         this.x = x;
         this.y = y;
         this.z = z;
@@ -36,13 +36,14 @@ public class Plate {
     }
 
     public void display(){
-        Game.INSTANCE.stroke(0,0,0);
+        Game.INSTANCE.stroke(Color.STROKE_COLOR);
+        Game.INSTANCE.strokeWeight(2f);
         Game.INSTANCE.pushMatrix();
         Game.INSTANCE.translate(x, y, z);
         Game.INSTANCE.rotateX(angleX);
         Game.INSTANCE.rotateZ(angleZ);
         Game.INSTANCE.rotateY(angleY);
-        Game.INSTANCE.fill(color.getV1(),color.getV2(), color.getV3(), color.getAlpha());
+        Game.INSTANCE.fill(color);
         Game.INSTANCE.box(PLATE_WIDTH, PLATE_THICKNESS, PLATE_WIDTH);
         Game.INSTANCE.popMatrix();
     }

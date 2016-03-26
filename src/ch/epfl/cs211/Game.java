@@ -72,24 +72,23 @@ public class Game extends PApplet {
     }
 
     public void setup() {
-        stroke(0);
-        strokeWeight(2);
-        plate = new Plate(0, 0, 0, new Color(200, 200, 200));
+        stroke(Color.STROKE_COLOR);
+        plate = new Plate(0, 0, 0, Color.PLATE_COLOR);
         hud = new HUD(25, 25, 200, 100, new Color(255, 166, 0));
         hudBall = new HUD(275, 25, 200, 300, new Color(255, 166, 0));
         hudMouse = new HUD(525, 25, 200, 100, new Color(255, 166, 0));
         mover = new Mover(plate);
-        openCylinder = new OpenCylinder(50, 40, 40, new Color(255, 0, 0));
-        closedCylinder = new ClosedCylinder(Mover.CYLINDER_RADIUS, 75, 30, new Color(50, 255, 50));
+        openCylinder = new OpenCylinder(50, 40, 40, Color.CYLINDER_COLOR);
+        closedCylinder = new ClosedCylinder(Mover.CYLINDER_RADIUS, 75, 30, Color.CYLINDER_COLOR);
         mode = GameModes.REGULAR;
         obstacleList = new ArrayList<>();
     }
 
     public void draw() {
 
-        background(200);
-        directionalLight(0, 90, 255, 0, 0.5f, 1);
-        ambientLight(102, 102, 102);
+        background(210);
+        ambientLight(80,80,80);
+        spotLight(255, 255, 255, 0,-500,0,0,1,0,PI/4f,2);
 
         switch (mode) {
             case REGULAR:
@@ -101,9 +100,6 @@ public class Game extends PApplet {
                 break;
         }
 
-
-        fill(50,50,255);
-        stroke(0,0,0);
     }
 
     private void drawObstacles(){
@@ -139,10 +135,6 @@ public class Game extends PApplet {
                 "\nZ: " + plate.getAngleZ() +
                 "\nSensitivity: " + plate.getAngleStep());
 
-        float phi = plate.getAngleZ();
-        float theta = -plate.getAngleX();
-
-
         hudBall.display("Ball x= " + roundThreeDecimals(mover.getX()) +
                 "\nBall y= " + roundThreeDecimals(mover.getY()) +
                 "\nBall z= " + roundThreeDecimals(mover.getZ()) +
@@ -156,6 +148,8 @@ public class Game extends PApplet {
         camera(plate.getX(), plate.getY(), plate.getZ() + 10,
                 plate.getX(), plate.getY(), plate.getZ(),
                 0, 1.0f, 0);
+
+        directionalLight(255, 255, 255, 0,0,-1);
 
         ortho();
         plate.saveState();

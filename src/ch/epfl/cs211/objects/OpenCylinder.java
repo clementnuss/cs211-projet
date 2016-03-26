@@ -12,7 +12,7 @@ public class OpenCylinder {
 
     private final PShape cylinder;
 
-    public OpenCylinder(float cylRadius, float cylHeight, int cylResolution, Color color) {
+    public OpenCylinder(float cylRadius, float cylHeight, int cylResolution, int color) {
 
         float angle;
         float[] x = new float[cylResolution + 1];
@@ -26,8 +26,8 @@ public class OpenCylinder {
 
         cylinder = Game.INSTANCE.createShape();
         cylinder.beginShape(PShape.QUAD_STRIP);
-        cylinder.fill(color.getV1(), color.getV2(), color.getV3(), color.getAlpha());
-        cylinder.strokeWeight(1.5f);
+        cylinder.fill(color);
+        cylinder.noStroke();
 
         for (int i = 0; i < x.length; i++) {
             cylinder.vertex(x[i], 0, z[i]);

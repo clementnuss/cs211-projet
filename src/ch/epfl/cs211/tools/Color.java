@@ -10,7 +10,11 @@ public class Color {
     private final float v3;
     private final float alpha;
 
-    public final static Color BLUE = new Color(45, 0, 255, 255);
+
+    public final static int BALL_COLOR = 0xFFffed5d;
+    public final static int CYLINDER_COLOR = 0xffd0d0ce;
+    public final static int STROKE_COLOR = 0xff1C1300;
+    public final static int PLATE_COLOR = 0x7f24C500;
 
     /**
      *
@@ -38,6 +42,14 @@ public class Color {
         this.v2 = v2;
         this.v3 = v3;
         this.alpha = 255f;
+    }
+
+    public int rgb() {
+        int rgb = Math.round(alpha);
+        rgb = (rgb << 8) | Math.round(v1);
+        rgb = (rgb << 8) | Math.round(v2);
+        rgb = (rgb << 8) | Math.round(v3);
+        return rgb;
     }
 
     /**

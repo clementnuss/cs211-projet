@@ -24,7 +24,7 @@ public class ClosedCylinder {
      * @param cylResolution The number of faces the cylinder will have
      * @param color The color with which to draw the cylinder
      */
-    public ClosedCylinder(float cylRadius, float cylHeight, int cylResolution, Color color) {
+    public ClosedCylinder(float cylRadius, float cylHeight, int cylResolution, int color) {
 
         float angle;
         float[] x = new float[cylResolution + 1];
@@ -36,8 +36,8 @@ public class ClosedCylinder {
         bottomSurface.beginShape(PShape.TRIANGLE_FAN);
         topSurface.beginShape(PShape.TRIANGLE_FAN);
 
-        bottomSurface.fill(color.getV1(), color.getV2(), color.getV3(), color.getAlpha());
-        topSurface.fill(color.getV1(), color.getV2(), color.getV3(), color.getAlpha());
+        bottomSurface.fill(color);
+        topSurface.fill(color);
 
         bottomSurface.noStroke();
         topSurface.noStroke();
