@@ -101,8 +101,9 @@ public class Mover {
 
         float minimumDistance = CYLINDER_RADIUS + SPHERE_RADIUS;
 
-        for (PVector cyl : cylinders) {
+        for (PVector cylinderBaseLocation : cylinders) {
 
+            PVector cyl = cylinderBaseLocation.copy().add(0, -SPHERE_RADIUS, 0);
             float distance = cyl.dist(pos);
             if (distance < minimumDistance) {
 
@@ -116,19 +117,6 @@ public class Mover {
 
                 pos = PVector.add(previousPos, correctedPos);
 
-                /*
-                //The amount by which the ball entered the cylinder
-                float illegalCrossingDistance = CYLINDER_RADIUS + SPHERE_RADIUS - distance;
-                System.out.println("illegal crossing dist: " + illegalCrossingDistance);
-
-                //Compute the point where the ball should have stopped
-                PVector correctedPos = previousPos.copy().sub(pos).normalize();
-                correctedPos.mult(illegalCrossingDistance);
-                System.out.format("Pos was: x: %.2f, y: %.2f, z: %.2f\n", pos.x, pos.y, pos.z);
-                System.out.format("Correction is x: %.2f, y: %.2f, z: %.2f\n", correctedPos.x, correctedPos.y, correctedPos.z);
-                pos.add(correctedPos.x,0,correctedPos.z);
-                previousPos = pos.copy();
-                */
                 PVector collisionNormal = new PVector(pos.x - cyl.x, 0, pos.z - cyl.z).normalize();
                 PVector updatedVel = PVector.mult(collisionNormal, 1.9f * velocity.dot(collisionNormal));
                 velocity.sub(updatedVel.x,0,updatedVel.z);
