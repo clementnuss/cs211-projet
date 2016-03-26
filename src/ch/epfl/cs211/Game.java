@@ -120,7 +120,7 @@ public class Game extends PApplet {
     }
 
     private void drawRegularMode() {
-        camera(plate.getX(), plate.getY()-500, plate.getZ() - 700,
+        camera(plate.getX(), plate.getY()-500, plate.getZ() + 700,
                 plate.getX(), plate.getY(), plate.getZ(),
                 0, 1.0f, 0);
 
@@ -153,13 +153,13 @@ public class Game extends PApplet {
 
     private void drawShiftedMode() {
 
-        camera(plate.getX(), plate.getY(), plate.getZ() - 10,
+        camera(plate.getX(), plate.getY(), plate.getZ() + 10,
                 plate.getX(), plate.getY(), plate.getZ(),
                 0, 1.0f, 0);
 
         ortho();
         plate.saveState();
-        plate.setAngleX(PI/2);
+        plate.setAngleX(-PI/2 -0.001f);
         plate.setAngleY(0);
         plate.setAngleZ(0);
         plate.display();
@@ -195,7 +195,7 @@ public class Game extends PApplet {
                        && (height / 2 - PLATE_OFFSET + OBSTACLE_SIZE / 2) < mouseY
                                                                         && mouseY < (height / 2 + PLATE_OFFSET - OBSTACLE_SIZE / 2)) {
                         obstacleList.add(
-                                new PVector(-(mouseX - width/2), -Plate.PLATE_THICKNESS/2, -(mouseY - height/2))
+                                new PVector((mouseX - width/2), 0, (mouseY - height/2))
                         );
                     }
                 }

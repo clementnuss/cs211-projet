@@ -27,7 +27,7 @@ public class OpenCylinder {
         cylinder = Game.INSTANCE.createShape();
         cylinder.beginShape(PShape.QUAD_STRIP);
         cylinder.fill(color.getV1(), color.getV2(), color.getV3(), color.getAlpha());
-        cylinder.strokeWeight(1);
+        cylinder.strokeWeight(1.5f);
 
         for (int i = 0; i < x.length; i++) {
             cylinder.vertex(x[i], 0, z[i]);

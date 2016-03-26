@@ -39,8 +39,8 @@ public class ClosedCylinder {
         bottomSurface.fill(color.getV1(), color.getV2(), color.getV3(), color.getAlpha());
         topSurface.fill(color.getV1(), color.getV2(), color.getV3(), color.getAlpha());
 
-        bottomSurface.strokeWeight(1);
-        topSurface.strokeWeight(1);
+        bottomSurface.noStroke();
+        topSurface.noStroke();
 
         bottomSurface.vertex(0, 0, 0);
         topSurface.vertex(0, -cylHeight, 0);
@@ -67,8 +67,6 @@ public class ClosedCylinder {
     }
 
     public void display(PVector pos) {
-
-        Game.INSTANCE.fill(255,0,0);
         Game.INSTANCE.pushMatrix();
         Game.INSTANCE.translate(pos.x, pos.y , pos.z);
         Game.INSTANCE.shape(closedCylinder);
