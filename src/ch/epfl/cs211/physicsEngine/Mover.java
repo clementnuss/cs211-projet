@@ -12,12 +12,12 @@ import static processing.core.PApplet.sin;
 
 public class Mover {
 
-    private final static float GRAVITY_SCALAR = 0.05f;
+    private final static float GRAVITY_SCALAR = 0.1f;
     private final static float SPHERE_RADIUS = 20f;
     public final static float CYLINDER_RADIUS = 25f;
-    private float x;
-    private float y;
-    private float z;
+
+    private PVector pos;
+    private PVector previousPos;
 
     private final Plate plate;
     private final float bound;
@@ -27,15 +27,16 @@ public class Mover {
 
     public Mover(Plate pl) {
         this.plate = pl;
-        this.x = plate.getX();
-        this.y = -(plate.getPlateThickness() / 2f + SPHERE_RADIUS);
-        this.z = plate.getZ();
+        this.pos = new PVector(plate.getX(), -(plate.getPlateThickness() / 2f + SPHERE_RADIUS), plate.getZ());
         velocity = new PVector(0, 0, 0);
         gravityForce = new PVector(0, 0, 0);
         bound = plate.getPlateWidth() / 2 - SPHERE_RADIUS;
     }
 
     public void update() {
+
+        previousPos = pos.copy();
+
         gravityForce.x = sin(plate.getAngleZ()) * GRAVITY_SCALAR;
         gravityForce.z = sin(-plate.getAngleX()) * GRAVITY_SCALAR;
 
@@ -54,19 +55,17 @@ public class Mover {
         float phi = plate.getAngleZ();
         float theta = -plate.getAngleX();
 
-        x += velocity.x;
-        z += velocity.z;
+        pos.add(velocity);
     }
 
     public void display() {
-        Game.INSTANCE.stroke(0,0,0);
-        Game.INSTANCE.fill(50,50,255);
+        Game.INSTANCE.stroke(255,174,0);
 
         Game.INSTANCE.pushMatrix();
         Game.INSTANCE.rotateX(plate.getAngleX());
         Game.INSTANCE.rotateY(plate.getAngleY());
         Game.INSTANCE.rotateZ(plate.getAngleZ());
-        Game.INSTANCE.translate(x, y, z);
+        Game.INSTANCE.translate(pos.x, pos.y, pos.z);
         Game.INSTANCE.sphere(SPHERE_RADIUS);
         Game.INSTANCE.popMatrix();
 
@@ -83,38 +82,43 @@ public class Mover {
         float lowerBoundX = plate.getX() - bound;
         float lowerBoundZ = plate.getZ() - bound;
 
-        if (x > upperBoundX || x < lowerBoundX) {
-            x = clamp(x, lowerBoundX, upperBoundX);
+        if (pos.x > upperBoundX || pos.x < lowerBoundX) {
+            pos.x = clamp(pos.x, lowerBoundX, upperBoundX);
             velocity.x = velocity.x * -1;
         }
-        if (z > plate.getZ() + bound || z < plate.getZ() - bound) {
-            z = clamp(z, -bound, bound);
+        if (pos.z > plate.getZ() + bound || pos.z < plate.getZ() - bound) {
+            pos.z = clamp(pos.z, -bound, bound);
             velocity.z = velocity.z * -1;
         }
     }
 
     private void checkCylinders(List<PVector> cylinders) {
 
-        PVector ball = new PVector(x, y, z);
+        PVector ball = pos.copy();
 
         for (PVector cyl : cylinders) {
-            if (cyl.dist(ball) <= CYLINDER_RADIUS + SPHERE_RADIUS) {
-                PVector normal = ball.sub(cyl).normalize();
-                velocity = velocity.sub(normal.mult(2).mult(velocity.dot(normal)));
+            float distance = cyl.dist(ball);
+            if (distance <= CYLINDER_RADIUS + SPHERE_RADIUS) {
+                System.out.println("Total: " + (CYLINDER_RADIUS+SPHERE_RADIUS) + "\n distance: "+ distance);
+                PVector normal = ball.copy().sub(cyl).normalize();
+                PVector correctedPos = ball.add(normal.copy().mult(CYLINDER_RADIUS+SPHERE_RADIUS-distance));
+                pos.x = correctedPos.x;
+                pos.z = correctedPos.z;
+                velocity = velocity.sub(normal.copy().mult(1.9f).mult(velocity.copy().dot(normal)));
             }
         }
     }
 
     public float getX() {
-        return x;
+        return pos.x;
     }
 
     public float getY() {
-        return y;
+        return pos.y;
     }
 
     public float getZ() {
-        return z;
+        return pos.z;
     }
 
 

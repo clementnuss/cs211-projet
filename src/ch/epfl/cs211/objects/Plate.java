@@ -36,6 +36,7 @@ public class Plate {
     }
 
     public void display(){
+        Game.INSTANCE.stroke(0,0,0);
         Game.INSTANCE.pushMatrix();
         Game.INSTANCE.translate(x, y, z);
         Game.INSTANCE.rotateX(angleX);

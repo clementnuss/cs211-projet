@@ -47,7 +47,7 @@ public class Game extends PApplet {
 
 
     private Plate plate;
-    private HUD hud, hudBall;
+    private HUD hud, hudBall, hudMouse;
     private Mover mover;
     private OpenCylinder openCylinder;
     private ClosedCylinder closedCylinder;
@@ -74,12 +74,13 @@ public class Game extends PApplet {
     public void setup() {
         stroke(0);
         strokeWeight(2);
-        plate = new Plate(0, 0, 0, new Color(152, 202, 227));
+        plate = new Plate(0, 0, 0, new Color(200, 200, 200));
         hud = new HUD(25, 25, 200, 100, new Color(255, 166, 0));
         hudBall = new HUD(275, 25, 200, 100, new Color(255, 166, 0));
+        hudMouse = new HUD(525, 25, 200, 100, new Color(255, 166, 0));
         mover = new Mover(plate);
         openCylinder = new OpenCylinder(50, 40, 40, new Color(150, 0, 0));
-        closedCylinder = new ClosedCylinder(Mover.CYLINDER_RADIUS, 10, 30, new Color(150, 0, 0));
+        closedCylinder = new ClosedCylinder(Mover.CYLINDER_RADIUS, 75, 30, new Color(150, 0, 0));
         mode = GameModes.REGULAR;
         obstacleList = new ArrayList<>();
     }
@@ -87,7 +88,7 @@ public class Game extends PApplet {
     public void draw() {
 
         background(200);
-        directionalLight(50, 100, 125, 0, 1, 0);
+        directionalLight(0, 90, 255, 0, 0.5f, 1);
         ambientLight(102, 102, 102);
 
         switch (mode) {
@@ -100,25 +101,26 @@ public class Game extends PApplet {
                 break;
         }
 
-        stroke(255,0,0);
-        fill(50,50,255);
 
+        fill(50,50,255);
+        stroke(0,0,0);
+    }
+
+    private void drawObstacles(){
         pushMatrix();
         rotateX(plate.getAngleX());
         rotateY(plate.getAngleY());
         rotateZ(plate.getAngleZ());
-        translate(plate.getX(), plate.getY(), plate.getZ());
+        translate(plate.getX(), plate.getY()-Plate.PLATE_THICKNESS/2, plate.getZ());
 
         for (PVector obst : obstacleList)
             closedCylinder.display(obst);
 
         popMatrix();
-
-        stroke(0,0,0);
     }
 
     private void drawRegularMode() {
-        camera(plate.getX(), plate.getY()-100, plate.getZ() - 700,
+        camera(plate.getX(), plate.getY()-500, plate.getZ() - 700,
                 plate.getX(), plate.getY(), plate.getZ(),
                 0, 1.0f, 0);
 
@@ -127,14 +129,7 @@ public class Game extends PApplet {
         mover.checkCollisions(obstacleList);
         mover.display();
 
-
-        pushMatrix();
-        rotateX(plate.getAngleX());
-        rotateY(plate.getAngleY());
-        rotateZ(plate.getAngleZ());
-
-
-        popMatrix();
+        drawObstacles();
 
         translate(mouseX, mouseY, 0);
 
@@ -148,10 +143,9 @@ public class Game extends PApplet {
         float theta = -plate.getAngleX();
 
 
-        hudBall.display("Phi (angle Z)= " + roundThreeDecimals(phi) +
-                "\nTheta (angle X)= " + roundThreeDecimals(theta) +
-                "\n x-contribution= " + roundThreeDecimals(-tan(phi) * mover.getX()) +
-                "\n z-contribution= " + roundThreeDecimals(-tan(theta) * mover.getY()));
+        hudBall.display("Ball x= " + roundThreeDecimals(mover.getX()) +
+                "\nBall y= " + roundThreeDecimals(mover.getY()) +
+                "\nBall z= " + roundThreeDecimals(mover.getZ()));
     }
 
     private void drawShiftedMode() {
@@ -167,11 +161,16 @@ public class Game extends PApplet {
         plate.setAngleZ(0);
 
         plate.display();
+        drawObstacles();
         plate.setAngleX(plate.getSavedAngleX());
         plate.setAngleY(plate.getSavedAngleY());
         plate.setAngleZ(plate.getSavedAngleZ());
 
         perspective();
+
+        camera();
+        hud.display("Mouse X: " + mouseX+
+                "\nMouse Y: " + mouseY );
 
     }
 

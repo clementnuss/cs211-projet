@@ -55,7 +55,6 @@ public class ClosedCylinder {
         Game.INSTANCE.pushMatrix();
         Game.INSTANCE.translate(pos.x, pos.y, pos.z);
 
-        System.out.println("x: " + pos.x + " y: " + pos.y + " z: " + pos.z);
         Game.INSTANCE.shape(closedCylinder);
         Game.INSTANCE.popMatrix();
     }
