@@ -15,6 +15,7 @@ public class Mover {
     private final static float GRAVITY_SCALAR = 0.1f;
     private final static float SPHERE_RADIUS = 20f;
     public final static float CYLINDER_RADIUS = 25f;
+    private final static float COLLISION_THRESHOLD = 1f;
 
     private PVector pos;
     private PVector previousPos;
@@ -59,7 +60,7 @@ public class Mover {
     }
 
     public void display() {
-        Game.INSTANCE.stroke(255,174,0);
+        Game.INSTANCE.stroke(255, 174, 0);
 
         Game.INSTANCE.pushMatrix();
         Game.INSTANCE.rotateX(plate.getAngleX());
@@ -97,14 +98,23 @@ public class Mover {
         PVector ball = pos.copy();
 
         for (PVector cyl : cylinders) {
-            float distance = cyl.dist(ball);
-            if (distance <= CYLINDER_RADIUS + SPHERE_RADIUS) {
-                System.out.println("Total: " + (CYLINDER_RADIUS+SPHERE_RADIUS) + "\n distance: "+ distance);
-                PVector normal = ball.copy().sub(cyl).normalize();
-                PVector correctedPos = ball.add(normal.copy().mult(CYLINDER_RADIUS+SPHERE_RADIUS-distance));
-                pos.x = correctedPos.x;
-                pos.z = correctedPos.z;
-                velocity = velocity.sub(normal.copy().mult(1.9f).mult(velocity.copy().dot(normal)));
+            float distance = cyl.dist(pos);
+            if (distance < CYLINDER_RADIUS + SPHERE_RADIUS) {
+                //The amount by which the ball entered the cylinder
+                float illegalCrossingDistance = CYLINDER_RADIUS + SPHERE_RADIUS - distance;
+                System.out.println("illegal crossing dist: " + illegalCrossingDistance);
+
+                //Compute the point where the ball should have stopped
+                PVector correctedPos = previousPos.copy().sub(pos).normalize();
+                correctedPos.mult(illegalCrossingDistance);
+                System.out.format("Pos was: x: %.2f, y: %.2f, z: %.2f\n", pos.x, pos.y, pos.z);
+                System.out.format("Correction is x: %.2f, y: %.2f, z: %.2f\n", correctedPos.x, correctedPos.y, correctedPos.z);
+                pos.add(correctedPos.x,0,correctedPos.z);
+                previousPos = pos.copy();
+
+                PVector collisionNormal = pos.copy().sub(cyl).normalize();
+                PVector updatedVel = collisionNormal.copy().mult(1.9f).mult(velocity.copy().dot(collisionNormal));
+                velocity.sub(updatedVel.x,0,updatedVel.y);
             }
         }
     }
@@ -121,6 +131,8 @@ public class Mover {
         return pos.z;
     }
 
-
+    public PVector getPosition() {
+        return pos;
+    }
 }
 
