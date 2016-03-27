@@ -17,7 +17,7 @@ public class Mover {
     private final static float GRAVITY_SCALAR = 0.1f;
     public final static float SPHERE_RADIUS = 20f;
     public final static float CYLINDER_RADIUS = 25f;
-    private final static float COLLISION_THRESHOLD = 0.0005f;
+    private final static float COLLISION_THRESHOLD = 0.0001f;
 
     private PVector pos;
     private PVector previousPos;
@@ -114,18 +114,21 @@ public class Mover {
 
                 PVector correctedPos = PVector.mult(nv, projOnVelocity - illegalCrossingLength);
 
-                pos = PVector.add(previousPos, correctedPos);
+                //performs shifting instead of finding latest legal value for position so it's cumulative among cylinders
+                correctedPos.add(previousPos);
+                PVector shifting = PVector.sub(correctedPos, pos);
+                pos.add(shifting);
 
                 PVector collisionNormal = new PVector(pos.x - cyl.x, 0, pos.z - cyl.z).normalize();
-                PVector updatedVel = PVector.mult(collisionNormal, 1.9f * velocity.dot(collisionNormal));
+                PVector updatedVel = PVector.mult(collisionNormal, 2f * velocity.dot(collisionNormal));
                 velocity.sub(updatedVel.x, 0, updatedVel.z);
 
             }
         }
-
         //This is to avoid glitches where the ball can't move but velocities keep accumulating
         if(collisionOccured && PVector.dist(previousPos, pos) < COLLISION_THRESHOLD){
             velocity = new PVector(0,0,0);
+
         }
     }
 

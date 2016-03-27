@@ -47,7 +47,7 @@ public class Game extends PApplet {
 
 
     private Plate plate;
-    private HUD hud, hudBall, hudMouse;
+    private HUD hudPlate, hudBall, hudMouse;
     private Mover mover;
     private OpenCylinder openCylinder;
     private ClosedCylinder closedCylinder;
@@ -74,9 +74,9 @@ public class Game extends PApplet {
     public void setup() {
         stroke(Color.STROKE_COLOR);
         plate = new Plate(0, 0, 0, Color.PLATE_COLOR);
-        hud = new HUD(25, 25, 200, 100, new Color(255, 166, 0));
-        hudBall = new HUD(275, 25, 200, 300, new Color(255, 166, 0));
-        hudMouse = new HUD(525, 25, 200, 100, new Color(255, 166, 0));
+        hudPlate = new HUD(25,25,150,300, Color.HUD_COLOR);
+        hudBall = new HUD(200, 25, 200, 300, Color.HUD_COLOR);
+        hudMouse = new HUD(25, 25, 250, 300, Color.HUD_COLOR);
         mover = new Mover(plate);
         openCylinder = new OpenCylinder(50, 40, 40, Color.CYLINDER_COLOR);
         closedCylinder = new ClosedCylinder(Mover.CYLINDER_RADIUS, 75, 30, Color.CYLINDER_COLOR);
@@ -130,7 +130,7 @@ public class Game extends PApplet {
         translate(mouseX, mouseY, 0);
 
         camera();   //Resets the camera in order to display 2d text
-        hud.display("X: " + plate.getAngleX() +
+        hudPlate.display("X: " + plate.getAngleX() +
                 "\nY: " + plate.getAngleY() +
                 "\nZ: " + plate.getAngleZ() +
                 "\nSensitivity: " + plate.getAngleStep());
@@ -145,11 +145,11 @@ public class Game extends PApplet {
 
     private void drawShiftedMode() {
 
-        camera(plate.getX(), plate.getY(), plate.getZ() + 10,
+        camera(plate.getX(), plate.getY(), plate.getZ() + 100,
                 plate.getX(), plate.getY(), plate.getZ(),
                 0, 1.0f, 0);
 
-        directionalLight(255, 255, 255, 0,0,-1);
+        directionalLight(210, 210, 210, 0,0.2f,-1);
 
         ortho();
         plate.saveState();
@@ -157,6 +157,8 @@ public class Game extends PApplet {
         plate.setAngleY(0);
         plate.setAngleZ(0);
         plate.display();
+        strokeWeight(10f);
+        stroke(0);
 
         drawObstacles();
         plate.setAngleX(plate.getSavedAngleX());
@@ -164,9 +166,10 @@ public class Game extends PApplet {
         plate.setAngleZ(plate.getSavedAngleZ());
 
         perspective();
-
         camera();
-        hud.display("Mouse X: " + mouseX+
+        hudMouse.display("You are currently in shift mode !\n" +
+                "Click on the plate to add obstacles." +
+                "\nMouse X: " + mouseX+
                 "\nMouse Y: " + mouseY );
 
     }
