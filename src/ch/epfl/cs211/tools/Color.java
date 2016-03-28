@@ -1,9 +1,10 @@
+/**
+ *  Visual Computing project (CS211) - 2016
+ *  Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
+ *
+ */
 package ch.epfl.cs211.tools;
 
-/**
- * Visual Computing project (CS211) - 2016
- * Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
- */
 public class Color {
     private final float v1;
     private final float v2;

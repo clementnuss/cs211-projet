@@ -1,12 +1,12 @@
-package ch.epfl.cs211.tools;
-
-import java.text.DecimalFormat;
-
 /**
  *  Visual Computing project (CS211) - 2016
  *  Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
  *
  */
+package ch.epfl.cs211.tools;
+
+import java.text.DecimalFormat;
+
 public final class ValueUtils {
 
     private final static DecimalFormat threeDForm = new DecimalFormat("#.###");

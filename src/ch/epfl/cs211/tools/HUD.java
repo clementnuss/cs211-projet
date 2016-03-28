@@ -1,11 +1,12 @@
+/**
+ *  Visual Computing project (CS211) - 2016
+ *  Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
+ *
+ */
 package ch.epfl.cs211.tools;
 
 import ch.epfl.cs211.Game;
 
-/**
- * Visual Computing project (CS211) - 2016
- * Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
- */
 public class HUD {
 
     private int x, y, width, height, z;

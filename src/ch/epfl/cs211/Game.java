@@ -19,7 +19,6 @@ import static ch.epfl.cs211.tools.ValueUtils.roundThreeDecimals;
 
 
 /**
- * Created by Clément Nussbaumer on 08.03.2016.
  * <p>
  * Visual Computing project (CS211) - 2016
  * Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier

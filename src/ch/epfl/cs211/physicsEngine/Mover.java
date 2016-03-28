@@ -1,5 +1,9 @@
+/**
+ *  Visual Computing project (CS211) - 2016
+ *  Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
+ *
+ */
 package ch.epfl.cs211.physicsEngine;
-
 
 import ch.epfl.cs211.Game;
 import ch.epfl.cs211.objects.Plate;
