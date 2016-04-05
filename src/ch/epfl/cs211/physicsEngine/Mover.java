@@ -22,6 +22,7 @@ public class Mover {
     public final static float SPHERE_RADIUS = 20f;
     public final static float CYLINDER_RADIUS = 25f;
     private final static float COLLISION_THRESHOLD = 0.0001f;
+    private final static float MU = 0.01f;
 
     private PVector pos;
     private PVector previousPos;
@@ -91,7 +92,7 @@ public class Mover {
             pos.x = clamp(pos.x, lowerBoundX, upperBoundX);
             velocity.x = velocity.x * -1;
         }
-        if (pos.z > plate.getZ() + bound || pos.z < plate.getZ() - bound) {
+        if (pos.z > upperBoundZ || pos.z < lowerBoundZ) {
             pos.z = clamp(pos.z, -bound, bound);
             velocity.z = velocity.z * -1;
         }
