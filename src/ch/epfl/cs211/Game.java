@@ -57,6 +57,7 @@ public class Game extends PApplet {
     private List<PVector> obstacleList;
 
     private float score = 0f;
+
     private final float SCORE_COEFFICIENT = 3f;
     public final static float MAX_SCORE = 100f;
     public final static float MIN_SCORE = 0;
