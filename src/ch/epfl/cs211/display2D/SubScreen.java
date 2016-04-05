@@ -26,8 +26,12 @@ public abstract class SubScreen {
 
     private final float x;
     private final float y;
+    private final float w;
+    private final float h;
 
     public SubScreen(int w, int h, float x, float y){
+        this.w = w;
+        this.h = h;
         this.x = x;
         this.y = y;
 
@@ -40,8 +44,28 @@ public abstract class SubScreen {
 
     public void draw(){};
 
-    private void drawBackgroundView(){}
-    private void drawTopView(){}
-    private void drawScoreView(){}
-    private void drawChartView(){}
+    private void drawBackgroundView(){
+        backGroundView.beginDraw();
+
+        backGroundView.endDraw();
+        Game.INSTANCE.image(backGroundView, 0,0);
+    }
+    private void drawTopView(){
+        topView.beginDraw();
+
+        topView.endDraw();
+        Game.INSTANCE.image(topView, 0,0);
+    }
+    private void drawScoreView(){
+        scoreBoard.beginDraw();
+
+        scoreBoard.endDraw();
+        Game.INSTANCE.image(scoreBoard, 0,0);
+    }
+    private void drawChartView(){
+        scoreChart.beginDraw();
+
+        scoreChart.endDraw();
+        Game.INSTANCE.image(scoreChart, 0,0);
+    }
 }
