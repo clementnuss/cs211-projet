@@ -3,7 +3,7 @@
  *  Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
  *
  */
-package ch.epfl.cs211.tools;
+package ch.epfl.cs211.display2D;
 
 import ch.epfl.cs211.Game;
 

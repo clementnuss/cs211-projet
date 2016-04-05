@@ -6,7 +6,7 @@ import ch.epfl.cs211.objects.OpenCylinder;
 import ch.epfl.cs211.objects.Plate;
 import ch.epfl.cs211.physicsEngine.Mover;
 import ch.epfl.cs211.tools.Color;
-import ch.epfl.cs211.tools.HUD;
+import ch.epfl.cs211.display2D.HUD;
 import processing.core.PApplet;
 import processing.core.PVector;
 import processing.event.KeyEvent;
