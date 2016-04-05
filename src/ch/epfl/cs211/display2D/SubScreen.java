@@ -12,9 +12,14 @@ import processing.core.PGraphics;
 public abstract class SubScreen {
     protected final PGraphics pGraphics;
 
-    public SubScreen(int w, int h){
+    private final float x;
+    private final float y;
+
+    public SubScreen(int w, int h, float x, float y){
         pGraphics = Game.INSTANCE.createGraphics(w,h);
+        this.x = x;
+        this.y = y;
     }
 
-    public abstract void draw();
+    public void draw(){};
 }
