@@ -4,6 +4,8 @@ import ch.epfl.cs211.Game;
 import processing.core.PGraphics;
 import ch.epfl.cs211.tools.Color;
 
+import static ch.epfl.cs211.Game.INSTANCE;
+
 
 /**
  * The createGraphics() function makes a surface with the size defined by the parameters. beginDraw() and
@@ -13,7 +15,7 @@ import ch.epfl.cs211.tools.Color;
 public class SubScreen {
 
     public final static int VISUALISATION_HEIGHT = 120;
-    public final static int VISUALISATION_WIDTH = Game.INSTANCE.width;
+    public final static int VISUALISATION_WIDTH = INSTANCE.width;
     public final static int VISUALISATION_OFFSET = 20;
     public final static int TOP_HEIGHT = 75;
     public final static int TOP_WIDTH = 75;
@@ -40,10 +42,10 @@ public class SubScreen {
         this.backGroundX = backGroundX;
         this.backGroundY = backGroundY;
 
-        backGroundView = Game.INSTANCE.createGraphics(VISUALISATION_WIDTH, VISUALISATION_HEIGHT);
-        topView = Game.INSTANCE.createGraphics(TOP_WIDTH, TOP_HEIGHT);
-        scoreBoard = Game.INSTANCE.createGraphics(SCORE_WIDTH, SCORE_HEIGHT);
-        scoreChart = Game.INSTANCE.createGraphics(CHART_WIDTH, CHART_HEIGHT);
+        backGroundView = INSTANCE.createGraphics(VISUALISATION_WIDTH, VISUALISATION_HEIGHT);
+        topView = INSTANCE.createGraphics(TOP_WIDTH, TOP_HEIGHT);
+        scoreBoard = INSTANCE.createGraphics(SCORE_WIDTH, SCORE_HEIGHT);
+        scoreChart = INSTANCE.createGraphics(CHART_WIDTH, CHART_HEIGHT);
 
         topViewX = backGroundX + VISUALISATION_OFFSET;
         topViewY = backGroundY + VISUALISATION_OFFSET;
@@ -54,7 +56,7 @@ public class SubScreen {
     }
 
     public void draw(){
-        Game.INSTANCE.noLights();
+        INSTANCE.noLights();
         drawBackgroundView();
         drawTopView();
         drawScoreView();
@@ -67,7 +69,7 @@ public class SubScreen {
         backGroundView.noStroke();
         backGroundView.rect(0,0, VISUALISATION_WIDTH, VISUALISATION_HEIGHT);
         backGroundView.endDraw();
-        Game.INSTANCE.image(backGroundView, backGroundX, backGroundY);
+        INSTANCE.image(backGroundView, backGroundX, backGroundY);
     }
     private void drawTopView(){
         topView.beginDraw();
@@ -75,14 +77,22 @@ public class SubScreen {
         topView.noStroke();
         topView.rect(0,0, TOP_WIDTH, TOP_HEIGHT);
         topView.endDraw();
-        Game.INSTANCE.image(topView, topViewX, topViewY);
+        INSTANCE.image(topView, topViewX, topViewY);
     }
     private void drawScoreView(){
         scoreBoard.beginDraw();
         scoreBoard.fill(0);
-        scoreBoard.rect(0,0, VISUALISATION_WIDTH, VISUALISATION_HEIGHT);
+        scoreBoard.rect(0,0, SCORE_WIDTH, SCORE_HEIGHT);
+
+        scoreBoard.fill(0xFFFF0450);
+        scoreBoard.textSize(10);
+        scoreBoard.text("Total score: " + INSTANCE.getScore() +
+                        "\n Velocity: " + INSTANCE.getMover().getVelocity().mag() +
+                        "\nLast score: " + INSTANCE.getLastChange(),
+                0, 0, VISUALISATION_WIDTH, VISUALISATION_HEIGHT);
+
         scoreBoard.endDraw();
-        Game.INSTANCE.image(scoreBoard, scoreBoardX, scoreBoardY);
+        INSTANCE.image(scoreBoard, scoreBoardX, scoreBoardY);
     }
     private void drawChartView(){
         scoreChart.beginDraw();
@@ -90,6 +100,6 @@ public class SubScreen {
         scoreChart.noStroke();
         scoreChart.rect(0,0, CHART_WIDTH, CHART_HEIGHT);
         scoreChart.endDraw();
-        Game.INSTANCE.image(scoreChart, scoreChartX, scoreChartY);
+        INSTANCE.image(scoreChart, scoreChartX, scoreChartY);
     }
 }

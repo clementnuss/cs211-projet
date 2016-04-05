@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static ch.epfl.cs211.tools.ValueUtils.roundThreeDecimals;
-import static java.lang.Math.abs;
 
 
 /**
@@ -56,8 +55,9 @@ public class Game extends PApplet {
     private GameModes mode;
     private List<PVector> obstacleList;
 
-    private float score = 0f;
-
+    private float score = 0f, prevScore = 0f, lastChange = 0f;
+    private List<Float> scoresList;
+    int scoreInterval = 0;
     private final float SCORE_COEFFICIENT = 3f;
     public final static float MAX_SCORE = 100f;
     public final static float MIN_SCORE = 0;
@@ -74,6 +74,7 @@ public class Game extends PApplet {
     }
 
     private Game() {
+        scoresList = new ArrayList<>();
     }
 
     public void settings() {
@@ -135,6 +136,16 @@ public class Game extends PApplet {
         plate.display();
         mover.update();
         mover.checkCollisions(obstacleList);
+        if (scoreInterval < 30)
+            scoreInterval++;
+        else {
+            scoreInterval = 0;
+            scoresList.add(score);
+        }
+
+        lastChange = score - prevScore;
+        prevScore = score;
+
         mover.display();
 
         drawObstacles();
@@ -243,6 +254,22 @@ public class Game extends PApplet {
             score = MIN_SCORE;
         else
             score -= chg;
+    }
+
+    public List<Float> getScoresList() {
+        return scoresList;
+    }
+
+    public Mover getMover() {
+        return mover;
+    }
+
+    public float getScore() {
+        return score;
+    }
+
+    public float getLastChange() {
+        return lastChange;
     }
 
 }
