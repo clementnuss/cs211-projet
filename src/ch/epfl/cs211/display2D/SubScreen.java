@@ -14,13 +14,13 @@ public class SubScreen {
 
     public final static int VISUALISATION_HEIGHT = 120;
     public final static int VISUALISATION_WIDTH = Game.INSTANCE.width;
-    public final static int VISUALISATION_OFFSET = 25;
+    public final static int VISUALISATION_OFFSET = 20;
     public final static int TOP_HEIGHT = 75;
     public final static int TOP_WIDTH = 75;
     public final static int SCORE_WIDTH = 75;
     public final static int SCORE_HEIGHT = 75;
-    public final static int CHART_WIDTH = 75;
-    public final static int CHART_HEIGHT = 75;
+    public final static int CHART_WIDTH = VISUALISATION_WIDTH - TOP_WIDTH - SCORE_WIDTH - 4*VISUALISATION_OFFSET;
+    public final static int CHART_HEIGHT = 80;
 
     private final PGraphics topView;
     private final PGraphics scoreBoard;
@@ -48,9 +48,9 @@ public class SubScreen {
         topViewX = backGroundX + VISUALISATION_OFFSET;
         topViewY = backGroundY + VISUALISATION_OFFSET;
         scoreBoardX = topViewX + TOP_WIDTH + VISUALISATION_OFFSET;
-        scoreBoardY = VISUALISATION_OFFSET;
+        scoreBoardY = backGroundY + VISUALISATION_OFFSET;
         scoreChartX = scoreBoardX + SCORE_WIDTH + VISUALISATION_OFFSET;
-        scoreChartY = VISUALISATION_OFFSET;
+        scoreChartY = backGroundY + VISUALISATION_OFFSET / 2;
     }
 
     public void draw(){
@@ -86,8 +86,9 @@ public class SubScreen {
     }
     private void drawChartView(){
         scoreChart.beginDraw();
-        scoreChart.fill(0);
-        scoreChart.rect(0,0, VISUALISATION_WIDTH, VISUALISATION_HEIGHT);
+        scoreChart.fill(Color.SUBSCREEN_CHART_COLOR);
+        scoreChart.noStroke();
+        scoreChart.rect(0,0, CHART_WIDTH, CHART_HEIGHT);
         scoreChart.endDraw();
         Game.INSTANCE.image(scoreChart, scoreChartX, scoreChartY);
     }

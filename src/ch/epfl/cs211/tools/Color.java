@@ -12,8 +12,9 @@ public class Color {
     public final static int STROKE_COLOR = 0xff1C1300;
     public final static int PLATE_COLOR = 0x7f24C500;
     public final static int HUD_COLOR = 0xff000000;
-    public final static int SUBSCREEN_BACKGROUND_COLOR = 0xffF0D7A6;
+    public final static int SUBSCREEN_BACKGROUND_COLOR = 0xffe6e3ac;
     public final static int SUBSCREEN_TOPVIEW_COLOR = 0xff337EFF;
+    public final static int SUBSCREEN_CHART_COLOR = 0xffefedc8;
 
 }
 
