@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static ch.epfl.cs211.tools.ValueUtils.roundThreeDecimals;
+import static java.lang.Math.abs;
 
 
 /**
@@ -55,7 +56,10 @@ public class Game extends PApplet {
     private GameModes mode;
     private List<PVector> obstacleList;
 
-    private Score score;
+    private float score = 0f;
+    private final float SCORE_COEFFICIENT = 3f;
+    public final static float MAX_SCORE = 100f;
+    public final static float MIN_SCORE = 0;
 
     private final static float PLATE_OFFSET = Plate.PLATE_WIDTH / 2;
     private final static float OBSTACLE_SIZE = 25f;
@@ -89,8 +93,6 @@ public class Game extends PApplet {
         closedCylinder = new ClosedCylinder(Mover.CYLINDER_RADIUS, 75, 30, Color.CYLINDER_COLOR);
         mode = GameModes.REGULAR;
         obstacleList = new ArrayList<>();
-
-        score = new Score();
     }
 
     public void draw() {
@@ -143,7 +145,7 @@ public class Game extends PApplet {
                 "\nY: " + plate.getAngleY() +
                 "\nZ: " + plate.getAngleZ() +
                 "\nSensitivity: " + plate.getAngleStep() +
-                "\nScore: " + score.getScore());
+                "\nScore: " + score);
 
         hudBall.display("Ball x= " + roundThreeDecimals(mover.getX()) +
                 "\nBall y= " + roundThreeDecimals(mover.getY()) +
@@ -227,15 +229,19 @@ public class Game extends PApplet {
     }
 
     public void incScore(float velocity) {
-        score.incScore(velocity);
+        float chg = abs(velocity) * SCORE_COEFFICIENT;
+        if (score + chg > MAX_SCORE)
+            score = MAX_SCORE;
+        else
+            score += chg;
     }
 
     public void decScore(float velocity) {
-        score.decScore(velocity);
-    }
-
-    public float getScore() {
-        return score.getScore();
+        float chg = abs(velocity) * SCORE_COEFFICIENT;
+        if (score - chg < MIN_SCORE)
+            score = MIN_SCORE;
+        else
+            score -= chg;
     }
 
 }
