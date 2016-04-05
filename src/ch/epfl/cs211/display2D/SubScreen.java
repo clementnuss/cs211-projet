@@ -12,8 +12,8 @@ import ch.epfl.cs211.tools.Color;
  */
 public class SubScreen {
 
-    public final static int VISUALISATION_HEIGHT = 100;
-    public final static int VISUALISATION_WIDTH = Game.INSTANCE.width - 50;
+    public final static int VISUALISATION_HEIGHT = 120;
+    public final static int VISUALISATION_WIDTH = Game.INSTANCE.width;
     public final static int VISUALISATION_OFFSET = 25;
     public final static int TOP_HEIGHT = 75;
     public final static int TOP_WIDTH = 75;
@@ -45,7 +45,6 @@ public class SubScreen {
         scoreBoard = Game.INSTANCE.createGraphics(SCORE_WIDTH, SCORE_HEIGHT);
         scoreChart = Game.INSTANCE.createGraphics(CHART_WIDTH, CHART_HEIGHT);
 
-
         topViewX = backGroundX + VISUALISATION_OFFSET;
         topViewY = backGroundY + VISUALISATION_OFFSET;
         scoreBoardX = topViewX + TOP_WIDTH + VISUALISATION_OFFSET;
@@ -55,6 +54,7 @@ public class SubScreen {
     }
 
     public void draw(){
+        Game.INSTANCE.noLights();
         drawBackgroundView();
         drawTopView();
         drawScoreView();
@@ -63,28 +63,31 @@ public class SubScreen {
 
     private void drawBackgroundView(){
         backGroundView.beginDraw();
-        backGroundView.background(Color.SUBSCREEN_BACKGROUND_COLOR);
-        backGroundView.fill(0);
+        backGroundView.fill(Color.SUBSCREEN_BACKGROUND_COLOR);
+        backGroundView.noStroke();
         backGroundView.rect(0,0, VISUALISATION_WIDTH, VISUALISATION_HEIGHT);
-
         backGroundView.endDraw();
         Game.INSTANCE.image(backGroundView, backGroundX, backGroundY);
     }
     private void drawTopView(){
         topView.beginDraw();
-
+        topView.fill(Color.SUBSCREEN_TOPVIEW_COLOR);
+        topView.noStroke();
+        topView.rect(0,0, TOP_WIDTH, TOP_HEIGHT);
         topView.endDraw();
         Game.INSTANCE.image(topView, topViewX, topViewY);
     }
     private void drawScoreView(){
         scoreBoard.beginDraw();
-
+        scoreBoard.fill(0);
+        scoreBoard.rect(0,0, VISUALISATION_WIDTH, VISUALISATION_HEIGHT);
         scoreBoard.endDraw();
         Game.INSTANCE.image(scoreBoard, scoreBoardX, scoreBoardY);
     }
     private void drawChartView(){
         scoreChart.beginDraw();
-
+        scoreChart.fill(0);
+        scoreChart.rect(0,0, VISUALISATION_WIDTH, VISUALISATION_HEIGHT);
         scoreChart.endDraw();
         Game.INSTANCE.image(scoreChart, scoreChartX, scoreChartY);
     }

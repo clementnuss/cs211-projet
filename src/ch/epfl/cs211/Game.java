@@ -79,7 +79,7 @@ public class Game extends PApplet {
         hudBall = new HUD(200, 25, 200, 300, Color.HUD_COLOR);
         hudMouse = new HUD(25, 25, 250, 300, Color.HUD_COLOR);
 
-        subView = new SubScreen(25, height - SubScreen.VISUALISATION_HEIGHT - 25);
+        subView = new SubScreen(0, height - SubScreen.VISUALISATION_HEIGHT);
 
         mover = new Mover(plate);
         openCylinder = new OpenCylinder(50, 40, 40, Color.CYLINDER_COLOR);
