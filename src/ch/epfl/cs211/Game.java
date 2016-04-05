@@ -47,7 +47,7 @@ public class Game extends PApplet {
 
     private Plate plate;
     private HUD hudPlate, hudBall, hudMouse;
-    private SubScreen topView, scoreBoardView, scoreChartView, backgroundView;
+    private SubScreen subView;
     private Mover mover;
     private OpenCylinder openCylinder;
     private ClosedCylinder closedCylinder;
@@ -69,7 +69,7 @@ public class Game extends PApplet {
     }
 
     public void settings() {
-        size(1024, 768, P3D);
+        size(1024, 576, P3D);
     }
 
     public void setup() {
@@ -79,11 +79,7 @@ public class Game extends PApplet {
         hudBall = new HUD(200, 25, 200, 300, Color.HUD_COLOR);
         hudMouse = new HUD(25, 25, 250, 300, Color.HUD_COLOR);
 
-        backgroundView = new Background(25, height - SubScreen.VISUALISATION_HEIGHT - 25);
-        scoreBoardView = new ScoreBoard(25, height - SubScreen.VISUALISATION_HEIGHT - 25);
-        scoreChartView = new ScoreChart(25, height - SubScreen.VISUALISATION_HEIGHT - 25);
-        topView = new TopView(25, height - SubScreen.VISUALISATION_HEIGHT - 25);
-
+        subView = new SubScreen(25, height - SubScreen.VISUALISATION_HEIGHT - 25);
 
         mover = new Mover(plate);
         openCylinder = new OpenCylinder(50, 40, 40, Color.CYLINDER_COLOR);
@@ -135,9 +131,9 @@ public class Game extends PApplet {
 
         drawObstacles();
 
-        translate(mouseX, mouseY, 0);
-
         camera();   //Resets the camera in order to display 2d text
+        subView.draw();
+
         hudPlate.display("X: " + plate.getAngleX() +
                 "\nY: " + plate.getAngleY() +
                 "\nZ: " + plate.getAngleZ() +
