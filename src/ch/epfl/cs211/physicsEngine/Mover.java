@@ -91,10 +91,12 @@ public class Mover {
         if (pos.x > upperBoundX || pos.x < lowerBoundX) {
             pos.x = clamp(pos.x, lowerBoundX, upperBoundX);
             velocity.x = velocity.x * -1;
+            Game.INSTANCE.decScore(velocity.mag());
         }
         if (pos.z > upperBoundZ || pos.z < lowerBoundZ) {
             pos.z = clamp(pos.z, -bound, bound);
             velocity.z = velocity.z * -1;
+            Game.INSTANCE.decScore(velocity.mag());
         }
     }
 
@@ -128,6 +130,7 @@ public class Mover {
                 PVector updatedVel = PVector.mult(collisionNormal, 2f * velocity.dot(collisionNormal));
                 velocity.sub(updatedVel.x, 0, updatedVel.z);
 
+                Game.INSTANCE.incScore(velocity.mag());
             }
         }
         //This is to avoid glitches where the ball can't move but velocities keep accumulating
