@@ -10,16 +10,38 @@ import processing.core.PGraphics;
  * the display window, at the position defined by its parameters.
  */
 public abstract class SubScreen {
-    protected final PGraphics pGraphics;
+
+    public final static int VISUALISATION_HEIGHT = 75;
+    public final static int TOP_HEIGHT = 75;
+    public final static int TOP_WIDTH = 75;
+    public final static int SCORE_WIDTH = 75;
+    public final static int SCORE_HEIGHT = 75;
+    public final static int CHART_WIDTH = 75;
+    public final static int CHART_HEIGHT = 75;
+
+    private final PGraphics topView;
+    private final PGraphics scoreBoard;
+    private final PGraphics scoreChart;
+    private final PGraphics backGroundView;
 
     private final float x;
     private final float y;
 
     public SubScreen(int w, int h, float x, float y){
-        pGraphics = Game.INSTANCE.createGraphics(w,h);
         this.x = x;
         this.y = y;
+
+        backGroundView = Game.INSTANCE.createGraphics(w,h);
+        topView = Game.INSTANCE.createGraphics(w,h);
+        scoreBoard = Game.INSTANCE.createGraphics(w,h);
+        scoreChart = Game.INSTANCE.createGraphics(w,h);
+
     }
 
     public void draw(){};
+
+    private void drawBackgroundView(){}
+    private void drawTopView(){}
+    private void drawScoreView(){}
+    private void drawChartView(){}
 }

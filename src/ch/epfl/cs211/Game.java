@@ -1,12 +1,12 @@
 package ch.epfl.cs211;
 
+import ch.epfl.cs211.display2D.*;
 import ch.epfl.cs211.objects.ClosedCylinder;
 import ch.epfl.cs211.objects.GameModes;
 import ch.epfl.cs211.objects.OpenCylinder;
 import ch.epfl.cs211.objects.Plate;
 import ch.epfl.cs211.physicsEngine.Mover;
 import ch.epfl.cs211.tools.Color;
-import ch.epfl.cs211.display2D.HUD;
 import processing.core.PApplet;
 import processing.core.PVector;
 import processing.event.KeyEvent;
@@ -47,11 +47,13 @@ public class Game extends PApplet {
 
     private Plate plate;
     private HUD hudPlate, hudBall, hudMouse;
+    private SubScreen topView, scoreBoardView, scoreChartView, backgroundView;
     private Mover mover;
     private OpenCylinder openCylinder;
     private ClosedCylinder closedCylinder;
     private GameModes mode;
     private List<PVector> obstacleList;
+
     private final static float PLATE_OFFSET = Plate.PLATE_WIDTH/2;
     private final static float OBSTACLE_SIZE = 25f;
 
@@ -76,6 +78,13 @@ public class Game extends PApplet {
         hudPlate = new HUD(25,25,150,300, Color.HUD_COLOR);
         hudBall = new HUD(200, 25, 200, 300, Color.HUD_COLOR);
         hudMouse = new HUD(25, 25, 250, 300, Color.HUD_COLOR);
+
+        backgroundView = new Background(25, height - SubScreen.VISUALISATION_HEIGHT - 25);
+        scoreBoardView = new ScoreBoard(25, height - SubScreen.VISUALISATION_HEIGHT - 25);
+        scoreChartView = new ScoreChart(25, height - SubScreen.VISUALISATION_HEIGHT - 25);
+        topView = new TopView(25, height - SubScreen.VISUALISATION_HEIGHT - 25);
+
+
         mover = new Mover(plate);
         openCylinder = new OpenCylinder(50, 40, 40, Color.CYLINDER_COLOR);
         closedCylinder = new ClosedCylinder(Mover.CYLINDER_RADIUS, 75, 30, Color.CYLINDER_COLOR);
