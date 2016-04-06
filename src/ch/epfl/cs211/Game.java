@@ -53,7 +53,7 @@ public class Game extends PApplet {
     private final static float MIN_SCORE = 0;
     private final static float PLATE_OFFSET = Plate.PLATE_WIDTH / 2;
     private final static float OBSTACLE_SIZE = 25f;
-    private final static int SCORE_UPDATE_INTERVAL = 60;
+    private final static int SCORE_UPDATE_INTERVAL = 6;
     private final static float SCORE_COEFFICIENT = 3f;
     //private final static int SCORELIST_MAXLENGTH =;
 
@@ -140,6 +140,8 @@ public class Game extends PApplet {
         else {
             scoreInterval = 0;
             scoresList.add(score);
+            if(scoresList.size() > subView.getMaxPlottableElements())
+                scoresList.remove();
         }
 
         lastChange = score - prevScore;
@@ -219,6 +221,13 @@ public class Game extends PApplet {
                         );
                     }
                 }
+                break;
+            case RIGHT:
+                if(mode == GameModes.REGULAR){
+                    mode = GameModes.SHIFTED;
+                }
+                else
+                    mode = GameModes.REGULAR;
                 break;
         }
     }

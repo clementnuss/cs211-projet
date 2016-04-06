@@ -125,4 +125,11 @@ public class SubScreen {
     public float getChartElementWidth(){
         return elementWidth;
     }
+
+    /**
+     * Method used by the main game instance to calculate whether it needs to delete an element from
+     * the deque where the scores are stored
+     * @return the number of elements that can be plotted using all the width available from the chart
+     */
+    public int getMaxPlottableElements(){ return Math.round(CHART_WIDTH / (elementWidth+1));}
 }
