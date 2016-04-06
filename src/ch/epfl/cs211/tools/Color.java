@@ -15,6 +15,7 @@ public class Color {
     public final static int SUBSCREEN_BACKGROUND_COLOR = 0xffe6e3ac;
     public final static int SUBSCREEN_TOPVIEW_COLOR = 0xff337EFF;
     public final static int SUBSCREEN_CHART_COLOR = 0xffefedc8;
+    public final static int SUBSCREEN_CHART_ELEMENT_COLOR = 0xff788888;
 
 }
 

@@ -1,10 +1,10 @@
 package ch.epfl.cs211.display2D;
 
-import ch.epfl.cs211.Game;
 import processing.core.PGraphics;
 import ch.epfl.cs211.tools.Color;
 
 import static ch.epfl.cs211.Game.INSTANCE;
+import static ch.epfl.cs211.Game.maxScore;
 
 
 /**
@@ -22,7 +22,8 @@ public class SubScreen {
     public final static int SCORE_WIDTH = 75;
     public final static int SCORE_HEIGHT = 75;
     public final static int CHART_WIDTH = VISUALISATION_WIDTH - TOP_WIDTH - SCORE_WIDTH - 4*VISUALISATION_OFFSET;
-    public final static int CHART_HEIGHT = 80;
+    public final static int CHART_HEIGHT = 100;
+    private final static int PLOT_MAX_ELEMENTS = 20;
 
     private final PGraphics topView;
     private final PGraphics scoreBoard;
@@ -37,6 +38,9 @@ public class SubScreen {
     private final float scoreBoardY;
     private final float scoreChartX;
     private final float scoreChartY;
+
+    private float elementWidth = 5;
+    private float elementHeight = CHART_HEIGHT / PLOT_MAX_ELEMENTS -1;
 
     public SubScreen(float backGroundX, float backGroundY){
         this.backGroundX = backGroundX;
@@ -99,7 +103,26 @@ public class SubScreen {
         scoreChart.fill(Color.SUBSCREEN_CHART_COLOR);
         scoreChart.noStroke();
         scoreChart.rect(0,0, CHART_WIDTH, CHART_HEIGHT);
+        int i = 0;
+
+        for(float scoreAtTime : INSTANCE.getScoresList()){
+            drawBar(scoreAtTime, 1 + (elementWidth + 1) * i++);
+        }
+
         scoreChart.endDraw();
         INSTANCE.image(scoreChart, scoreChartX, scoreChartY);
+    }
+
+    private void drawBar(float score, float pos){
+        float elementHeight = CHART_HEIGHT / PLOT_MAX_ELEMENTS;
+        scoreChart.fill(Color.SUBSCREEN_CHART_ELEMENT_COLOR);
+        int nElems = Math.round((score / maxScore) * PLOT_MAX_ELEMENTS);
+        for(int y = 1; y <= nElems; y++){
+            scoreChart.rect(pos, CHART_HEIGHT - (y * (elementHeight)), elementWidth, elementHeight - 1);
+        }
+    }
+
+    public float getChartElementWidth(){
+        return elementWidth;
     }
 }
