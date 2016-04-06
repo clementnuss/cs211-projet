@@ -1,5 +1,6 @@
 package ch.epfl.cs211;
 
+import ch.epfl.cs211.display2D.HScrollbar;
 import ch.epfl.cs211.display2D.HUD;
 import ch.epfl.cs211.display2D.SubScreen;
 import ch.epfl.cs211.objects.ClosedCylinder;
@@ -59,8 +60,13 @@ public class Game extends PApplet {
 
     public static float maxScore = 0f;
     private Plate plate;
-    private HUD hudPlate, hudBall, hudMouse;
+
+    //2D
     private SubScreen subView;
+    private HScrollbar hScrollbar;
+    private HUD hudPlate, hudBall, hudMouse;
+
+    //Physics
     private Mover mover;
     private ClosedCylinder closedCylinder;
     private GameModes mode;
@@ -90,6 +96,7 @@ public class Game extends PApplet {
         hudBall = new HUD(200, 25, 200, 300, Color.HUD_COLOR);
         hudMouse = new HUD(25, 25, 250, 300, Color.HUD_COLOR);
         subView = new SubScreen(0, height - SubScreen.VISUALISATION_HEIGHT);
+        hScrollbar = new HScrollbar(subView.getScoreChartX() , subView.getScoreChartY() + SubScreen.CHART_HEIGHT + 2, 400, 8);
         mover = new Mover(plate);
         closedCylinder = new ClosedCylinder(Mover.CYLINDER_RADIUS, 75, 30, Color.CYLINDER_COLOR);
         mode = GameModes.REGULAR;
@@ -100,7 +107,7 @@ public class Game extends PApplet {
 
         background(210);
         ambientLight(80, 80, 80);
-        spotLight(255, 255, 255, 0, -500, -250, 0, 1, 0, PI / 4f, 2);
+        spotLight(255, 255, 255, 200, -500, -250, 0, 1, 0, PI / 4f, 2);
 
         switch (mode) {
             case REGULAR:
@@ -140,7 +147,7 @@ public class Game extends PApplet {
         else {
             scoreInterval = 0;
             scoresList.add(score);
-            if(scoresList.size() > subView.getMaxPlottableElements())
+            while(scoresList.size() > subView.getMaxPlottableElements())
                 scoresList.remove();
         }
 
@@ -153,7 +160,9 @@ public class Game extends PApplet {
 
         camera();   //Resets the camera in order to display 2d text
         subView.draw();
-
+        if(hScrollbar.update())
+            subView.updateChart(hScrollbar.getPos());
+        hScrollbar.display();
         hudPlate.display("X: " + plate.getAngleX() +
                 "\nY: " + plate.getAngleY() +
                 "\nZ: " + plate.getAngleZ() +
@@ -200,7 +209,8 @@ public class Game extends PApplet {
     }
 
     public void mouseDragged() {
-        if (mode == GameModes.REGULAR) plate.updateAngle();
+        if (mode == GameModes.REGULAR && mouseY < height - SubScreen.VISUALISATION_HEIGHT)
+            plate.updateAngle();
     }
 
     public void mouseWheel(MouseEvent event) {

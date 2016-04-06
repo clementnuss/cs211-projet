@@ -23,6 +23,7 @@ public class SubScreen {
     public final static int SCORE_HEIGHT = 75;
     public final static int CHART_WIDTH = VISUALISATION_WIDTH - TOP_WIDTH - SCORE_WIDTH - 4*VISUALISATION_OFFSET;
     public final static int CHART_HEIGHT = 100;
+    private final static int CHART_ELEM_WIDTH = 6;
     private final static int PLOT_MAX_ELEMENTS = 20;
 
     private final PGraphics topView;
@@ -39,7 +40,7 @@ public class SubScreen {
     private final float scoreChartX;
     private final float scoreChartY;
 
-    private float elementWidth = 5;
+    private float elementWidth = 10;
     private float elementHeight = CHART_HEIGHT / PLOT_MAX_ELEMENTS -1;
 
     public SubScreen(float backGroundX, float backGroundY){
@@ -56,7 +57,7 @@ public class SubScreen {
         scoreBoardX = topViewX + TOP_WIDTH + VISUALISATION_OFFSET;
         scoreBoardY = backGroundY + VISUALISATION_OFFSET;
         scoreChartX = scoreBoardX + SCORE_WIDTH + VISUALISATION_OFFSET;
-        scoreChartY = backGroundY + VISUALISATION_OFFSET / 2;
+        scoreChartY = backGroundY + VISUALISATION_OFFSET / 3;
     }
 
     public void draw(){
@@ -132,4 +133,11 @@ public class SubScreen {
      * @return the number of elements that can be plotted using all the width available from the chart
      */
     public int getMaxPlottableElements(){ return Math.round(CHART_WIDTH / (elementWidth+1));}
+
+    public void updateChart(float newElemSizeRatio){
+        elementWidth = (1.5f * newElemSizeRatio + 0.5f) * CHART_ELEM_WIDTH;
+    }
+
+    public float getScoreChartX(){return scoreChartX;}
+    public float getScoreChartY(){return scoreChartY;}
 }

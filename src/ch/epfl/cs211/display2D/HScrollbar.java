@@ -39,8 +39,9 @@ public class HScrollbar {
 
   /**
    * @brief Updates the state of the scrollbar according to the mouse movement
+   * @return A boolean indicating if the state of the scrollbar has changed
    */
-  public void update() {
+  public boolean update() {
     if (isMouseOver()) {
       mouseOver = true;
     }
@@ -58,7 +59,9 @@ public class HScrollbar {
     }
     if (INSTANCE.abs(newSliderPosition - sliderPosition) > 1) {
       sliderPosition = sliderPosition + (newSliderPosition - sliderPosition);
+        return true;
     }
+      return false;
   }
 
   /**

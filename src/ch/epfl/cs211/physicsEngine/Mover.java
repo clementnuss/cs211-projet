@@ -21,7 +21,7 @@ public class Mover {
     private final static float GRAVITY_SCALAR = 0.1f;
     public final static float SPHERE_RADIUS = 20f;
     public final static float CYLINDER_RADIUS = 25f;
-    private final static float COLLISION_THRESHOLD = 0.0001f;
+    private final static float COLLISION_THRESHOLD = 0.00007f;
     private final static float MU = 0.01f;
 
     private PVector pos;
@@ -127,7 +127,7 @@ public class Mover {
                 pos.add(shifting);
 
                 PVector collisionNormal = new PVector(pos.x - cyl.x, 0, pos.z - cyl.z).normalize();
-                PVector updatedVel = PVector.mult(collisionNormal, 2f * velocity.dot(collisionNormal));
+                PVector updatedVel = PVector.mult(collisionNormal, 1.9f * velocity.dot(collisionNormal));
                 velocity.sub(updatedVel.x, 0, updatedVel.z);
 
                 Game.INSTANCE.incScore(velocity.mag());
