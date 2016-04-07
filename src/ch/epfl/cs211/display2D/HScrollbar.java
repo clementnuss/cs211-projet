@@ -1,8 +1,6 @@
 package ch.epfl.cs211.display2D;
 
-import ch.epfl.cs211.Game;
-
-import static ch.epfl.cs211.Game.INSTANCE;
+import static ch.epfl.cs211.Game.GAME;
 
 public class HScrollbar {
   float barWidth;  //Bar's width in pixels
@@ -48,16 +46,16 @@ public class HScrollbar {
     else {
       mouseOver = false;
     }
-    if (INSTANCE.mousePressed && mouseOver) {
+    if (GAME.mousePressed && mouseOver) {
       locked = true;
     }
-    if (!INSTANCE.mousePressed) {
+    if (!GAME.mousePressed) {
       locked = false;
     }
     if (locked) {
-      newSliderPosition = constrain(INSTANCE.mouseX - barHeight/2, sliderPositionMin, sliderPositionMax);
+      newSliderPosition = constrain(GAME.mouseX - barHeight/2, sliderPositionMin, sliderPositionMax);
     }
-    if (INSTANCE.abs(newSliderPosition - sliderPosition) > 1) {
+    if (GAME.abs(newSliderPosition - sliderPosition) > 1) {
       sliderPosition = sliderPosition + (newSliderPosition - sliderPosition);
         return true;
     }
@@ -74,7 +72,7 @@ public class HScrollbar {
    * @return val clamped into the interval [minVal, maxVal]
    */
   public float constrain(float val, float minVal, float maxVal) {
-    return INSTANCE.min(INSTANCE.max(val, minVal), maxVal);
+    return GAME.min(GAME.max(val, minVal), maxVal);
   }
 
   /**
@@ -83,29 +81,24 @@ public class HScrollbar {
    * @return Whether the mouse is hovering the scrollbar
    */
   public boolean isMouseOver() {
-    if (INSTANCE.mouseX > xPosition && INSTANCE.mouseX < xPosition+barWidth &&
-            INSTANCE.mouseY > yPosition && INSTANCE.mouseY < yPosition+barHeight) {
-      return true;
-    }
-    else {
-      return false;
-    }
+    return (GAME.mouseX > xPosition && GAME.mouseX < xPosition+barWidth &&
+            GAME.mouseY > yPosition && GAME.mouseY < yPosition+barHeight);
   }
 
   /**
    * @brief Draws the scrollbar in its current state
    */ 
-  public void display() {
-      INSTANCE.noStroke();
-      INSTANCE.fill(204);
-      INSTANCE.rect(xPosition, yPosition, barWidth, barHeight);
+  public void draw() {
+      GAME.noStroke();
+      GAME.fill(204);
+      GAME.rect(xPosition, yPosition, barWidth, barHeight);
     if (mouseOver || locked) {
-        INSTANCE.fill(0, 0, 0);
+        GAME.fill(0, 0, 0);
     }
     else {
-        INSTANCE.fill(102, 102, 102);
+        GAME.fill(102, 102, 102);
     }
-      INSTANCE.rect(sliderPosition, yPosition, barHeight, barHeight);
+      GAME.rect(sliderPosition, yPosition, barHeight, barHeight);
   }
 
   /**
@@ -115,5 +108,15 @@ public class HScrollbar {
    */
   public float getPos() {
     return (sliderPosition - xPosition)/(barWidth - barHeight);
+  }
+
+  public void setPos(float newXPos, float newYPos){
+      float oldSliderPosition = getPos();
+      xPosition = newXPos;
+      yPosition = newYPos;
+      sliderPosition = xPosition + (oldSliderPosition * (barWidth - barHeight));
+      sliderPositionMin = xPosition;
+      sliderPositionMax = xPosition + barWidth - barHeight;
+      newSliderPosition = sliderPosition;
   }
 }

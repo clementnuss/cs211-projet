@@ -47,42 +47,49 @@ import static ch.epfl.cs211.tools.ValueUtils.roundThreeDecimals;
  */
 public class Game extends PApplet {
 
+    //Game instance
+    public static final Game GAME = new Game();
 
-    public static final Game INSTANCE = new Game();
-
+    //Game constants
     private final static float SCORE_LIMIT = 1000f;
     private final static float MIN_SCORE = 0;
     private final static float PLATE_OFFSET = Plate.PLATE_WIDTH / 2;
     private final static float OBSTACLE_SIZE = 25f;
-    private final static int SCORE_UPDATE_INTERVAL = 6;
+    private final static int SCORE_UPDATE_INTERVAL = 30;
     private final static float SCORE_COEFFICIENT = 3f;
-    //private final static int SCORELIST_MAXLENGTH =;
+    private final static int MIN_SCREENWIDTH = 800;
+    private final static int MIN_SCREENHEIGHT = 576;
 
     public static float maxScore = 0f;
-    private Plate plate;
 
     //2D
     private SubScreen subView;
-    private HScrollbar hScrollbar;
     private HUD hudPlate, hudBall, hudMouse;
 
     //Physics
+    private Plate plate;
     private Mover mover;
     private ClosedCylinder closedCylinder;
-    private GameModes mode;
     private List<PVector> obstacleList;
+
+    //Game features
+    private int oldWidth;
+    private int oldHeight;
+    private GameModes mode;
     private float score = 0f, prevScore = 0f, lastChange = 0f;
     private Deque<Float> scoresList;
     private int scoreInterval = 0;
 
     public static void main(String[] args) {
 
-        PApplet.runSketch(new String[]{"ch.epfl.cs211.Game"}, Game.INSTANCE);
+        PApplet.runSketch(new String[]{"ch.epfl.cs211.Game"}, Game.GAME);
 
     }
 
     private Game() {
         scoresList = new ArrayDeque<>();
+        oldWidth = width;
+        oldHeight = height;
     }
 
     public void settings() {
@@ -95,8 +102,7 @@ public class Game extends PApplet {
         hudPlate = new HUD(25, 25, 150, 300, Color.HUD_COLOR);
         hudBall = new HUD(200, 25, 200, 300, Color.HUD_COLOR);
         hudMouse = new HUD(25, 25, 250, 300, Color.HUD_COLOR);
-        subView = new SubScreen(0, height - SubScreen.VISUALISATION_HEIGHT);
-        hScrollbar = new HScrollbar(subView.getScoreChartX() , subView.getScoreChartY() + SubScreen.CHART_HEIGHT + 2, 400, 8);
+        subView = new SubScreen();
         mover = new Mover(plate);
         closedCylinder = new ClosedCylinder(Mover.CYLINDER_RADIUS, 75, 30, Color.CYLINDER_COLOR);
         mode = GameModes.REGULAR;
@@ -105,6 +111,10 @@ public class Game extends PApplet {
 
     public void draw() {
 
+        if(checkIfResized())
+            subView.updateDimensions();
+
+        width = 1000;
         background(210);
         ambientLight(80, 80, 80);
         spotLight(255, 255, 255, 200, -500, -250, 0, 1, 0, PI / 4f, 2);
@@ -160,9 +170,6 @@ public class Game extends PApplet {
 
         camera();   //Resets the camera in order to display 2d text
         subView.draw();
-        if(hScrollbar.update())
-            subView.updateChart(hScrollbar.getPos());
-        hScrollbar.display();
         hudPlate.display("X: " + plate.getAngleX() +
                 "\nY: " + plate.getAngleY() +
                 "\nZ: " + plate.getAngleZ() +
@@ -240,6 +247,21 @@ public class Game extends PApplet {
                     mode = GameModes.REGULAR;
                 break;
         }
+    }
+
+    public boolean checkIfResized(){
+        if(oldHeight != height || oldWidth != width){
+            //Check wether user didn't set a window size which is too small
+            if(height < MIN_SCREENHEIGHT)
+                height = MIN_SCREENHEIGHT;
+            if(width < MIN_SCREENWIDTH)
+                width = MIN_SCREENWIDTH;
+            oldHeight = height;
+            oldWidth = width;
+
+            return true;
+        }
+        return false;
     }
 
     public void keyPressed(KeyEvent event) {

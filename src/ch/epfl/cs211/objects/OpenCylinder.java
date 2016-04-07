@@ -6,7 +6,6 @@
 package ch.epfl.cs211.objects;
 
 import ch.epfl.cs211.Game;
-import ch.epfl.cs211.tools.Color;
 import processing.core.PShape;
 
 import static java.lang.Math.PI;
@@ -29,7 +28,7 @@ public class OpenCylinder {
             z[i] = (float) cos(angle) * cylRadius;
         }
 
-        cylinder = Game.INSTANCE.createShape();
+        cylinder = Game.GAME.createShape();
         cylinder.beginShape(PShape.QUAD_STRIP);
         cylinder.fill(color);
         cylinder.noStroke();
@@ -43,7 +42,7 @@ public class OpenCylinder {
     }
 
     public void display() {
-        Game.INSTANCE.shape(cylinder);
+        Game.GAME.shape(cylinder);
     }
 
 

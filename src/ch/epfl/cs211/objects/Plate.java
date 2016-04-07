@@ -41,22 +41,22 @@ public class Plate {
     }
 
     public void display(){
-        Game.INSTANCE.stroke(Color.STROKE_COLOR);
-        Game.INSTANCE.strokeWeight(2f);
-        Game.INSTANCE.pushMatrix();
-        Game.INSTANCE.translate(x, y, z);
-        Game.INSTANCE.rotateX(angleX);
-        Game.INSTANCE.rotateZ(angleZ);
-        Game.INSTANCE.rotateY(angleY);
-        Game.INSTANCE.fill(color);
-        Game.INSTANCE.box(PLATE_WIDTH, PLATE_THICKNESS, PLATE_WIDTH);
-        Game.INSTANCE.popMatrix();
+        Game.GAME.stroke(Color.STROKE_COLOR);
+        Game.GAME.strokeWeight(2f);
+        Game.GAME.pushMatrix();
+        Game.GAME.translate(x, y, z);
+        Game.GAME.rotateX(angleX);
+        Game.GAME.rotateZ(angleZ);
+        Game.GAME.rotateY(angleY);
+        Game.GAME.fill(color);
+        Game.GAME.box(PLATE_WIDTH, PLATE_THICKNESS, PLATE_WIDTH);
+        Game.GAME.popMatrix();
     }
 
     public void updateAngle(){
 
-        int deltaX = Game.INSTANCE.mouseX - Game.INSTANCE.pmouseX;
-        int deltaY = Game.INSTANCE.mouseY - Game.INSTANCE.pmouseY;
+        int deltaX = Game.GAME.mouseX - Game.GAME.pmouseX;
+        int deltaY = Game.GAME.mouseY - Game.GAME.pmouseY;
 
 
         if(deltaX > 0){

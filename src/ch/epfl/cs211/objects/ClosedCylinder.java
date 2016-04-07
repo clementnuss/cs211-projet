@@ -33,8 +33,8 @@ public class ClosedCylinder {
         float[] x = new float[cylResolution + 1];
         float[] z = new float[cylResolution + 1];
 
-        PShape bottomSurface = Game.INSTANCE.createShape();
-        PShape topSurface = Game.INSTANCE.createShape();
+        PShape bottomSurface = Game.GAME.createShape();
+        PShape topSurface = Game.GAME.createShape();
 
         bottomSurface.beginShape(PShape.TRIANGLE_FAN);
         topSurface.beginShape(PShape.TRIANGLE_FAN);
@@ -63,17 +63,17 @@ public class ClosedCylinder {
         topSurface.endShape();
 
 
-        closedCylinder = Game.INSTANCE.createShape(PShape.GROUP);
+        closedCylinder = Game.GAME.createShape(PShape.GROUP);
         closedCylinder.addChild(new OpenCylinder(cylRadius, cylHeight, cylResolution, color).getShape());
         closedCylinder.addChild(bottomSurface, 0);
         closedCylinder.addChild(topSurface, 1);
     }
 
     public void display(PVector pos) {
-        Game.INSTANCE.pushMatrix();
-        Game.INSTANCE.translate(pos.x, pos.y , pos.z);
-        Game.INSTANCE.shape(closedCylinder);
-        Game.INSTANCE.popMatrix();
+        Game.GAME.pushMatrix();
+        Game.GAME.translate(pos.x, pos.y , pos.z);
+        Game.GAME.shape(closedCylinder);
+        Game.GAME.popMatrix();
     }
 
 }

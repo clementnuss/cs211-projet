@@ -13,6 +13,7 @@ import processing.core.PVector;
 import java.util.List;
 
 import static ch.epfl.cs211.tools.ValueUtils.clamp;
+import static ch.epfl.cs211.Game.GAME;
 import static processing.core.PApplet.sin;
 import static processing.core.PApplet.sqrt;
 
@@ -65,15 +66,15 @@ public class Mover {
 
     public void display() {
 
-        Game.INSTANCE.noStroke();
-        Game.INSTANCE.fill(Color.BALL_COLOR);
-        Game.INSTANCE.pushMatrix();
-        Game.INSTANCE.rotateX(plate.getAngleX());
-        Game.INSTANCE.rotateY(plate.getAngleY());
-        Game.INSTANCE.rotateZ(plate.getAngleZ());
-        Game.INSTANCE.translate(pos.x, pos.y, pos.z);
-        Game.INSTANCE.sphere(SPHERE_RADIUS);
-        Game.INSTANCE.popMatrix();
+        GAME.noStroke();
+        GAME.fill(Color.BALL_COLOR);
+        GAME.pushMatrix();
+        GAME.rotateX(plate.getAngleX());
+        GAME.rotateY(plate.getAngleY());
+        GAME.rotateZ(plate.getAngleZ());
+        GAME.translate(pos.x, pos.y, pos.z);
+        GAME.sphere(SPHERE_RADIUS);
+        GAME.popMatrix();
 
     }
 
@@ -91,12 +92,12 @@ public class Mover {
         if (pos.x > upperBoundX || pos.x < lowerBoundX) {
             pos.x = clamp(pos.x, lowerBoundX, upperBoundX);
             velocity.x = velocity.x * -1;
-            Game.INSTANCE.decScore(velocity.mag());
+            GAME.decScore(velocity.mag());
         }
         if (pos.z > upperBoundZ || pos.z < lowerBoundZ) {
             pos.z = clamp(pos.z, -bound, bound);
             velocity.z = velocity.z * -1;
-            Game.INSTANCE.decScore(velocity.mag());
+            GAME.decScore(velocity.mag());
         }
     }
 
@@ -130,7 +131,7 @@ public class Mover {
                 PVector updatedVel = PVector.mult(collisionNormal, 1.9f * velocity.dot(collisionNormal));
                 velocity.sub(updatedVel.x, 0, updatedVel.z);
 
-                Game.INSTANCE.incScore(velocity.mag());
+                GAME.incScore(velocity.mag());
             }
         }
         //This is to avoid glitches where the ball can't move but velocities keep accumulating
