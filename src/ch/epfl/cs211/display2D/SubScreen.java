@@ -27,7 +27,7 @@ public class SubScreen {
     public static int chartWidth;
     public final static int CHART_HEIGHT = 100;
     private final static int CHART_ELEM_WIDTH = 5;
-    private final static int PLOT_MAX_ELEMENTS = 20;
+    private final static int PLOT_MAX_ELEMENTS = 25; //Should be a number that divides CHART_ELEM_WIDTH
 
     private PGraphics topView;
     private PGraphics scoreBoard;
@@ -45,7 +45,7 @@ public class SubScreen {
     private float scoreChartX;
     private float scoreChartY;
 
-    private float elementWidth = CHART_ELEM_WIDTH;
+    private float elementWidth;
 
     public SubScreen(){
         hScrollbar = new HScrollbar(0,0, 400, 8);
@@ -155,6 +155,7 @@ public class SubScreen {
         scoreChartX = scoreBoardX + SCORE_WIDTH + VISUALISATION_OFFSET;
         scoreChartY = backGroundY + VISUALISATION_OFFSET / 3;
         hScrollbar.setPos(scoreChartX, scoreChartY + CHART_HEIGHT + 2);
+        elementWidth = (1.5f * hScrollbar.getPos() + 0.5f) * CHART_ELEM_WIDTH;
     }
 
     public float getScoreChartX(){return scoreChartX;}

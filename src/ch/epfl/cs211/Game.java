@@ -57,8 +57,6 @@ public class Game extends PApplet {
     private final static float OBSTACLE_SIZE = 25f;
     private final static int SCORE_UPDATE_INTERVAL = 30;
     private final static float SCORE_COEFFICIENT = 3f;
-    private final static int MIN_SCREENWIDTH = 800;
-    private final static int MIN_SCREENHEIGHT = 576;
 
     public static float maxScore = 0f;
 
@@ -130,19 +128,6 @@ public class Game extends PApplet {
                 break;
         }
 
-    }
-
-    private void drawObstacles() {
-        pushMatrix();
-        rotateX(plate.getAngleX());
-        rotateY(plate.getAngleY());
-        rotateZ(plate.getAngleZ());
-        translate(plate.getX(), plate.getY() - Plate.PLATE_THICKNESS / 2, plate.getZ());
-
-        for (PVector obst : obstacleList)
-            closedCylinder.display(obst);
-
-        popMatrix();
     }
 
     private void drawRegularMode() {
@@ -218,6 +203,19 @@ public class Game extends PApplet {
 
     }
 
+    private void drawObstacles() {
+        pushMatrix();
+        rotateX(plate.getAngleX());
+        rotateY(plate.getAngleY());
+        rotateZ(plate.getAngleZ());
+        translate(plate.getX(), plate.getY() - Plate.PLATE_THICKNESS / 2, plate.getZ());
+
+        for (PVector obst : obstacleList)
+            closedCylinder.display(obst, mode == GameModes.SHIFTED);
+
+        popMatrix();
+    }
+
     public void mouseDragged() {
         if (mode == GameModes.REGULAR && mouseY < height - SubScreen.VISUALISATION_HEIGHT)
             plate.updateAngle();
@@ -244,26 +242,13 @@ public class Game extends PApplet {
                     }
                 }
                 break;
-            case RIGHT:
-                if(mode == GameModes.REGULAR){
-                    mode = GameModes.SHIFTED;
-                }
-                else
-                    mode = GameModes.REGULAR;
-                break;
         }
     }
 
     public boolean checkIfResized(){
         if(oldHeight != height || oldWidth != width){
-            //Check wether user didn't set a window size which is too small
-            if(height < MIN_SCREENHEIGHT)
-                height = MIN_SCREENHEIGHT;
-            if(width < MIN_SCREENWIDTH)
-                width = MIN_SCREENWIDTH;
             oldHeight = height;
             oldWidth = width;
-
             return true;
         }
         return false;
