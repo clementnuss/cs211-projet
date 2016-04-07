@@ -93,9 +93,9 @@ public class Mover {
     }
 
     private void checkCylinders(List<PVector> cylinders) {
-
-        PVector nv = velocity.copy().normalize();
         boolean collisionOccured = false;
+        PVector correctedPos = pos.copy();
+        PVector correctedVel = velocity.copy();
 
         float minimumDistance = CYLINDER_RADIUS + SPHERE_RADIUS;
 
@@ -103,31 +103,21 @@ public class Mover {
 
             PVector cyl = cylinderBaseLocation.copy().add(0, -SPHERE_RADIUS, 0);
             float distance = cyl.dist(pos);
-            if (distance < minimumDistance) {
+            if (distance <= minimumDistance) {
                 collisionOccured = true;
-                PVector ballToCyl = PVector.sub(cyl, previousPos);
-                float projOnVelocity = PVector.dot(nv, ballToCyl);
-
-                float distanceOfProjSquared = ballToCyl.magSq() - (projOnVelocity * projOnVelocity);
-                float illegalCrossingLength = sqrt((minimumDistance * minimumDistance) - distanceOfProjSquared);
-
-                PVector correctedPos = PVector.mult(nv, projOnVelocity - illegalCrossingLength);
-
-                //performs shifting instead of finding latest legal value for position so it's cumulative among cylinders
-                correctedPos.add(previousPos);
-                PVector shifting = PVector.sub(correctedPos, pos);
-                pos.add(shifting);
+                PVector cylToBall = PVector.sub(pos, cyl);
+                correctedPos.add(PVector.mult(cylToBall.copy().normalize(), (minimumDistance - cylToBall.mag())));
 
                 PVector collisionNormal = new PVector(pos.x - cyl.x, 0, pos.z - cyl.z).normalize();
                 PVector updatedVel = PVector.mult(collisionNormal, 2f * velocity.dot(collisionNormal));
-                velocity.sub(updatedVel.x, 0, updatedVel.z);
-
+                correctedVel.sub(updatedVel.x, 0, updatedVel.z);
             }
         }
-        //This is to avoid glitches where the ball can't move but velocities keep accumulating
-        if(collisionOccured && PVector.dist(previousPos, pos) < COLLISION_THRESHOLD){
-            velocity = new PVector(0,0,0);
 
+        if(collisionOccured){
+            pos.x = correctedPos.x;
+            pos.z = correctedPos.z;
+            velocity = correctedVel.normalize().mult(velocity.mag()*0.9f);
         }
     }
 
