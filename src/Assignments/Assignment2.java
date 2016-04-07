@@ -123,7 +123,7 @@ public class Assignment2 extends PApplet {
     }
 
     My2DBox projectBox (My3DPoint eye, My3DBox box) {
-        My2DPoint[] projectedBox = new My2DPoint[8];;
+        My2DPoint[] projectedBox = new My2DPoint[8];
 
         for (int i = 0; i < 8; i++) {
             projectedBox[i] = projectPoint(eye, box.p[i]);

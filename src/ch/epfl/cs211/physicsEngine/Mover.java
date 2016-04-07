@@ -4,7 +4,7 @@
  */
 package ch.epfl.cs211.physicsEngine;
 
-import ch.epfl.cs211.Game;
+
 import ch.epfl.cs211.objects.Plate;
 import ch.epfl.cs211.tools.Color;
 import processing.core.PVector;
@@ -13,29 +13,31 @@ import java.util.List;
 
 import static ch.epfl.cs211.tools.ValueUtils.clamp;
 import static processing.core.PApplet.sin;
+import static ch.epfl.cs211.Game.GAME;
 
 public class Mover {
 
-    public final static float SPHERE_RADIUS = 20f;
+    private final static float SPHERE_RADIUS = 20f;
     public final static float CYLINDER_RADIUS = 25f;
-    private final static float GRAVITY_SCALAR = 1f * 9.81f / Game.INSTANCE.frameRate;
+    public final static float GROUND_OFFSET = -Plate.PLATE_THICKNESS/2 - SPHERE_RADIUS;
+    public final static float SPHERE_TO_CYLINDER_DISTANCE = SPHERE_RADIUS + CYLINDER_RADIUS;
+    private final static float GRAVITY_SCALAR = 9.81f / GAME.frameRate;
     private final static float FRICTION_FACTOR = 0.02f;
-    private final static float SPHERE_TO_CYLINDER_DISTANCE = SPHERE_RADIUS + CYLINDER_RADIUS;
 
-    private PVector pos;
+    private final PVector pos;
 
     private final Plate plate;
     private final float bound;
     private PVector velocity;
-    private PVector gravityForce;
+    private final PVector gravityForce;
 
 
     public Mover(Plate pl) {
         this.plate = pl;
-        this.pos = new PVector(plate.getX(), -(plate.getPlateThickness() / 2f + SPHERE_RADIUS), plate.getZ());
+        this.pos = new PVector(plate.getX(), GROUND_OFFSET, plate.getZ());
         velocity = new PVector(0, 0, 0);
         gravityForce = new PVector(0, 0, 0);
-        bound = plate.getPlateWidth() / 2f - SPHERE_RADIUS;
+        bound = Plate.PLATE_WIDTH / 2f - SPHERE_RADIUS;
     }
 
     public void update() {
@@ -54,15 +56,15 @@ public class Mover {
 
     public void display() {
 
-        Game.INSTANCE.noStroke();
-        Game.INSTANCE.fill(Color.BALL_COLOR);
-        Game.INSTANCE.pushMatrix();
-        Game.INSTANCE.rotateX(plate.getAngleX());
-        Game.INSTANCE.rotateY(plate.getAngleY());
-        Game.INSTANCE.rotateZ(plate.getAngleZ());
-        Game.INSTANCE.translate(pos.x, pos.y, pos.z);
-        Game.INSTANCE.sphere(SPHERE_RADIUS);
-        Game.INSTANCE.popMatrix();
+        GAME.noStroke();
+        GAME.fill(Color.BALL_COLOR);
+        GAME.pushMatrix();
+        GAME.rotateX(plate.getAngleX());
+        GAME.rotateY(plate.getAngleY());
+        GAME.rotateZ(plate.getAngleZ());
+        GAME.translate(pos.x, pos.y, pos.z);
+        GAME.sphere(SPHERE_RADIUS);
+        GAME.popMatrix();
 
     }
 
@@ -79,11 +81,11 @@ public class Mover {
 
         if (pos.x > upperBoundX || pos.x < lowerBoundX) {
             pos.x = clamp(pos.x, lowerBoundX, upperBoundX);
-            velocity.x = velocity.x * -0.9f;
+            velocity.x = velocity.x * -0.8f;
         }
         if (pos.z > upperBoundZ || pos.z < lowerBoundZ) {
             pos.z = clamp(pos.z, -bound, bound);
-            velocity.z = velocity.z * -0.9f;
+            velocity.z = velocity.z * -0.8f;
         }
     }
 
@@ -122,7 +124,7 @@ public class Mover {
         if (collisionOccured) {
             pos.x = correctedPos.x;
             pos.z = correctedPos.z;
-            velocity = correctedVel.normalize().mult(velocity.mag() * 0.9f);
+            velocity = correctedVel.normalize().mult(velocity.mag() * 0.8f);
         }
     }
 

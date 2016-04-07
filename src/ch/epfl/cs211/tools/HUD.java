@@ -5,12 +5,18 @@
  */
 package ch.epfl.cs211.tools;
 
-import ch.epfl.cs211.Game;
+import static ch.epfl.cs211.Game.GAME;
 
+/**
+ * Class implementing the head-up display (all the debug information that appears on the screen)
+ */
 public class HUD {
 
-    private int x, y, width, height, z;
-    private int color;
+    private final int x;
+    private final int y;
+    private final int width;
+    private final int height;
+    private final int color;
 
     /**
      *
@@ -33,9 +39,9 @@ public class HUD {
      * @param text  the text to be drawn in the HUD
      */
     public void display(String text) {
-        Game.INSTANCE.textSize(14);
-        Game.INSTANCE.fill(color);
-        Game.INSTANCE.text(text, x, y, width, height);  // Specify a z-axis value
+        GAME.textSize(14);
+        GAME.fill(color);
+        GAME.text(text, x, y, width, height);
     }
 
 }

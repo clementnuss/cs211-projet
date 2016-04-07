@@ -5,13 +5,13 @@
  */
 package ch.epfl.cs211.objects;
 
-import ch.epfl.cs211.Game;
 import processing.core.PShape;
 import processing.core.PVector;
 
 import static java.lang.Math.PI;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
+import static ch.epfl.cs211.Game.GAME;
 
 /**
  * Class representing a closed cylinder
@@ -19,6 +19,11 @@ import static java.lang.Math.sin;
 public class ClosedCylinder {
 
     private final PShape closedCylinder;
+    private final PShape closedCylinderStroked;
+    private final int cylResolution;
+    private final int color;
+    private final float[] x;
+    private final float[] z;
 
     /**
      *
@@ -29,24 +34,12 @@ public class ClosedCylinder {
      */
     public ClosedCylinder(float cylRadius, float cylHeight, int cylResolution, int color) {
 
+        this.cylResolution = cylResolution;
+        this.color = color;
+
         float angle;
-        float[] x = new float[cylResolution + 1];
-        float[] z = new float[cylResolution + 1];
-
-        PShape bottomSurface = Game.INSTANCE.createShape();
-        PShape topSurface = Game.INSTANCE.createShape();
-
-        bottomSurface.beginShape(PShape.TRIANGLE_FAN);
-        topSurface.beginShape(PShape.TRIANGLE_FAN);
-
-        bottomSurface.fill(color);
-        topSurface.fill(color);
-
-        bottomSurface.noStroke();
-        topSurface.noStroke();
-
-        bottomSurface.vertex(0, 0, 0);
-        topSurface.vertex(0, -cylHeight, 0);
+        x = new float[cylResolution + 1];
+        z = new float[cylResolution + 1];
 
         for (int i = 0; i < cylResolution + 1; i++) {
             angle = (float) ((2 * PI) / cylResolution) * i;
@@ -54,26 +47,49 @@ public class ClosedCylinder {
             z[i] = (float) cos(angle) * cylRadius;
         }
 
-        for (int i = 0; i < cylResolution + 1; i++) {
-            bottomSurface.vertex(x[i], 0, z[i]);
-            topSurface.vertex(x[i], -cylHeight, z[i]);
-        }
-
-        bottomSurface.endShape();
-        topSurface.endShape();
+        PShape bottomSurface = createDiskSurface(0);
+        PShape bottomSurfaceForStroked = createDiskSurface(0);
+        PShape topSurface = createDiskSurface(-cylHeight);
+        PShape topSurfaceForStroked = createDiskSurface(-cylHeight);
 
 
-        closedCylinder = Game.INSTANCE.createShape(PShape.GROUP);
-        closedCylinder.addChild(new OpenCylinder(cylRadius, cylHeight, cylResolution, color).getShape());
+
+        closedCylinder = GAME.createShape(PShape.GROUP);
+        closedCylinder.addChild(new OpenCylinder(cylRadius, cylHeight, cylResolution, color, false).getShape());
         closedCylinder.addChild(bottomSurface, 0);
         closedCylinder.addChild(topSurface, 1);
+
+        closedCylinderStroked = GAME.createShape(PShape.GROUP);
+        closedCylinderStroked.addChild(new OpenCylinder(cylRadius, cylHeight, cylResolution, color, true).getShape());
+        closedCylinderStroked.addChild(bottomSurfaceForStroked, 0);
+        closedCylinderStroked.addChild(topSurfaceForStroked, 1);
+
     }
 
-    public void display(PVector pos) {
-        Game.INSTANCE.pushMatrix();
-        Game.INSTANCE.translate(pos.x, pos.y , pos.z);
-        Game.INSTANCE.shape(closedCylinder);
-        Game.INSTANCE.popMatrix();
+    public void display(PVector pos, boolean withStroke) {
+        GAME.pushMatrix();
+        GAME.translate(pos.x, pos.y , pos.z);
+        if(withStroke)
+            GAME.shape(closedCylinderStroked);
+        else{
+            GAME.shape(closedCylinder);}
+        GAME.popMatrix();
+    }
+
+    private PShape createDiskSurface(float heightCoord){
+        PShape surface = GAME.createShape();
+        surface.beginShape(PShape.TRIANGLE_FAN);
+        surface.fill(color);
+        surface.noStroke();
+        surface.vertex(0, heightCoord, 0);
+
+
+        for (int i = 0; i < cylResolution + 1; i++) {
+            surface.vertex(x[i], heightCoord, z[i]);
+        }
+
+        surface.endShape();
+        return surface;
     }
 
 }

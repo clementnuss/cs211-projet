@@ -5,11 +5,12 @@
  */
 package ch.epfl.cs211.objects;
 
-import ch.epfl.cs211.Game;
 import ch.epfl.cs211.tools.Color;
 
-import static java.lang.Math.*;
+import static ch.epfl.cs211.Game.abs;
 import static ch.epfl.cs211.tools.ValueUtils.*;
+import static ch.epfl.cs211.Game.GAME;
+import static ch.epfl.cs211.Game.PI;
 
 public class Plate {
 
@@ -18,14 +19,17 @@ public class Plate {
     /*  STEP_VALUE is the amount by which we increase / decrease
         the angle when the mouse is dragged
      */
-    private final static float STEP_VALUE = 0.005f;
-    private final static float MIN_STEP_VALUE = 0.01f;
-    private final static float MAX_STEP_VALUE = 0.05f;
+    private final static float STEP_VALUE = 0.05f;
+    private final static float ANGLE_VALUE = 0.02f;
+    private final static float MIN_STEP_VALUE = 0.1f;
+    private final static float MAX_STEP_VALUE = 0.5f;
     public final static float PLATE_THICKNESS = 20f;
     public final static float PLATE_WIDTH = 500f;
 
-    private int x, y, z;
-    private float angleX, angleY, angleZ, angleStep;
+    private final int x;
+    private final int y;
+    private final int z;
+    private float angleX, angleY, angleZ, sensitivity;
     private float savedAngleX, savedAngleY, savedAngleZ;
     private final int color;
 
@@ -36,73 +40,45 @@ public class Plate {
         this.angleX = 0;
         this.angleY = 0;
         this.angleZ = 0;
-        this.angleStep = 0.02f;
+        this.sensitivity = (MAX_STEP_VALUE + MIN_STEP_VALUE) / 2;
         this.color = color;
     }
 
     public void display(){
-        Game.INSTANCE.stroke(Color.STROKE_COLOR);
-        Game.INSTANCE.strokeWeight(2f);
-        Game.INSTANCE.pushMatrix();
-        Game.INSTANCE.translate(x, y, z);
-        Game.INSTANCE.rotateX(angleX);
-        Game.INSTANCE.rotateZ(angleZ);
-        Game.INSTANCE.rotateY(angleY);
-        Game.INSTANCE.fill(color);
-        Game.INSTANCE.box(PLATE_WIDTH, PLATE_THICKNESS, PLATE_WIDTH);
-        Game.INSTANCE.popMatrix();
+        GAME.stroke(Color.STROKE_COLOR);
+        GAME.strokeWeight(2f);
+        GAME.pushMatrix();
+        GAME.translate(x, y, z);
+        GAME.rotateX(angleX);
+        GAME.rotateZ(angleZ);
+        GAME.rotateY(angleY);
+        GAME.fill(color);
+        GAME.box(PLATE_WIDTH, PLATE_THICKNESS, PLATE_WIDTH);
+        GAME.popMatrix();
     }
 
     public void updateAngle(){
 
-        int deltaX = Game.INSTANCE.mouseX - Game.INSTANCE.pmouseX;
-        int deltaY = Game.INSTANCE.mouseY - Game.INSTANCE.pmouseY;
+        int deltaX = GAME.mouseX - GAME.pmouseX;
+        int deltaY = GAME.mouseY - GAME.pmouseY;
 
+        float amountX = abs(deltaX * sensitivity * ANGLE_VALUE);
+        float amountY = abs(deltaY * sensitivity * ANGLE_VALUE);
 
         if(deltaX > 0){
-            angleZ = maxClamp(angleZ + angleStep, MAX_ANGLE);
+            angleZ = maxClamp(angleZ + amountX, MAX_ANGLE);
         }else if(deltaX < 0){
-            angleZ = minClamp(angleZ - angleStep, -MAX_ANGLE);
+            angleZ = minClamp(angleZ - amountX, -MAX_ANGLE);
         }
         if(deltaY < 0){
-            angleX = maxClamp(angleX + angleStep, MAX_ANGLE);
+            angleX = maxClamp(angleX + amountY, MAX_ANGLE);
         }else if(deltaY > 0){
-            angleX = minClamp(angleX - angleStep, -MAX_ANGLE);
+            angleX = minClamp(angleX - amountY, -MAX_ANGLE);
         }
-    }
-
-    public void setAngleX(float angleX) {
-        this.angleX = angleX;
-    }
-
-    public void setAngleZ(float angleZ) {
-        this.angleZ = angleZ;
-    }
-
-    public void setAngleY(float angleY) {
-        this.angleY = angleY;
     }
 
     public void updateSensitivity(int count){
-        angleStep = roundThreeDecimals(clamp(angleStep - (count * STEP_VALUE), MIN_STEP_VALUE, MAX_STEP_VALUE));
-    }
-
-    public void saveState(){
-        savedAngleX = angleX;
-        savedAngleY = angleY;
-        savedAngleZ = angleZ;
-    }
-
-    public float getSavedAngleZ() {
-        return savedAngleZ;
-    }
-
-    public float getSavedAngleY() {
-        return savedAngleY;
-    }
-
-    public float getSavedAngleX() {
-        return savedAngleX;
+        sensitivity = roundThreeDecimals(clamp(sensitivity - (count * STEP_VALUE), MIN_STEP_VALUE, MAX_STEP_VALUE));
     }
 
     public float getAngleX() {
@@ -129,11 +105,25 @@ public class Plate {
         return z;
     }
 
-    public float getAngleStep() {
-        return angleStep;
+    public float getSensitivity() {
+        return sensitivity;
     }
 
-    public float getPlateThickness(){return PLATE_THICKNESS;}
+    public void setVertical(){
+        angleX = -PI/2f;
+        angleY = 0;
+        angleZ = 0;
+    }
 
-    public float getPlateWidth(){return PLATE_WIDTH;}
+    public void restoreState(){
+        angleX = savedAngleX;
+        angleY = savedAngleY;
+        angleZ = savedAngleZ;
+    }
+
+    public void saveState(){
+        savedAngleX = angleX;
+        savedAngleY = angleY;
+        savedAngleZ = angleZ;
+    }
 }

@@ -2,7 +2,6 @@ package ch.epfl.cs211;
 
 import ch.epfl.cs211.objects.ClosedCylinder;
 import ch.epfl.cs211.objects.GameModes;
-import ch.epfl.cs211.objects.OpenCylinder;
 import ch.epfl.cs211.objects.Plate;
 import ch.epfl.cs211.physicsEngine.Mover;
 import ch.epfl.cs211.tools.Color;
@@ -27,7 +26,7 @@ import static ch.epfl.cs211.tools.ValueUtils.roundThreeDecimals;
  * PROCESSING 3D AXIS
  * <p>
  * <p>
- *       ¬ Z
+ *       ¬ -Z
  *     /
  *   /
  * /
@@ -45,26 +44,26 @@ import static ch.epfl.cs211.tools.ValueUtils.roundThreeDecimals;
 public class Game extends PApplet {
 
 
+    public static final Game GAME = new Game();
+
+    private final static float PLATE_OFFSET = Plate.PLATE_WIDTH/2;
+    private final static float OBSTACLE_SIZE = 25f;
     private Plate plate;
     private HUD hudPlate, hudBall, hudMouse;
     private Mover mover;
-    private OpenCylinder openCylinder;
     private ClosedCylinder closedCylinder;
     private GameModes mode;
-    private List<PVector> obstacleList;
-    private final static float PLATE_OFFSET = Plate.PLATE_WIDTH/2;
-    private final static float OBSTACLE_SIZE = 25f;
+    private boolean modeHasChanged;
 
-    public static final Game INSTANCE = new Game();
+    private List<PVector> obstacleList;
 
     public static void main(String[] args) {
 
-        PApplet.runSketch(new String[]{"ch.epfl.cs211.Game"}, Game.INSTANCE);
+        PApplet.runSketch(new String[]{"ch.epfl.cs211.Game"}, GAME);
 
     }
 
-    private Game() {
-    }
+    private Game() {}
 
     public void settings() {
         size(1024, 576, P3D);
@@ -77,17 +76,17 @@ public class Game extends PApplet {
         hudBall = new HUD(200, 25, 200, 300, Color.HUD_COLOR);
         hudMouse = new HUD(25, 25, 250, 300, Color.HUD_COLOR);
         mover = new Mover(plate);
-        openCylinder = new OpenCylinder(50, 40, 40, Color.CYLINDER_COLOR);
         closedCylinder = new ClosedCylinder(Mover.CYLINDER_RADIUS, 75, 30, Color.CYLINDER_COLOR);
         mode = GameModes.REGULAR;
         obstacleList = new ArrayList<>();
+        modeHasChanged = false;
     }
 
     public void draw() {
 
         background(210);
         ambientLight(80,80,80);
-        spotLight(255, 255, 255, 0,-500,0,0,1,0,PI/4f,2);
+        spotLight(255, 255, 255, 200,-500,-200,0,1,0,PI/4f,2);
 
         switch (mode) {
             case REGULAR:
@@ -101,38 +100,31 @@ public class Game extends PApplet {
 
     }
 
-    private void drawObstacles(){
-        pushMatrix();
-        rotateX(plate.getAngleX());
-        rotateY(plate.getAngleY());
-        rotateZ(plate.getAngleZ());
-        translate(plate.getX(), plate.getY()-Plate.PLATE_THICKNESS/2, plate.getZ());
-
-        for (PVector obst : obstacleList)
-            closedCylinder.display(obst);
-
-        popMatrix();
-    }
-
     private void drawRegularMode() {
         camera(plate.getX(), plate.getY()-500, plate.getZ() + 700,
                 plate.getX(), plate.getY(), plate.getZ(),
                 0, 1.0f, 0);
 
+        //If the orientation of the plate was saved and modified we restore it
+        if(modeHasChanged){
+            plate.restoreState();
+            perspective();
+            modeHasChanged = false;
+        }
+
         plate.display();
+
         mover.update();
         mover.checkCollisions(obstacleList);
         mover.display();
 
         drawObstacles();
 
-        translate(mouseX, mouseY, 0);
-
         camera();   //Resets the camera in order to display 2d text
         hudPlate.display("X: " + plate.getAngleX() +
                 "\nY: " + plate.getAngleY() +
                 "\nZ: " + plate.getAngleZ() +
-                "\nSensitivity: " + plate.getAngleStep());
+                "\nSensitivity: " + plate.getSensitivity());
 
         hudBall.display("Ball x= " + roundThreeDecimals(mover.getX()) +
                 "\nBall y= " + roundThreeDecimals(mover.getY()) +
@@ -150,27 +142,35 @@ public class Game extends PApplet {
 
         directionalLight(210, 210, 210, 0,0.2f,-1);
 
-        ortho();
-        plate.saveState();
-        plate.setAngleX(-PI/2 -0.001f);
-        plate.setAngleY(0);
-        plate.setAngleZ(0);
+        if(modeHasChanged){
+            ortho();
+            plate.saveState();
+            modeHasChanged = false;
+        }
+
+        plate.setVertical();
         plate.display();
-        strokeWeight(10f);
-        stroke(0);
-
+        mover.display();
         drawObstacles();
-        plate.setAngleX(plate.getSavedAngleX());
-        plate.setAngleY(plate.getSavedAngleY());
-        plate.setAngleZ(plate.getSavedAngleZ());
-
-        perspective();
         camera();
         hudMouse.display("You are currently in shift mode !\n" +
                 "Click on the plate to add obstacles." +
                 "\nMouse X: " + mouseX+
                 "\nMouse Y: " + mouseY );
 
+    }
+
+    private void drawObstacles(){
+        pushMatrix();
+        rotateX(plate.getAngleX());
+        rotateY(plate.getAngleY());
+        rotateZ(plate.getAngleZ());
+        translate(plate.getX(), plate.getY()-Plate.PLATE_THICKNESS/2, plate.getZ());
+
+        for (PVector obst : obstacleList)
+            closedCylinder.display(obst, mode == GameModes.SHIFTED);
+
+        popMatrix();
     }
 
     public void mouseDragged() {
@@ -185,14 +185,16 @@ public class Game extends PApplet {
         switch (event.getButton()) {
             case LEFT:
                 if (mode == GameModes.SHIFTED) {
-                    //check if click occured above the plate and not outside boundaries
-                    if ((width / 2 - PLATE_OFFSET + OBSTACLE_SIZE / 2)    < mouseX
-                                                                        && mouseX < (width / 2 + PLATE_OFFSET - OBSTACLE_SIZE / 2)
-                       && (height / 2 - PLATE_OFFSET + OBSTACLE_SIZE / 2) < mouseY
-                                                                        && mouseY < (height / 2 + PLATE_OFFSET - OBSTACLE_SIZE / 2)) {
-                        obstacleList.add(
-                                new PVector((mouseX - width/2), 0, (mouseY - height/2))
-                        );
+                    float xPos = mouseX - width/2;
+                    float yPos = mouseY - height/2;
+                    //check if click occured above a legal position
+                    if ((width / 2 - PLATE_OFFSET + OBSTACLE_SIZE) < mouseX
+                          && mouseX < (width / 2 + PLATE_OFFSET - OBSTACLE_SIZE)
+                            && (height / 2 - PLATE_OFFSET + OBSTACLE_SIZE) < mouseY
+                            && mouseY < (height / 2 + PLATE_OFFSET - OBSTACLE_SIZE)
+                            && !(PVector.dist(mover.getPosition(), new PVector(xPos, Mover.GROUND_OFFSET, yPos)) < Mover.SPHERE_TO_CYLINDER_DISTANCE))
+                    {
+                        obstacleList.add( new PVector(xPos, 0, yPos));
                     }
                 }
                 break;
@@ -203,6 +205,7 @@ public class Game extends PApplet {
         switch (event.getKeyCode()) {
             case SHIFT:
                 mode = GameModes.SHIFTED;
+                modeHasChanged = true;
                 break;
         }
     }
@@ -211,6 +214,7 @@ public class Game extends PApplet {
         switch (event.getKeyCode()) {
             case SHIFT:
                 mode = GameModes.REGULAR;
+                modeHasChanged = true;
                 break;
         }
     }
