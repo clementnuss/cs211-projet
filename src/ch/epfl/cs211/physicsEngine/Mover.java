@@ -1,7 +1,6 @@
 /**
- *  Visual Computing project (CS211) - 2016
- *  Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
- *
+ * Visual Computing project (CS211) - 2016
+ * Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
  */
 package ch.epfl.cs211.physicsEngine;
 
@@ -14,18 +13,16 @@ import java.util.List;
 
 import static ch.epfl.cs211.tools.ValueUtils.clamp;
 import static processing.core.PApplet.sin;
-import static processing.core.PApplet.sqrt;
 
 public class Mover {
 
-    private final static float GRAVITY_SCALAR = 0.5f * 9.81f / Game.INSTANCE.frameRate;
-    private final static float FRICTION_FACTOR = 0.02f;
     public final static float SPHERE_RADIUS = 20f;
     public final static float CYLINDER_RADIUS = 25f;
-    private final static float COLLISION_THRESHOLD = 0.00005f;
+    private final static float GRAVITY_SCALAR = 1f * 9.81f / Game.INSTANCE.frameRate;
+    private final static float FRICTION_FACTOR = 0.02f;
+    private final static float SPHERE_TO_CYLINDER_DISTANCE = SPHERE_RADIUS + CYLINDER_RADIUS;
 
     private PVector pos;
-    private PVector previousPos;
 
     private final Plate plate;
     private final float bound;
@@ -42,8 +39,6 @@ public class Mover {
     }
 
     public void update() {
-
-        previousPos = pos.copy();
 
         gravityForce.x = sin(plate.getAngleZ()) * GRAVITY_SCALAR;
         gravityForce.z = sin(-plate.getAngleX()) * GRAVITY_SCALAR;
@@ -94,19 +89,29 @@ public class Mover {
 
     private void checkCylinders(List<PVector> cylinders) {
         boolean collisionOccured = false;
+
+        /*
+            Because corrections are additive among cylinders we take copies that will store all
+            correction shifts computed using the original position of the ball.
+        */
         PVector correctedPos = pos.copy();
         PVector correctedVel = velocity.copy();
-
-        float minimumDistance = CYLINDER_RADIUS + SPHERE_RADIUS;
 
         for (PVector cylinderBaseLocation : cylinders) {
 
             PVector cyl = cylinderBaseLocation.copy().add(0, -SPHERE_RADIUS, 0);
             float distance = cyl.dist(pos);
-            if (distance <= minimumDistance) {
+
+            if (distance <= SPHERE_TO_CYLINDER_DISTANCE) {
                 collisionOccured = true;
-                PVector cylToBall = PVector.sub(pos, cyl);
-                correctedPos.add(PVector.mult(cylToBall.copy().normalize(), (minimumDistance - cylToBall.mag())));
+                PVector cylinderToBall = PVector.sub(pos, cyl);
+
+                /*
+                    Ball entered cylinder, push it outwards in a radial fashion.
+                    This is not as accurate as finding the last valid position but it requires a lot
+                    less computation and the loss of realism is practically invisible.
+                 */
+                correctedPos.add(PVector.mult(cylinderToBall.copy().normalize(), (SPHERE_TO_CYLINDER_DISTANCE - cylinderToBall.mag())));
 
                 PVector collisionNormal = new PVector(pos.x - cyl.x, 0, pos.z - cyl.z).normalize();
                 PVector updatedVel = PVector.mult(collisionNormal, 2f * velocity.dot(collisionNormal));
@@ -114,10 +119,10 @@ public class Mover {
             }
         }
 
-        if(collisionOccured){
+        if (collisionOccured) {
             pos.x = correctedPos.x;
             pos.z = correctedPos.z;
-            velocity = correctedVel.normalize().mult(velocity.mag()*0.9f);
+            velocity = correctedVel.normalize().mult(velocity.mag() * 0.9f);
         }
     }
 

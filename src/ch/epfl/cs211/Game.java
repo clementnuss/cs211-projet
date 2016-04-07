@@ -67,7 +67,7 @@ public class Game extends PApplet {
     }
 
     public void settings() {
-        size(1024, 768, P3D);
+        size(1024, 576, P3D);
     }
 
     public void setup() {
