@@ -12,11 +12,11 @@ import static java.lang.Math.PI;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 
-public class OpenCylinder {
+class OpenCylinder {
 
     private final PShape cylinder;
 
-    public OpenCylinder(float cylRadius, float cylHeight, int cylResolution, int color) {
+    public OpenCylinder(float cylRadius, float cylHeight, int cylResolution, int color, boolean withStroke) {
 
         float angle;
         float[] x = new float[cylResolution + 1];
@@ -31,7 +31,11 @@ public class OpenCylinder {
         cylinder = Game.GAME.createShape();
         cylinder.beginShape(PShape.QUAD_STRIP);
         cylinder.fill(color);
-        cylinder.noStroke();
+        cylinder.strokeWeight(2);
+        if(withStroke)
+            cylinder.stroke(0);
+        else
+            cylinder.noStroke();
 
         for (int i = 0; i < x.length; i++) {
             cylinder.vertex(x[i], 0, z[i]);
