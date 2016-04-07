@@ -18,10 +18,11 @@ import static processing.core.PApplet.sqrt;
 
 public class Mover {
 
-    private final static float GRAVITY_SCALAR = 0.1f;
+    private final static float GRAVITY_SCALAR = 0.5f * 9.81f / Game.INSTANCE.frameRate;
+    private final static float FRICTION_FACTOR = 0.02f;
     public final static float SPHERE_RADIUS = 20f;
     public final static float CYLINDER_RADIUS = 25f;
-    private final static float COLLISION_THRESHOLD = 0.0001f;
+    private final static float COLLISION_THRESHOLD = 0.00005f;
 
     private PVector pos;
     private PVector previousPos;
@@ -48,14 +49,8 @@ public class Mover {
         gravityForce.z = sin(-plate.getAngleX()) * GRAVITY_SCALAR;
 
         velocity.add(gravityForce);
-
-        float normalForce = 1;
-        float mu = 0.01f;
-        float frictionMagnitude = normalForce * mu;
         PVector friction = velocity.copy();
-        friction.mult(-1);
-        friction.normalize();
-        friction.mult(frictionMagnitude);
+        friction.mult(-FRICTION_FACTOR);
 
         velocity.add(friction);
 
@@ -89,11 +84,11 @@ public class Mover {
 
         if (pos.x > upperBoundX || pos.x < lowerBoundX) {
             pos.x = clamp(pos.x, lowerBoundX, upperBoundX);
-            velocity.x = velocity.x * -1;
+            velocity.x = velocity.x * -0.9f;
         }
-        if (pos.z > plate.getZ() + bound || pos.z < plate.getZ() - bound) {
+        if (pos.z > upperBoundZ || pos.z < lowerBoundZ) {
             pos.z = clamp(pos.z, -bound, bound);
-            velocity.z = velocity.z * -1;
+            velocity.z = velocity.z * -0.9f;
         }
     }
 
