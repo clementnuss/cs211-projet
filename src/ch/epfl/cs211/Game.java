@@ -30,9 +30,9 @@ import static ch.epfl.cs211.tools.ValueUtils.roundThreeDecimals;
  * PROCESSING 3D AXIS
  * <p>
  * <p>
- * ¬ Z
- * /
- * /
+ *       ¬ -Z
+ *     /
+ *   /
  * /
  * -------------> X
  * |
@@ -70,6 +70,8 @@ public class Game extends PApplet {
     private Plate plate;
     private Mover mover;
     private ClosedCylinder closedCylinder;
+    private boolean modeHasChanged;
+
     private List<PVector> obstacleList;
 
     //Game features
@@ -114,7 +116,6 @@ public class Game extends PApplet {
         if(checkIfResized())
             subView.updateDimensions();
 
-        width = 1000;
         background(210);
         ambientLight(80, 80, 80);
         spotLight(255, 255, 255, 200, -500, -250, 0, 1, 0, PI / 4f, 2);
@@ -149,6 +150,13 @@ public class Game extends PApplet {
                 plate.getX(), plate.getY(), plate.getZ(),
                 0, 1.0f, 0);
 
+        //If the orientation of the plate was saved and modified we restore it
+        if(modeHasChanged){
+            plate.restoreState();
+            perspective();
+            modeHasChanged = false;
+        }
+
         plate.display();
         mover.update();
         mover.checkCollisions(obstacleList);
@@ -173,7 +181,7 @@ public class Game extends PApplet {
         hudPlate.display("X: " + plate.getAngleX() +
                 "\nY: " + plate.getAngleY() +
                 "\nZ: " + plate.getAngleZ() +
-                "\nSensitivity: " + plate.getAngleStep() +
+                "\nSensitivity: " + plate.getSensitivity() +
                 "\nScore: " + score);
 
         hudBall.display("Ball x= " + roundThreeDecimals(mover.getX()) +
@@ -192,21 +200,16 @@ public class Game extends PApplet {
 
         directionalLight(210, 210, 210, 0, 0.2f, -1);
 
-        ortho();
-        plate.saveState();
-        plate.setAngleX(-PI / 2 - 0.001f);
-        plate.setAngleY(0);
-        plate.setAngleZ(0);
+        if(modeHasChanged){
+            ortho();
+            plate.saveState();
+            modeHasChanged = false;
+        }
+
+        plate.setVertical();
         plate.display();
-        strokeWeight(10f);
-        stroke(0);
-
+        mover.display();
         drawObstacles();
-        plate.setAngleX(plate.getSavedAngleX());
-        plate.setAngleY(plate.getSavedAngleY());
-        plate.setAngleZ(plate.getSavedAngleZ());
-
-        perspective();
         camera();
         hudMouse.display("You are currently in shift mode !\n" +
                 "Click on the plate to add obstacles." +
@@ -228,14 +231,16 @@ public class Game extends PApplet {
         switch (event.getButton()) {
             case LEFT:
                 if (mode == GameModes.SHIFTED) {
-                    //check if click occured above the plate and not outside boundaries
-                    if ((width / 2 - PLATE_OFFSET + OBSTACLE_SIZE / 2) < mouseX
-                            && mouseX < (width / 2 + PLATE_OFFSET - OBSTACLE_SIZE / 2)
-                            && (height / 2 - PLATE_OFFSET + OBSTACLE_SIZE / 2) < mouseY
-                            && mouseY < (height / 2 + PLATE_OFFSET - OBSTACLE_SIZE / 2)) {
-                        obstacleList.add(
-                                new PVector((mouseX - width / 2), 0, (mouseY - height / 2))
-                        );
+                    float xPos = mouseX - width/2;
+                    float yPos = mouseY - height/2;
+                    //check if click occurred above a legal position
+                    if ((width / 2 - PLATE_OFFSET + OBSTACLE_SIZE) < mouseX
+                          && mouseX < (width / 2 + PLATE_OFFSET - OBSTACLE_SIZE)
+                            && (height / 2 - PLATE_OFFSET + OBSTACLE_SIZE) < mouseY
+                            && mouseY < (height / 2 + PLATE_OFFSET - OBSTACLE_SIZE)
+                            && !(PVector.dist(mover.getPosition(), new PVector(xPos, Mover.GROUND_OFFSET, yPos)) < Mover.SPHERE_TO_CYLINDER_DISTANCE))
+                    {
+                        obstacleList.add( new PVector(xPos, 0, yPos));
                     }
                 }
                 break;
@@ -268,6 +273,7 @@ public class Game extends PApplet {
         switch (event.getKeyCode()) {
             case SHIFT:
                 mode = GameModes.SHIFTED;
+                modeHasChanged = true;
                 break;
         }
     }
@@ -276,6 +282,7 @@ public class Game extends PApplet {
         switch (event.getKeyCode()) {
             case SHIFT:
                 mode = GameModes.REGULAR;
+                modeHasChanged = true;
                 break;
         }
     }
