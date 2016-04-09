@@ -22,10 +22,9 @@ public class InteractiveProjections extends PApplet {
     }
 
     public void draw() {
-        camera(width/2, height/2, depth, 0, 0, 0, 0, 0, 1);
-        translate(0, height / 2, 0);
+        camera(0, 0, depth, 0, 0, 0, 0, 1, 0);
 
-        ambientLight(102, 102, 102);
+        ambientLight(205, 181, 153);
         background(200);
 
         rx = clamp(rx, MIN_ANGLE, MAX_ANGLE);
@@ -34,7 +33,7 @@ public class InteractiveProjections extends PApplet {
         rotateX(rx);
         rotateY(ry);
 
-        box(114);
+        box(160);
     }
 
     public void keyPressed() {
