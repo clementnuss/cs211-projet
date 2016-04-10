@@ -1,7 +1,6 @@
 /**
- *  Visual Computing project (CS211) - 2016
- *  Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
- *
+ * Visual Computing project (CS211) - 2016
+ * Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
  */
 
 public class Projections extends PApplet {
@@ -23,7 +22,7 @@ public class Projections extends PApplet {
         My3DBox input3DBox = new My3DBox(origin, 100, 150, 300);
 
         //rotated around x
-        float[][] transform1 = rotateXMatrix(PI/8);
+        float[][] transform1 = rotateXMatrix(PI / 8);
         input3DBox = transformBox(input3DBox, transform1);
         projectBox(eye, input3DBox).render();
 
@@ -42,6 +41,7 @@ public class Projections extends PApplet {
     class My2DPoint {
         float x;
         float y;
+
         My2DPoint(float x, float y) {
             this.x = x;
             this.y = y;
@@ -52,6 +52,7 @@ public class Projections extends PApplet {
         float x;
         float y;
         float z;
+
         My3DPoint(float x, float y, float z) {
             this.x = x;
             this.y = y;
@@ -64,17 +65,18 @@ public class Projections extends PApplet {
         float z_Minus_ez = p.z - eye.z;
         float ez = eye.z;
 
-        return new My2DPoint((-ez *(p.x - eye.x))/z_Minus_ez, (-ez *(p.y - eye.y))/z_Minus_ez);
+        return new My2DPoint((-ez * (p.x - eye.x)) / z_Minus_ez, (-ez * (p.y - eye.y)) / z_Minus_ez);
     }
 
 
     class My2DBox {
         My2DPoint[] s;
+
         My2DBox(My2DPoint[] s) {
             this.s = s;
         }
 
-        void render(){
+        void render() {
             strokeWeight(2.14f);
 
             stroke(0xff00ff00);
@@ -100,26 +102,29 @@ public class Projections extends PApplet {
 
     class My3DBox {
         My3DPoint[] p;
-        My3DBox(My3DPoint origin, float dimX, float dimY, float dimZ){
+
+        My3DBox(My3DPoint origin, float dimX, float dimY, float dimZ) {
             float x = origin.x;
             float y = origin.y;
             float z = origin.z;
-            this.p = new My3DPoint[] {new My3DPoint(x,y+dimY,z+dimZ),
-                    new My3DPoint(x,y,z+dimZ),
-                    new My3DPoint(x+dimX,y,z+dimZ),
-                    new My3DPoint(x+dimX,y+dimY,z+dimZ),
-                    new My3DPoint(x,y+dimY,z),
+            this.p = new My3DPoint[]{new My3DPoint(x, y + dimY, z + dimZ),
+                    new My3DPoint(x, y, z + dimZ),
+                    new My3DPoint(x + dimX, y, z + dimZ),
+                    new My3DPoint(x + dimX, y + dimY, z + dimZ),
+                    new My3DPoint(x, y + dimY, z),
                     origin,
-                    new My3DPoint(x+dimX,y,z),
-                    new My3DPoint(x+dimX,y+dimY,z)};
+                    new My3DPoint(x + dimX, y, z),
+                    new My3DPoint(x + dimX, y + dimY, z)};
         }
+
         My3DBox(My3DPoint[] p) {
             this.p = p;
         }
     }
 
-    My2DBox projectBox (My3DPoint eye, My3DBox box) {
-        My2DPoint[] projectedBox = new My2DPoint[8];;
+    My2DBox projectBox(My3DPoint eye, My3DBox box) {
+        My2DPoint[] projectedBox = new My2DPoint[8];
+        ;
 
         for (int i = 0; i < 8; i++) {
             projectedBox[i] = projectPoint(eye, box.p[i]);
@@ -128,40 +133,41 @@ public class Projections extends PApplet {
         return new My2DBox(projectedBox);
     }
 
-    float[] homogeneous3DPoint (My3DPoint p) {
+    float[] homogeneous3DPoint(My3DPoint p) {
         float[] result = {p.x, p.y, p.z, 1};
         return result;
     }
 
-    float[][]  rotateXMatrix(float angle) {
-        return(new float[][] {{1, 0, 0, 0},
+    float[][] rotateXMatrix(float angle) {
+        return (new float[][]{{1, 0, 0, 0},
                 {0, cos(angle), sin(angle), 0},
                 {0, -sin(angle), cos(angle), 0},
                 {0, 0, 0, 1}});
     }
-    float[][]  rotateYMatrix(float angle) {
-        return(new float[][] {{cos(angle), 0, sin(angle), 0},
+
+    float[][] rotateYMatrix(float angle) {
+        return (new float[][]{{cos(angle), 0, sin(angle), 0},
                 {0, 1, 0, 0},
                 {-sin(angle), 0, cos(angle), 0},
                 {0, 0, 0, 1}});
     }
 
-    float[][]  rotateZMatrix(float angle) {
-        return(new float[][] {{cos(angle), -sin(angle), 0, 0},
+    float[][] rotateZMatrix(float angle) {
+        return (new float[][]{{cos(angle), -sin(angle), 0, 0},
                 {sin(angle), cos(angle), 0, 0},
                 {0, 0, 1, 0},
                 {0, 0, 0, 1}});
     }
 
-    float[][]  scaleMatrix(float x, float y, float z) {
-        return(new float[][] {{x, 0, 0, x},
+    float[][] scaleMatrix(float x, float y, float z) {
+        return (new float[][]{{x, 0, 0, x},
                 {0, y, 0, y},
                 {0, 0, z, z},
                 {0, 0, 0, 1}});
     }
 
-    float[][]  translationMatrix(float x, float y, float z) {
-        return(new float[][] {{1, 0, 0, x},
+    float[][] translationMatrix(float x, float y, float z) {
+        return (new float[][]{{1, 0, 0, x},
                 {0, 1, 0, y},
                 {0, 0, 1, z},
                 {0, 0, 0, 1}});
@@ -170,8 +176,8 @@ public class Projections extends PApplet {
     float[] matrixProduct(float[][] a, float[] b) {
         float[] back = new float[4];
 
-        for(int i = 0; i < 4; i++) {
-            for(int j = 0; j < 4; j++) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
                 back[i] += a[i][j] * b[j];
             }
         }
@@ -182,7 +188,7 @@ public class Projections extends PApplet {
     My3DBox transformBox(My3DBox box, float[][] transformMatrix) {
         My3DPoint[] back = new My3DPoint[8];
 
-        for(int k = 0; k < 8; k++) {
+        for (int k = 0; k < 8; k++) {
             float[] homogeneousVertex = homogeneous3DPoint(box.p[k]);
             homogeneousVertex = matrixProduct(transformMatrix, homogeneousVertex);
             back[k] = euclidian3DPoint(homogeneousVertex);
@@ -191,8 +197,8 @@ public class Projections extends PApplet {
     }
 
 
-    My3DPoint euclidian3DPoint (float[] a) {
-        My3DPoint result = new My3DPoint(a[0]/a[3], a[1]/a[3], a[2]/a[3]);
+    My3DPoint euclidian3DPoint(float[] a) {
+        My3DPoint result = new My3DPoint(a[0] / a[3], a[1] / a[3], a[2] / a[3]);
         return result;
     }
 
