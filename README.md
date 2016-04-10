@@ -1,7 +1,14 @@
 # cs211-projet
-Projet de Visual Computing
+Projet de Visual Computing (CS211)
 
-### Utiliser Java pour créer du Processing
+Auteurs : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
+
+
+Les répertoires `Game`, `InteractiveProjections` et `Projections` contiennent les fichiers importants pour le rendu Milestone 1.
+
+Dans le réperoire src se trouve l'arborescence que l'on utilse pour coder le projet en java.
+
+#### Utilisation de Java pour programmer du Processing
 
 Alors plein d'infos sur [ce](https://processing.org/tutorials/eclipse/) lien.
 A noter qu'il faut inclure comme "Library" les fichiers `core.jar, gluegen.jar, jogl-all.jar` pour pouvoir exécuter le tout comme il faut!
