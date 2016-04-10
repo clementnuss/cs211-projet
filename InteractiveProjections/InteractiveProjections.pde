@@ -32,7 +32,7 @@ public class InteractiveProjections extends PApplet {
         rotateX(rx);
         rotateY(ry);
 
-        box(160);
+        box(114);
     }
 
     public void keyPressed() {
