@@ -1,10 +1,14 @@
 package ch.epfl.cs211.display2D;
 
+import ch.epfl.cs211.objects.Plate;
+import ch.epfl.cs211.physicsEngine.Mover;
 import processing.core.PGraphics;
 import ch.epfl.cs211.tools.Color;
+import processing.core.PVector;
 
 import static ch.epfl.cs211.Game.GAME;
 import static ch.epfl.cs211.Game.maxScore;
+import static processing.core.PApplet.map;
 
 
 /**
@@ -73,6 +77,20 @@ public class SubScreen {
         topView.fill(Color.SUBSCREEN_TOPVIEW_COLOR);
         topView.noStroke();
         topView.rect(0,0, TOP_WIDTH, TOP_HEIGHT);
+        float plateBound = GAME.getMover().getBound();
+
+        float sphereRadius = map(Mover.SPHERE_RADIUS, 0, Plate.PLATE_WIDTH, 0, TOP_HEIGHT);
+        //TODO: implement cylinders
+        float cylRadius = map(Mover.CYLINDER_RADIUS, 0, Plate.PLATE_WIDTH, 0, TOP_HEIGHT);
+
+
+        PVector pos = GAME.getMover().getPosition();
+        float px = map(pos.x, - plateBound, plateBound, sphereRadius, TOP_WIDTH -sphereRadius);
+        float py = map(pos.z, - plateBound, plateBound, sphereRadius, TOP_HEIGHT -sphereRadius);
+
+        topView.fill(Color.BALL_COLOR);
+        topView.ellipse(px, py, sphereRadius, sphereRadius);
+
         topView.endDraw();
         GAME.image(topView, topViewX, topViewY);
     }
@@ -160,5 +178,6 @@ public class SubScreen {
 
     public float getScoreChartX(){return scoreChartX;}
     public float getScoreChartY(){return scoreChartY;}
-    
+
+
 }

@@ -17,7 +17,7 @@ import static ch.epfl.cs211.Game.GAME;
 
 public class Mover {
 
-    private final static float SPHERE_RADIUS = 20f;
+    public final static float SPHERE_RADIUS = 20f;
     public final static float CYLINDER_RADIUS = 25f;
     public final static float GROUND_OFFSET = -Plate.PLATE_THICKNESS/2 - SPHERE_RADIUS;
     public final static float SPHERE_TO_CYLINDER_DISTANCE = SPHERE_RADIUS + CYLINDER_RADIUS;
@@ -151,4 +151,9 @@ public class Mover {
     public PVector getVelocity() {
         return velocity;
     }
+
+    public float getBound() {
+        return bound;
+    }
+
 }
