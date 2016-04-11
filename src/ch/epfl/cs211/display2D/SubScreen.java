@@ -3,6 +3,8 @@ package ch.epfl.cs211.display2D;
 import ch.epfl.cs211.objects.Plate;
 import ch.epfl.cs211.physicsEngine.Mover;
 import ch.epfl.cs211.tools.Color;
+import ch.epfl.cs211.tools.ValueUtils;
+import jdk.internal.org.objectweb.asm.tree.analysis.Value;
 import processing.core.PGraphics;
 import processing.core.PVector;
 
@@ -23,11 +25,11 @@ public class SubScreen {
 
     public final static int VISUALISATION_HEIGHT = 120;
     public static int visualisationWidth;
-    public final static int VISUALISATION_OFFSET = 20;
-    public final static int TOP_HEIGHT = 75;
-    public final static int TOP_WIDTH = 75;
-    public final static int SCORE_WIDTH = 75;
-    public final static int SCORE_HEIGHT = 75;
+    public final static int VISUALISATION_OFFSET = 10;
+    public final static int TOP_HEIGHT = 100;
+    public final static int TOP_WIDTH = 100;
+    public final static int SCORE_WIDTH = 100;
+    public final static int SCORE_HEIGHT = 100;
     public static int chartWidth;
     public final static int CHART_HEIGHT = 100;
     private final static int CHART_ELEM_WIDTH = 5;
@@ -104,15 +106,15 @@ public class SubScreen {
 
     private void drawScoreView() {
         scoreBoard.beginDraw();
-        scoreBoard.fill(0);
+        scoreBoard.fill(0xFFbeeaff);
         scoreBoard.rect(0, 0, SCORE_WIDTH, SCORE_HEIGHT);
 
         scoreBoard.fill(0xFFFF0450);
-        scoreBoard.textSize(10);
-        scoreBoard.text("Total score: " + GAME.getScore() +
-                        "\n Velocity: " + GAME.getMover().getVelocity().mag() +
-                        "\nLast score: " + GAME.getLastChange(),
-                0, 0, visualisationWidth, VISUALISATION_HEIGHT);
+        scoreBoard.textSize(12);
+        scoreBoard.text("Total score: \n      ->" + GAME.getScore() +
+                        "\nVelocity: \n      ->" + ValueUtils.roundThreeDecimals(GAME.getMover().getVelocity().mag()) +
+                        "\nLast score: \n      ->" + GAME.getLastChange(),
+                4, 4, visualisationWidth, VISUALISATION_HEIGHT);
 
         scoreBoard.endDraw();
         GAME.image(scoreBoard, scoreBoardX, scoreBoardY);
