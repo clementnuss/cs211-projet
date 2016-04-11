@@ -64,7 +64,6 @@ public class SubScreen {
         drawChartView();
     }
 
-    ;
 
     private void drawBackgroundView() {
         backGroundView.beginDraw();
@@ -90,13 +89,13 @@ public class SubScreen {
         float py = map(pos.z, -plateBound, plateBound, sphereRadius, TOP_HEIGHT - sphereRadius);
 
         topView.fill(Color.BALL_COLOR);
-        topView.ellipse(px, py, sphereRadius, sphereRadius);
+        topView.ellipse(px, py, 2 * sphereRadius, 2 * sphereRadius);
 
         topView.fill(Color.CYLINDER_COLOR);
         for (PVector cyl : GAME.getObstacleList()) {
             px = map(cyl.x, -plateBound, plateBound, cylRadius, TOP_WIDTH - cylRadius);
             py = map(cyl.z, -plateBound, plateBound, cylRadius, TOP_HEIGHT - cylRadius);
-            topView.ellipse(px, py, cylRadius, cylRadius);
+            topView.ellipse(px, py, 2 * cylRadius, 2 * cylRadius);
         }
 
         topView.endDraw();
