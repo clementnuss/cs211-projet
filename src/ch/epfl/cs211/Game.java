@@ -1,6 +1,5 @@
 package ch.epfl.cs211;
 
-import ch.epfl.cs211.display2D.HScrollbar;
 import ch.epfl.cs211.display2D.HUD;
 import ch.epfl.cs211.display2D.SubScreen;
 import ch.epfl.cs211.objects.ClosedCylinder;
@@ -30,9 +29,9 @@ import static ch.epfl.cs211.tools.ValueUtils.roundThreeDecimals;
  * PROCESSING 3D AXIS
  * <p>
  * <p>
- *       ¬ -Z
- *     /
- *   /
+ * ¬ -Z
+ * /
+ * /
  * /
  * -------------> X
  * |
@@ -111,7 +110,7 @@ public class Game extends PApplet {
 
     public void draw() {
 
-        if(checkIfResized())
+        if (checkIfResized())
             subView.updateDimensions();
 
         background(210);
@@ -136,7 +135,7 @@ public class Game extends PApplet {
                 0, 1.0f, 0);
 
         //If the orientation of the plate was saved and modified we restore it
-        if(modeHasChanged){
+        if (modeHasChanged) {
             plate.restoreState();
             perspective();
             modeHasChanged = false;
@@ -150,7 +149,7 @@ public class Game extends PApplet {
         else {
             scoreInterval = 0;
             scoresList.add(score);
-            while(scoresList.size() > subView.getMaxPlottableElements())
+            while (scoresList.size() > subView.getMaxPlottableElements())
                 scoresList.remove();
         }
 
@@ -185,7 +184,7 @@ public class Game extends PApplet {
 
         directionalLight(210, 210, 210, 0, 0.2f, -1);
 
-        if(modeHasChanged){
+        if (modeHasChanged) {
             ortho();
             plate.saveState();
             modeHasChanged = false;
@@ -229,24 +228,23 @@ public class Game extends PApplet {
         switch (event.getButton()) {
             case LEFT:
                 if (mode == GameModes.SHIFTED) {
-                    float xPos = mouseX - width/2;
-                    float yPos = mouseY - height/2;
+                    float xPos = mouseX - width / 2;
+                    float yPos = mouseY - height / 2;
                     //check if click occurred above a legal position
                     if ((width / 2 - PLATE_OFFSET + OBSTACLE_SIZE) < mouseX
-                          && mouseX < (width / 2 + PLATE_OFFSET - OBSTACLE_SIZE)
+                            && mouseX < (width / 2 + PLATE_OFFSET - OBSTACLE_SIZE)
                             && (height / 2 - PLATE_OFFSET + OBSTACLE_SIZE) < mouseY
                             && mouseY < (height / 2 + PLATE_OFFSET - OBSTACLE_SIZE)
-                            && !(PVector.dist(mover.getPosition(), new PVector(xPos, Mover.GROUND_OFFSET, yPos)) < Mover.SPHERE_TO_CYLINDER_DISTANCE))
-                    {
-                        obstacleList.add( new PVector(xPos, 0, yPos));
+                            && !(PVector.dist(mover.getPosition(), new PVector(xPos, Mover.GROUND_OFFSET, yPos)) < Mover.SPHERE_TO_CYLINDER_DISTANCE)) {
+                        obstacleList.add(new PVector(xPos, 0, yPos));
                     }
                 }
                 break;
         }
     }
 
-    public boolean checkIfResized(){
-        if(oldHeight != height || oldWidth != width){
+    public boolean checkIfResized() {
+        if (oldHeight != height || oldWidth != width) {
             oldHeight = height;
             oldWidth = width;
             return true;
@@ -306,6 +304,10 @@ public class Game extends PApplet {
 
     public float getLastChange() {
         return lastChange;
+    }
+
+    public List<PVector> getObstacleList() {
+        return obstacleList;
     }
 
 }
