@@ -4,7 +4,6 @@ import ch.epfl.cs211.objects.Plate;
 import ch.epfl.cs211.physicsEngine.Mover;
 import ch.epfl.cs211.tools.Color;
 import ch.epfl.cs211.tools.ValueUtils;
-import jdk.internal.org.objectweb.asm.tree.analysis.Value;
 import processing.core.PGraphics;
 import processing.core.PVector;
 
@@ -109,12 +108,11 @@ public class SubScreen {
         scoreBoard.fill(0xFFbeeaff);
         scoreBoard.rect(0, 0, SCORE_WIDTH, SCORE_HEIGHT);
 
-        scoreBoard.fill(0xFFFF0450);
-        scoreBoard.textSize(12);
-        scoreBoard.text("Total score: \n      ->" + GAME.getScore() +
-                        "\nVelocity: \n      ->" + ValueUtils.roundThreeDecimals(GAME.getMover().getVelocity().mag()) +
-                        "\nLast score: \n      ->" + GAME.getLastChange(),
-                4, 4, visualisationWidth, VISUALISATION_HEIGHT);
+        scoreBoard.fill(0xFF000000);
+        scoreBoard.textSize(14);
+        scoreBoard.text("Total score: \n   -> " + ValueUtils.roundThreeDecimals(GAME.getScore()) +
+                        "\nVelocity: \n   -> " + ValueUtils.roundThreeDecimals(GAME.getMover().getVelocity().mag()),
+                7, 7, SCORE_WIDTH - 7, SCORE_HEIGHT - 7);
 
         scoreBoard.endDraw();
         GAME.image(scoreBoard, scoreBoardX, scoreBoardY);
@@ -185,7 +183,7 @@ public class SubScreen {
         scoreBoardX = topViewX + TOP_WIDTH + VISUALISATION_OFFSET;
         scoreBoardY = backGroundY + VISUALISATION_OFFSET;
         scoreChartX = scoreBoardX + SCORE_WIDTH + VISUALISATION_OFFSET;
-        scoreChartY = backGroundY + VISUALISATION_OFFSET / 3;
+        scoreChartY = backGroundY + 2 * VISUALISATION_OFFSET / 3;
         hScrollbar.setPos(scoreChartX, scoreChartY + CHART_HEIGHT + 2);
         elementWidth = (1.5f * hScrollbar.getPos() + 0.5f) * CHART_ELEM_WIDTH;
     }
