@@ -6,6 +6,7 @@
 package ch.epfl.cs211.objects;
 
 import ch.epfl.cs211.tools.Color;
+import ch.epfl.cs211.tools.ValueUtils;
 
 import static ch.epfl.cs211.Game.abs;
 import static ch.epfl.cs211.tools.ValueUtils.*;
@@ -75,6 +76,7 @@ public class Plate {
         }else if(deltaY > 0){
             angleX = minClamp(angleX - amountY, -MAX_ANGLE);
         }
+
     }
 
     public void updateSensitivity(int count){
