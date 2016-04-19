@@ -1,9 +1,15 @@
+#include <iostream>
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
 
 using namespace cv;
 
-/// Global variables
+struct HSVbounds {
+    int hMin = 0, sMin = 0, vMin = 0,
+            hMax = 180, sMax = 255, vMax = 255;
+};
+
+typedef void (*TrackbarCallback)(int pos, void* userdata);
 
 int threshold_value = 0;
 int threshold_type = 3;;
@@ -11,19 +17,33 @@ int const max_value = 255;
 int const max_type = 4;
 int const max_BINARY_value = 255;
 
-Mat src, src_gray, dst;
-const char *window_name = "Threshold Demo";
+Mat src, src_gray, src_hsv, hsv_filtered, dst;
+HSVbounds bounds;
+
+const char *threshold_window = "Threshold";
+const char *hsv_window = "HSV";
+const char *hsv_trackbars = "HSV Trackbars";
+
 
 const char *trackbar_type = "Type: \n 0: Binary \n 1: Binary Inverted \n 2: Truncate \n 3: To Zero \n 4: To Zero Inverted";
 const char *trackbar_value = "Value";
 
 /// Function headers
-void Threshold_Demo(int, void *);
+void threshold_show(int, void *);
+
+void hsv_show(int, void *);
+
+void createTrackbars(HSVbounds &bounds, string winName, TrackbarCallback callback);
 
 /**
  * @function main
  */
 int main(int argc, char **argv) {
+
+    if (argc < 2) {
+        std::cerr  << "You need to call this program with the path of the image to display !";
+        return 0xbeef;
+    }
     /// Load an image
     src = imread(argv[1], 1);
 
@@ -31,19 +51,21 @@ int main(int argc, char **argv) {
     cvtColor(src, src_gray, CV_BGR2GRAY);
 
     /// Create a window to display results
-    namedWindow(window_name, CV_WINDOW_AUTOSIZE);
+    namedWindow(threshold_window, CV_WINDOW_AUTOSIZE);
 
     /// Create Trackbar to choose type of Threshold
-    createTrackbar(trackbar_type,
-                   window_name, &threshold_type,
-                   max_type, Threshold_Demo);
+    createTrackbar(trackbar_type, threshold_window, &threshold_type, max_type, threshold_show);
 
-    createTrackbar(trackbar_value,
-                   window_name, &threshold_value,
-                   max_value, Threshold_Demo);
+    createTrackbar(trackbar_value, threshold_window, &threshold_value, max_value, threshold_show);
+
+    cvtColor(src, src_hsv, COLOR_BGR2HSV);
+
+    createTrackbars(bounds, hsv_trackbars, hsv_show);
 
     /// Call the function to initialize
-    Threshold_Demo(0, 0);
+    threshold_show(0, 0);
+
+    hsv_show(0,0);
 
     /// Wait until user finishes program
     while (true) {
@@ -56,9 +78,9 @@ int main(int argc, char **argv) {
 
 
 /**
- * @function Threshold_Demo
+ * @function threshold_show
  */
-void Threshold_Demo(int, void *) {
+void threshold_show(int, void *) {
     /* 0: Binary
        1: Binary Inverted
        2: Threshold Truncated
@@ -68,5 +90,28 @@ void Threshold_Demo(int, void *) {
 
     threshold(src_gray, dst, threshold_value, max_BINARY_value, threshold_type);
 
-    imshow(window_name, dst);
+    imshow(threshold_window, dst);
+}
+
+void hsv_show(int, void *) {
+
+    inRange(src_hsv,
+            Scalar(bounds.hMin, bounds.sMin, bounds.vMin),
+            Scalar(bounds.hMax, bounds.sMax, bounds.vMax),
+            hsv_filtered);
+
+    imshow(hsv_window, hsv_filtered);
+}
+
+void createTrackbars(HSVbounds &bounds, string winName, TrackbarCallback callback) {
+    namedWindow(winName, 0);
+
+    createTrackbar("min_H", winName, &bounds.hMin, bounds.hMax, callback);
+    createTrackbar("max_H", winName, &bounds.hMax, bounds.hMax, callback);
+
+    createTrackbar("min_S", winName, &bounds.sMin, bounds.sMax, callback);
+    createTrackbar("max_S", winName, &bounds.sMax, bounds.sMax, callback);
+
+    createTrackbar("min_V", winName, &bounds.vMin, bounds.vMax, callback);
+    createTrackbar("max_V", winName, &bounds.vMax, bounds.vMax, callback);
 }
