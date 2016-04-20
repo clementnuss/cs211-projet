@@ -7,6 +7,20 @@ PImage displayedImage;
 float oldBarValue1;
 float oldBarValue2;
 
+float[][] hKernel = { { 0,  1, 0  },
+{ 0,  0, 0 },
+{ 0, -1, 0 } };
+
+float[][] vKernel = { { 0,  0,  0  },
+{ 1,  0, -1 },
+{ 0,  0,  0  } };
+
+int[][] gaussianKernel =
+{ {9,12,9},
+  {12,15,12},
+  {9,12,9},
+};
+
 int[][] kernel1 = 
 { {0,0,0},
   {0,2,0},
@@ -32,7 +46,8 @@ void setup() {
 void draw() {
   background(color(0, 0, 0));
   if(oldBarValue1 != thresholdBar1.getPos() || oldBarValue2 != thresholdBar2.getPos())
-      displayedImage = convolve(img, kernel2.length);
+      //Possibility to switch filter to different Kernels (1,2, and Gaussian defined above)
+      displayedImage = convolve(img, kernel2.length, kernel2);
       image(displayedImage, 0, 0);
   thresholdBar1.display();
   thresholdBar1.update();
@@ -80,7 +95,7 @@ PImage selectedHue(PImage img, float threshold1, float threshold2){
   return result;
 }
 
-public PImage convolve(PImage img, int N) {
+public PImage convolve(PImage img, int N, int[][] matrix) {
   PImage result = createImage(width, height, ALPHA);
   float sum;
   float weight = 4.0f;
@@ -103,7 +118,7 @@ public PImage convolve(PImage img, int N) {
           int xp = x - halfN + i;
           int yp = y - halfN + j;
           if(xp >= 0 && yp >= 0 && xp < img.width && yp < img.height)
-            sum += brightness(img.pixels[(yp * img.width) + xp]) * kernel2[j][i];
+            sum += brightness(img.pixels[(yp * img.width) + xp]) * matrix[j][i];
         }
       }
       sum /= weight;
@@ -113,3 +128,26 @@ public PImage convolve(PImage img, int N) {
   updatePixels();
   return result;
 } 
+
+public PImage sobel(PImage img, int N) {
+  float sum_h;
+  float sum_v;
+  float weight = 3.0f;
+  PImage result = createImage(img.width, img.height, ALPHA);
+  
+  // clear the image
+  for (int i = 0; i < img.width * img.height; i++) {
+  result.pixels[i] = color(0);
+  }
+  
+  float max=0;
+  float[] buffer = new float[img.width * img.height];
+  
+  // *************************************
+  // Implement here the double convolution
+  // *************************************
+  
+  
+  
+  return result;
+}
