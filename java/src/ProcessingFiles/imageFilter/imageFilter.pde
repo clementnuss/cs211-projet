@@ -32,7 +32,8 @@ void setup() {
 void draw() {
   background(color(0, 0, 0));
   if(oldBarValue1 != thresholdBar1.getPos() || oldBarValue2 != thresholdBar2.getPos())
-      displayedImage = image(convolve(img, kernel2.length),0,0);
+      displayedImage = convolve(img, kernel2.length);
+      image(displayedImage, 0, 0);
   thresholdBar1.display();
   thresholdBar1.update();
   thresholdBar2.display();
