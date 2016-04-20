@@ -143,7 +143,7 @@ public PImage sobel(PImage img, int N) {
   float max=0;
   float[] buffer = new float[img.width * img.height];
   
-  // *************************************
+  // ************************************
   // Implement here the double convolution
   // *************************************
   
