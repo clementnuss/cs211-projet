@@ -43,6 +43,7 @@ void draw() {
 PImage filterThreshold(PImage img, float threshold, boolean inverted) {
   PImage result = createImage(width, height, RGB);
   // create a new, initially transparent, 'result' image
+  loadPixels();
   for (int i = 0; i < img.width * img.height; i++) {
     
     if(inverted)
@@ -50,14 +51,17 @@ PImage filterThreshold(PImage img, float threshold, boolean inverted) {
     else
        result.pixels[i] = (brightness(img.pixels[i]) > threshold) ? 0xFFFFFF : 0x0;
   }
+  updatePixels();
   return result;
 }
 
 PImage hueAsGrayLevel(PImage img) {
   PImage result = createImage(width, height, RGB);
+  loadPixels();
   for (int i = 0; i < img.width * img.height; i++) {
     result.pixels[i] = color(round(hue(img.pixels[i])));
   }
+  updatePixels();
   return result;
 }
 
@@ -66,11 +70,13 @@ PImage selectedHue(PImage img, float threshold1, float threshold2){
   int originalColor;
   float originalColorHue;
   // create a new, initially transparent, 'result' image
+  loadPixels();
   for (int i = 0; i < img.width * img.height; i++) { 
        originalColor = img.pixels[i];
        originalColorHue = hue(originalColor);
        result.pixels[i] = (threshold1 <= originalColorHue && originalColorHue <= threshold2) ? originalColor : 0x0;
   }
+  updatePixels();
   return result;
 }
 
@@ -88,7 +94,7 @@ public PImage convolve(PImage img, int N) {
   //       corresponding weights in the kernel matrix
   //     - sum all these intensities and divide it by the weight
   //     - set result.pixels[y * img.width + x] to this value
-
+  loadPixels();
   for (int y=0; y < img.height; y++) {
     for (int x = 0; x < img.width; x++) {
       sum = 0;
@@ -104,5 +110,6 @@ public PImage convolve(PImage img, int N) {
       result.pixels[(y * result.width) + x] = color(sum);
     }
   }
+  updatePixels();
   return result;
 } 
