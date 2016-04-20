@@ -7,11 +7,13 @@ PImage displayedImage;
 float oldBarValue1;
 float oldBarValue2;
 
-float[][] hKernel = { { 0,  1, 0  },
+float[][] hKernel =
+{ { 0,  1, 0  },
 { 0,  0, 0 },
 { 0, -1, 0 } };
 
-float[][] vKernel = { { 0,  0,  0  },
+float[][] vKernel =
+{ { 0,  0,  0  },
 { 1,  0, -1 },
 { 0,  0,  0  } };
 
@@ -130,24 +132,64 @@ public PImage convolve(PImage img, int N, int[][] matrix) {
 } 
 
 public PImage sobel(PImage img, int N) {
+  float sum;
   float sum_h;
   float sum_v;
+ 
   float weight = 3.0f;
+  int halfN = N/2;
   PImage result = createImage(img.width, img.height, ALPHA);
   
   // clear the image
+  loadPixels();
   for (int i = 0; i < img.width * img.height; i++) {
-  result.pixels[i] = color(0);
+    result.pixels[i] = color(0);
   }
+  updatePixels();
   
   float max=0;
-  float[] buffer = new float[img.width * img.height];
+  /*
+   I went for a two dimensional buffer because it's more representative of the pixels visual repartition on the screen
+   Feel free to adapt if it's not relevant
+  */
+  float[][] buffer = new float[img.width][img.height];
   
-  // ************************************
-  // Implement here the double convolution
-  // *************************************
   
+  for (int y=0; y < img.height; y++) {
+    for (int x = 0; x < img.width; x++) {
+      sum = 0;
+      sum_h = 0;
+      sum_v = 0;
+      for (int j = 0; j < N; j++) {
+        for (int i = 0; i < N; i++) {
+          int xp = x - halfN + i;
+          int yp = y - halfN + j;
+          if(xp >= 0 && yp >= 0 && xp < img.width && yp < img.height)
+            sum_h += brightness(img.pixels[(yp * img.width) + xp]) * hKernel[j][i];
+            sum_v += brightness(img.pixels[(yp * img.width) + xp]) * vKernel[j][i];
+        }
+      }
+      sum=sqrt(pow(sum_h, 2) + pow(sum_v, 2));
+      if(sum > max)
+        max = sum;
+      buffer[y][x] = sum;
+    }
+  }
   
+  loadPixels();
+  for (int y = 2; y < img.height - 2; y++) {
+    // Skip top and bottom edges
+    for (int x = 2; x < img.width - 2; x++) {
+      // Skip left and right
+      if (buffer[y][x] > (int)(max * weight)) {
+      // 30% of the max
+      result.pixels[y * img.width + x] = color(255);
+      } else {
+      result.pixels[y * img.width + x] = color(0);
+      }
+    }
+  }
   
+  updatePixels();  
   return result;
 }
