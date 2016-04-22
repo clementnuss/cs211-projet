@@ -34,7 +34,7 @@ void settings() {
   size(800, 600, P2D);
 }
 void setup() {
-  img = loadImage("board1.jpg");
+  img = loadImage("board2.jpg");
   thresholdBar1 = new HScrollbar(0, 0, width, 20);
   thresholdBar2 = new HScrollbar(0, 25, width, 20);
   oldBarValue1 = 0;
@@ -47,7 +47,7 @@ void draw() {
       oldBarValue2 = thresholdBar2.getPos();
       
       //IMAGE TREATMENT PIPELINE
-      toDisplay = brightnessThreshold(saturationThreshold(hueThreshold(img.copy(),115,135), 87, 255),1,false);
+      toDisplay = brightnessThreshold(saturationThreshold(hueThreshold(img.copy(),100,140), 80, 255),1,false);
       //MAYBE BLURR THIS IMAGE ?
      image(sobel(toDisplay),0,0);
   }
@@ -124,7 +124,7 @@ private float computeWeight(int[][] m){
 public PImage convolve(PImage img, int[][] matrix) {
   PImage result = createImage(width, height, ALPHA);
   float sum;
-  float weight = computeWeight(matrix);
+  float weight = computeWeight(matrix)*2;
   int N = matrix.length;
   int halfN = N/2;
   
