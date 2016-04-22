@@ -2,20 +2,15 @@ PImage img;
 int max = 0xFFFFFF;
 HScrollbar thresholdBar1;
 HScrollbar thresholdBar2;
-PImage displayedImage;
+PImage toDisplay;
 
 float oldBarValue1;
 float oldBarValue2;
 
-float[][] hKernel =
-{ { 0,  1, 0  },
-{ 0,  0, 0 },
-{ 0, -1, 0 } };
-
-float[][] vKernel =
-{ { 0,  0,  0  },
-{ 1,  0, -1 },
-{ 0,  0,  0  } };
+final float[]sobelKernel = {1f,0f,-1f};
+final int SOBEL_LENGTH = sobelKernel.length;
+final float SOBEL_WEIGHT = 1f;
+final float SOBEL_PERCENTAGE = 0.3f;
 
 int[][] gaussianKernel =
 { {9,12,9},
@@ -23,7 +18,7 @@ int[][] gaussianKernel =
   {9,12,9},
 };
 
-int[][] kernel1 = 
+int[][] kernel1 =
 { {0,0,0},
   {0,2,0},
   {0,0,0},
@@ -31,165 +26,162 @@ int[][] kernel1 =
 
 int[][] kernel2 = 
 { {0,1,0},
-  {1,0,1},
+  {1,0,1}, //<>//
   {0,1,0},
 };
 
 void settings() {
-  size(800, 600);
+  size(800, 600, P2D);
 }
 void setup() {
   img = loadImage("board1.jpg");
-  thresholdBar1 = new HScrollbar(0, 0, 800, 20);
-  thresholdBar2 = new HScrollbar(0, 20, 800, 20);
+  thresholdBar1 = new HScrollbar(0, 0, width, 20);
+  thresholdBar2 = new HScrollbar(0, 25, width, 20);
   oldBarValue1 = 0;
   oldBarValue2 = 0;
 }
 void draw() {
-  background(color(0, 0, 0));
-  if(oldBarValue1 != thresholdBar1.getPos() || oldBarValue2 != thresholdBar2.getPos())
-      //Possibility to switch filter to different Kernels (1,2, and Gaussian defined above)
-      displayedImage = convolve(img, kernel2.length, kernel2);
-      image(displayedImage, 0, 0);
+  if(oldBarValue1 != thresholdBar1.getPos() || oldBarValue2 != thresholdBar2.getPos()){
+    background(0);
+      oldBarValue1 = thresholdBar1.getPos();
+      oldBarValue2 = thresholdBar2.getPos();
+      
+      //IMAGE TREATMENT PIPELINE
+      toDisplay = brightnessThreshold(saturationThreshold(hueThreshold(img.copy(),115,135), 87, 255),1,false);
+      //MAYBE BLURR THIS IMAGE ?
+     image(sobel(toDisplay),0,0);
+  }
+  
   thresholdBar1.display();
   thresholdBar1.update();
   thresholdBar2.display();
   thresholdBar2.update();
 }
 
-PImage filterThreshold(PImage img, float threshold, boolean inverted) {
-  PImage result = createImage(width, height, RGB);
-  // create a new, initially transparent, 'result' image
-  loadPixels();
+//A good value to extract the board would be 87 to 255
+PImage saturationThreshold(PImage img, float t1, float t2){
+  img.loadPixels();
+  System.out.println("[INFO:] SATURATION threshold selection is " +t1+ "-" +t2+" MIN-MAX");
+  
+  for (int i = 0; i < img.width * img.height; i++) {
+     int originalColor = img.pixels[i];
+     float sat = saturation(originalColor);
+     img.pixels[i] = (t1 <= sat && sat <= t2) ? originalColor : 0x0;
+  }
+  img.updatePixels();
+  return img;
+}
+
+
+//Takes an image, a threshold between 0 and 1 and it will set all pixels above the threshold to WHITE and the others to BLACK
+PImage brightnessThreshold(PImage img, float t, boolean inverted) {
+  img.loadPixels();
   for (int i = 0; i < img.width * img.height; i++) {
     
     if(inverted)
-       result.pixels[i] = (brightness(img.pixels[i]) < threshold) ? 0xFFFFFF : 0x0;
+       img.pixels[i] = (brightness(img.pixels[i]) < t) ? 0xFFFFFFFF : 0x0;
     else
-       result.pixels[i] = (brightness(img.pixels[i]) > threshold) ? 0xFFFFFF : 0x0;
+       img.pixels[i] = (brightness(img.pixels[i]) > t) ? 0xFFFFFFFF : 0x0;
   }
-  updatePixels();
-  return result;
+  img.updatePixels();
+  return img;
 }
 
 PImage hueAsGrayLevel(PImage img) {
-  PImage result = createImage(width, height, RGB);
-  loadPixels();
   for (int i = 0; i < img.width * img.height; i++) {
-    result.pixels[i] = color(round(hue(img.pixels[i])));
+    img.pixels[i] = color(hue(img.pixels[i]));
   }
-  updatePixels();
-  return result;
+  return img;
 }
 
-PImage selectedHue(PImage img, float threshold1, float threshold2){
-  PImage result = createImage(width, height, RGB);
+//A good value to extract the board would be 115 to 132
+PImage hueThreshold(PImage img, float t1, float t2){
+  img.loadPixels();
   int originalColor;
   float originalColorHue;
-  // create a new, initially transparent, 'result' image
-  loadPixels();
-  for (int i = 0; i < img.width * img.height; i++) { 
+  
+  System.out.println("[INFO:] HUE threshold selection is " +t1+ "-" +t2+" MIN-MAX");
+  
+  for (int i = 0; i < img.width * img.height; i++) {
        originalColor = img.pixels[i];
        originalColorHue = hue(originalColor);
-       result.pixels[i] = (threshold1 <= originalColorHue && originalColorHue <= threshold2) ? originalColor : 0x0;
+       img.pixels[i] = (t1 <= originalColorHue && originalColorHue <= t2) ? originalColor : 0x0;
   }
-  updatePixels();
-  return result;
+  img.updatePixels();
+  return img;
 }
 
-public PImage convolve(PImage img, int N, int[][] matrix) {
+private float computeWeight(int[][] m){
+ int s= 0;
+ for(int i = 0; i < m.length; i++){
+   for(int j =0; j < m[i].length; j++){
+      s += m[i][j];
+   }
+ }
+ return s;
+}
+
+public PImage convolve(PImage img, int[][] matrix) {
   PImage result = createImage(width, height, ALPHA);
   float sum;
-  float weight = 4.0f;
+  float weight = computeWeight(matrix);
+  int N = matrix.length;
   int halfN = N/2;
-
-  // kernel size N = 3
-  //
-  // for each (x,y) pixel in the image:
-  //     - multiply intensities for pixels in the range
-  //       (x - N/2, y - N/2) to (x + N/2, y + N/2) by the
-  //       corresponding weights in the kernel matrix
-  //     - sum all these intensities and divide it by the weight
-  //     - set result.pixels[y * img.width + x] to this value
-  loadPixels();
-  for (int y=0; y < img.height; y++) {
-    for (int x = 0; x < img.width; x++) {
+  
+  for (int y=halfN; y < img.height - halfN; y++) {
+    for (int x = halfN; x < img.width - halfN; x++) {
       sum = 0;
       for (int j = 0; j < N; j++) {
         for (int i = 0; i < N; i++) {
           int xp = x - halfN + i;
           int yp = y - halfN + j;
-          if(xp >= 0 && yp >= 0 && xp < img.width && yp < img.height)
-            sum += brightness(img.pixels[(yp * img.width) + xp]) * matrix[j][i];
+          sum += brightness(img.pixels[(yp * img.width) + xp]) * matrix[j][i];
         }
       }
       sum /= weight;
       result.pixels[(y * result.width) + x] = color(sum);
     }
   }
-  updatePixels();
   return result;
-} 
+}
 
-public PImage sobel(PImage img, int N) {
-  float sum;
+public PImage sobel(PImage img) {
   float sum_h;
   float sum_v;
- 
-  float weight = 3.0f;
-  int halfN = N/2;
-  PImage result = createImage(img.width, img.height, ALPHA);
-  
-  // clear the image
-  loadPixels();
-  for (int i = 0; i < img.width * img.height; i++) {
-    result.pixels[i] = color(0);
-  }
-  updatePixels();
-  
   float max=0;
-  /*
-   I went for a two dimensional buffer because it's more representative of the pixels visual repartition on the screen
-   Feel free to adapt if it's not relevant
-  */
-  float[][] buffer = new float[img.width][img.height];
-  
-  
-  for (int y=0; y < img.height; y++) {
-    for (int x = 0; x < img.width; x++) {
-      sum = 0;
-      sum_h = 0;
-      sum_v = 0;
-      for (int j = 0; j < N; j++) {
-        for (int i = 0; i < N; i++) {
-          int xp = x - halfN + i;
-          int yp = y - halfN + j;
-          if(xp >= 0 && yp >= 0 && xp < img.width && yp < img.height)
-            sum_h += brightness(img.pixels[(yp * img.width) + xp]) * hKernel[j][i];
-            sum_v += brightness(img.pixels[(yp * img.width) + xp]) * vKernel[j][i];
-        }
-      }
-      sum=sqrt(pow(sum_h, 2) + pow(sum_v, 2));
-      if(sum > max)
-        max = sum;
+  float[][] buffer = new float[img.height][img.width];
+  PImage result = createImage(img.width, img.height, ALPHA);
+
+  /* Convolve operation is separeted in two rectangular matrices to save computations, namely 2*n instead of n^2 per image pixel  */
+  //Vertical convolution  
+  for (int y=1; y < img.height-1; y++) {
+    for (int x = 1; x < img.width-1; x++) {
+      sum_h = 0; sum_v = 0;
+      
+     //Horiontal convolution
+      int xp = y * img.width + x;
+      sum_h += sobelKernel[0]*brightness(img.pixels[xp-1]);
+      sum_h += sobelKernel[2]*brightness(img.pixels[xp+1]);
+      
+      //Vertical convolution      
+      sum_v += sobelKernel[0]*brightness(img.pixels[(y-1) * img.width + x]);
+      sum_v += sobelKernel[2]*brightness(img.pixels[(y+1) * img.width + x]);
+      
+      //Compute de gradient
+      float sum=sqrt(pow(sum_h, 2) + pow(sum_v, 2));
+      
+      if(sum > max){max = sum;}
       buffer[y][x] = sum;
     }
   }
-  
-  loadPixels();
-  for (int y = 2; y < img.height - 2; y++) {
-    // Skip top and bottom edges
+
+  for (int y = 2; y < img.height - 2; y++) { //<>//
     for (int x = 2; x < img.width - 2; x++) {
-      // Skip left and right
-      if (buffer[y][x] > (int)(max * weight)) {
-      // 30% of the max
-      result.pixels[y * img.width + x] = color(255);
-      } else {
-      result.pixels[y * img.width + x] = color(0);
-      }
+      if (buffer[y][x] > (max * SOBEL_PERCENTAGE)) 
+        result.pixels[y * img.width + x] = 0xFFFFFFFF;
+      else 
+        result.pixels[y * img.width + x] = 0xFF000000;
     }
   }
-  
-  updatePixels();  
   return result;
 }
