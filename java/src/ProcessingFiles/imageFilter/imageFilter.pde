@@ -47,7 +47,17 @@ void draw() {
       oldBarValue2 = thresholdBar2.getPos();
 
       //IMAGE TREATMENT PIPELINE
-      toDisplay = brightnessThreshold(saturationThreshold(hueThreshold(img.copy(),100,140), 80, 255),1,false);
+      // 1. saturation threshold
+      // 2. hue threshold
+      // 3. gaussian blur
+      // 4. brightness threshold
+      toDisplay = brightnessThreshold(
+              gaussianBlur(
+                  hueThreshold(
+                      saturationThreshold(img.copy(),80,255)
+                  , 100, 140)
+              )
+          ,1,false);
 
       //First apply gaussian blur
       toDisplay = gaussianBlur(toDisplay);
@@ -152,6 +162,7 @@ public PImage convolve(PImage img, int[][] matrix) {
 public PImage sobel(PImage img) {
   float sum_h;
   float sum_v;
+  float max = 0f;
   float[][] buffer = new float[img.height][img.width];
   PImage result = createImage(img.width, img.height, ALPHA);
 
@@ -163,22 +174,26 @@ public PImage sobel(PImage img) {
 
      //Horiontal convolution
       int xp = y * img.width + x;
-      sum_h += sobelKernel[0]*(img.pixels[xp-1] & 0x1);
-      sum_h += sobelKernel[2]*(img.pixels[xp+1] & 0x1);
+      sum_h += sobelKernel[0]*brightness(img.pixels[xp-1]);
+      sum_h += sobelKernel[2]*brightness(img.pixels[xp+1]);
 
       //Vertical convolution
-      sum_v += sobelKernel[0]*(img.pixels[(y-1) * img.width + x] & 0x1);
-      sum_v += sobelKernel[2]*(img.pixels[(y+1) * img.width + x] & 0x1);
+      sum_v += sobelKernel[0]*brightness(img.pixels[(y-1) * img.width + x]);
+      sum_v += sobelKernel[2]*brightness(img.pixels[(y+1) * img.width + x]);
 
       //Compute de gradient
       float sum=sqrt(pow(sum_h, 2) + pow(sum_v, 2));
+      if (sum > max)
+      {
+        max = sum;
+      }
       buffer[y][x] = sum;
     }
   }
 
   for (int y = 2; y < img.height - 2; y++) { //<>//
     for (int x = 2; x < img.width - 2; x++) {
-      if (buffer[y][x] > (SOBEL_PERCENTAGE))
+      if (buffer[y][x] > (max * SOBEL_PERCENTAGE))
         result.pixels[y * img.width + x] = 0xFFFFFFFF;
       else
         result.pixels[y * img.width + x] = 0xFF000000;
