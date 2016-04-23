@@ -24,7 +24,7 @@ int[][] kernel1 =
   {0,0,0},
 };
 
-int[][] kernel2 = 
+int[][] kernel2 =
 { {0,1,0},
   {1,0,1}, //<>//
   {0,1,0},
@@ -34,7 +34,7 @@ void settings() {
   size(800, 600, P2D);
 }
 void setup() {
-  img = loadImage("board2.jpg");
+  img = loadImage("board1.jpg");
   thresholdBar1 = new HScrollbar(0, 0, width, 20);
   thresholdBar2 = new HScrollbar(0, 25, width, 20);
   oldBarValue1 = 0;
@@ -45,13 +45,17 @@ void draw() {
     background(0);
       oldBarValue1 = thresholdBar1.getPos();
       oldBarValue2 = thresholdBar2.getPos();
-      
+
       //IMAGE TREATMENT PIPELINE
       toDisplay = brightnessThreshold(saturationThreshold(hueThreshold(img.copy(),100,140), 80, 255),1,false);
-      //MAYBE BLURR THIS IMAGE ?
+
+      //First apply gaussian blur
+      toDisplay = gaussianBlur(toDisplay);
+
+      //then sobel
      image(sobel(toDisplay),0,0);
   }
-  
+
   thresholdBar1.display();
   thresholdBar1.update();
   thresholdBar2.display();
@@ -62,7 +66,7 @@ void draw() {
 PImage saturationThreshold(PImage img, float t1, float t2){
   img.loadPixels();
   System.out.println("[INFO:] SATURATION threshold selection is " +t1+ "-" +t2+" MIN-MAX");
-  
+
   for (int i = 0; i < img.width * img.height; i++) {
      int originalColor = img.pixels[i];
      float sat = saturation(originalColor);
@@ -77,7 +81,7 @@ PImage saturationThreshold(PImage img, float t1, float t2){
 PImage brightnessThreshold(PImage img, float t, boolean inverted) {
   img.loadPixels();
   for (int i = 0; i < img.width * img.height; i++) {
-    
+
     if(inverted)
        img.pixels[i] = (brightness(img.pixels[i]) < t) ? 0xFFFFFFFF : 0x0;
     else
@@ -99,9 +103,9 @@ PImage hueThreshold(PImage img, float t1, float t2){
   img.loadPixels();
   int originalColor;
   float originalColorHue;
-  
+
   System.out.println("[INFO:] HUE threshold selection is " +t1+ "-" +t2+" MIN-MAX");
-  
+
   for (int i = 0; i < img.width * img.height; i++) {
        originalColor = img.pixels[i];
        originalColorHue = hue(originalColor);
@@ -127,7 +131,7 @@ public PImage convolve(PImage img, int[][] matrix) {
   float weight = computeWeight(matrix)*2;
   int N = matrix.length;
   int halfN = N/2;
-  
+
   for (int y=halfN; y < img.height - halfN; y++) {
     for (int x = halfN; x < img.width - halfN; x++) {
       sum = 0;
@@ -152,20 +156,20 @@ public PImage sobel(PImage img) {
   PImage result = createImage(img.width, img.height, ALPHA);
 
   /* Convolve operation is separeted in two rectangular matrices to save computations, namely 2*n instead of n^2 per image pixel  */
-  //Vertical convolution  
+  //Vertical convolution
   for (int y=1; y < img.height-1; y++) {
     for (int x = 1; x < img.width-1; x++) {
       sum_h = 0; sum_v = 0;
-      
+
      //Horiontal convolution
       int xp = y * img.width + x;
       sum_h += sobelKernel[0]*(img.pixels[xp-1] & 0x1);
       sum_h += sobelKernel[2]*(img.pixels[xp+1] & 0x1);
-      
-      //Vertical convolution      
+
+      //Vertical convolution
       sum_v += sobelKernel[0]*(img.pixels[(y-1) * img.width + x] & 0x1);
       sum_v += sobelKernel[2]*(img.pixels[(y+1) * img.width + x] & 0x1);
-      
+
       //Compute de gradient
       float sum=sqrt(pow(sum_h, 2) + pow(sum_v, 2));
       buffer[y][x] = sum;
@@ -174,11 +178,16 @@ public PImage sobel(PImage img) {
 
   for (int y = 2; y < img.height - 2; y++) { //<>//
     for (int x = 2; x < img.width - 2; x++) {
-      if (buffer[y][x] > (SOBEL_PERCENTAGE)) 
+      if (buffer[y][x] > (SOBEL_PERCENTAGE))
         result.pixels[y * img.width + x] = 0xFFFFFFFF;
-      else 
+      else
         result.pixels[y * img.width + x] = 0xFF000000;
     }
   }
   return result;
+}
+
+public PImage gaussianBlur(PImage img) {
+    PImage result = convolve(img, gaussianKernel);
+    return result;
 }
