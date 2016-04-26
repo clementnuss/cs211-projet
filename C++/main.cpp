@@ -33,7 +33,7 @@ void threshold_show(int, void *);
 
 void hsv_show(int, void *);
 
-void createTrackbars(HSVbounds &bounds, string winName, TrackbarCallback callback);
+void createTrackbars(HSVbounds &bounds, std::string winName, TrackbarCallback callback);
 
 /**
  * @function main
@@ -103,7 +103,7 @@ void hsv_show(int, void *) {
     imshow(hsv_window, hsv_filtered);
 }
 
-void createTrackbars(HSVbounds &bounds, string winName, TrackbarCallback callback) {
+void createTrackbars(HSVbounds &bounds, std::string winName, TrackbarCallback callback) {
     namedWindow(winName, 0);
 
     createTrackbar("min_H", winName, &bounds.hMin, bounds.hMax, callback);

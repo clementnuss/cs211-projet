@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.3)
 project(imageProcessing)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 
@@ -10,7 +10,7 @@ if (UNIX)
     find_package(OpenCV REQUIRED)
     find_package(raspicam REQUIRED)
 elseif (WIN32)
-    set(OpenCV_DIR "C:\\OpenCV\\opencv-2.4.11")
+    set(OpenCV_DIR "C:\\clm\\opencv-3.1.0")
     find_package(OpenCV REQUIRED)
 endif ()
 
