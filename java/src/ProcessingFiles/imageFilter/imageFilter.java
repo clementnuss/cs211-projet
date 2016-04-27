@@ -232,13 +232,22 @@ public class imageFilter extends PApplet {
         float discretizationStepsR = 2.5f;
 
         // dimensions of the accumulator
-        int phiDim = (int) (Math.PI / discretizationStepsPhi);
+        int thetaDim = (int) (Math.PI / discretizationStepsPhi);
         int rDim = (int) (((edgeImg.width + edgeImg.height) * 2 + 1) / discretizationStepsR);
-        System.out.println("phi dimension : " + phiDim + " r dim " + rDim);
+        int halfRAxisSize = (rDim - 1) / 2;
+        System.out.println("phi dimension : " + thetaDim + " r dim " + rDim);
+
+        float[] sinTable = new float[thetaDim];
+        float[] cosTable = new float[thetaDim];
+        for (int theta = 0; theta < thetaDim; theta++) {
+            double thetaRadians = theta * Math.PI / thetaDim;
+            sinTable[theta] = (float) Math.sin(thetaRadians);
+            cosTable[theta] = (float) Math.cos(thetaRadians);
+        }
 
 
         // our accumulator (with a 1 pix margin around)
-        int[] accumulator = new int[(phiDim + 2) * (rDim + 2)];
+        int[] accumulator = new int[(thetaDim + 2) * (rDim + 2)];
         System.out.println("accumulator size:" + accumulator.length + " image size : h=" + edgeImg.height + " w=" + edgeImg.width);
 
         // Fill the accumulator: on edge points (ie, white pixels of the edge
@@ -247,43 +256,30 @@ public class imageFilter extends PApplet {
         for (int y = 0; y < edgeImg.height; y++) {
 
             for (int x = 0; x < edgeImg.width; x++) {
-                // Are we on an edge?
+
                 if (brightness(edgeImg.pixels[y * edgeImg.width + x]) != 0) {
 
+                    for (int theta = 0; theta < thetaDim; theta++) {
+                        float r = cosTable[theta] * x + sinTable[theta] * y;
 
-                    for (float phi = 0; phi < Math.PI; phi += discretizationStepsPhi) {
-
-                        float r = x * cos(phi) + y * sin(phi);
-                        r += (rDim - 1) / 2;
-                        int rAcc = Math.round(r);
-                        int phiAcc = Math.round(phi);
-
-                        //int accR = idx - (accPhi + 1) * (rDim + 2) - 1;
-                        int index = Math.round(r + (phi + 1) * (rDim + 2) + 1);
-
-                        accumulator[index] += 1;
-
+                        int rScaled = Math.round((r + halfRAxisSize) / discretizationStepsR);
+                        int index = theta * rDim + rScaled;
+                        accumulator[index]++;
                     }
-
-                    // ...determine here all the lines (r, phi) passing through
-                    // pixel (x,y), convert (r,phi) to coordinates in the
-                    // accumulator, and increment accordingly the accumulator.
-                    // Be careful: r may be negative, so you may want to center onto
-                    // the accumulator with something like: r += (rDim - 1) / 2
                 }
             }
         }
 
         System.out.println("Accumulator computation ended");
 
-        PImage houghImg = createImage(rDim + 2, phiDim + 2, ALPHA);
+        PImage houghImg = createImage(rDim + 2, thetaDim + 2, ALPHA);
 
         for (int i = 0; i < accumulator.length; i++) {
             houghImg.pixels[i] = color(min(255, accumulator[i]));
         }
 
         // You may want to resize the accumulator to make it easier to see:
-        houghImg.resize(400, 400);
+        houghImg.resize(600, 800);
         houghImg.updatePixels();
         System.out.println("hough image computed");
 
