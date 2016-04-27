@@ -2,6 +2,7 @@ package ProcessingFiles.imageFilter;
 
 import ch.epfl.cs211.display2D.HScrollbar;
 import processing.core.PApplet;
+import processing.core.PGraphics;
 import processing.core.PImage;
 
 public class imageFilter extends PApplet {
@@ -87,7 +88,7 @@ public class imageFilter extends PApplet {
         //then sobel
         sobel = sobel(toDisplay);
 
-        image(hough(sobel), 0, 0);
+        image(hough(sobel, img.copy()), 0, 0);
 
 
         noLoop();
@@ -227,14 +228,15 @@ public class imageFilter extends PApplet {
         return convolve(img, gaussianKernel);
     }
 
-    private PImage hough(PImage edgeImg) {
+
+    private PImage hough(PImage edgeImg, PImage originalImage) {
         float discretizationStepsPhi = 0.06f;
         float discretizationStepsR = 2.5f;
 
         // dimensions of the accumulator
         int thetaDim = (int) (Math.PI / discretizationStepsPhi);
         int rDim = (int) (((edgeImg.width + edgeImg.height) * 2 + 1) / discretizationStepsR);
-        int halfRAxisSize = (rDim - 1) / 2;
+        int halfRAxisSize = Math.round((rDim - 1) * 0.5f);
         System.out.println("phi dimension : " + thetaDim + " r dim " + rDim);
 
         float[] sinTable = new float[thetaDim];
@@ -263,7 +265,11 @@ public class imageFilter extends PApplet {
                         float r = cosTable[theta] * x + sinTable[theta] * y;
 
                         int rScaled = Math.round((r + halfRAxisSize) / discretizationStepsR);
+
                         int index = theta * rDim + rScaled;
+
+                        int idx = rScaled + (theta + 1) * (rDim + 2) - 1;
+
                         accumulator[index]++;
                     }
                 }
@@ -283,8 +289,61 @@ public class imageFilter extends PApplet {
         houghImg.updatePixels();
         System.out.println("hough image computed");
 
-        return houghImg;
+        PGraphics pg = createGraphics(originalImage.width, originalImage.height);
+
+        pg.beginDraw();
+        pg.image(originalImage, 0, 0);
+
+        for (int idx = 0; idx < accumulator.length; idx++) {
+            if (accumulator[idx] > 8) {
+                // first, compute back the (r, phi) polar coordinates:
+                int accPhi = (int) (idx / (rDim + 2)) - 1;
+                int accR = idx - (accPhi + 1) * (rDim + 2) - 1;
+                float r = (accR - halfRAxisSize) * discretizationStepsR;
+                float phi = accPhi * discretizationStepsPhi;
+
+                // Cartesian equation of a line: y = ax + b
+                // in polar, y = (-cos(phi)/sin(phi))x + (r/sin(phi))
+                // => y = 0 : x = r / cos(phi)
+                // => x = 0 : y = r / sin(phi)
+                // compute the intersection of this line with the 4 borders of
+                // the image
+
+                int x0 = 0;
+                int y0 = (int) (r / sin(phi));
+                int x1 = (int) (r / cos(phi));
+                int y1 = 0;
+                int x2 = edgeImg.width;
+                int y2 = (int) (-cos(phi) / sin(phi) * x2 + r / sin(phi));
+                int y3 = edgeImg.width;
+                int x3 = (int) (-(y3 - r / sin(phi)) * (sin(phi) / cos(phi)));
+
+                // Finally, plot the lines
+                pg.stroke(204, 102, 0);
+                if (y0 > 0) {
+                    if (x1 > 0)
+                        pg.line(x0, y0, x1, y1);
+                    else if (y2 > 0)
+                        pg.line(x0, y0, x2, y2);
+                    else
+                        pg.line(x0, y0, x3, y3);
+                } else {
+                    if (x1 > 0) {
+                        if (y2 > 0)
+                            pg.line(x1, y1, x2, y2);
+                        else
+                            pg.line(x1, y1, x3, y3);
+                    } else
+                        pg.line(x2, y2, x3, y3);
+                }
+            }
+        }
+
+        pg.endDraw();
+
+        return pg.get();
     }
+
 
     public static void main(String[] args) {
 
