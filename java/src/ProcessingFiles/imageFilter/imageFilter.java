@@ -235,10 +235,13 @@ public class imageFilter extends PApplet {
 
         // dimensions of the accumulator
         int thetaDim = (int) (Math.PI / discretizationStepsPhi);
-        int rDim = (int) (((edgeImg.width + edgeImg.height) * 2 + 1) / discretizationStepsR);
-        int halfRAxisSize = Math.round((rDim - 1) * 0.5f);
-        System.out.println("phi dimension : " + thetaDim + " r dim " + rDim);
+        int r_max = (int) Math.ceil(Math.hypot(originalImage.width, originalImage.height));
+        int halfRAxisSize = Math.round(r_max / discretizationStepsR);
 
+        System.out.println("phi dimension : " + thetaDim + " r dim " + r_max);
+
+        // source for hough implementation :
+        // https://rosettacode.org/wiki/Hough_transform#Java
         float[] sinTable = new float[thetaDim];
         float[] cosTable = new float[thetaDim];
         for (int theta = 0; theta < thetaDim; theta++) {
@@ -247,9 +250,8 @@ public class imageFilter extends PApplet {
             cosTable[theta] = (float) Math.cos(thetaRadians);
         }
 
-
         // our accumulator (with a 1 pix margin around)
-        int[] accumulator = new int[(thetaDim + 2) * (rDim + 2)];
+        int[] accumulator = new int[(thetaDim + 2) * (r_max + 2)];
         System.out.println("accumulator size:" + accumulator.length + " image size : h=" + edgeImg.height + " w=" + edgeImg.width);
 
         // Fill the accumulator: on edge points (ie, white pixels of the edge
@@ -262,15 +264,12 @@ public class imageFilter extends PApplet {
                 if (brightness(edgeImg.pixels[y * edgeImg.width + x]) != 0) {
 
                     for (int theta = 0; theta < thetaDim; theta++) {
+
                         float r = cosTable[theta] * x + sinTable[theta] * y;
+                        int rScaled = Math.round((r * halfRAxisSize) / r_max) + halfRAxisSize;
+                        int idx = rScaled + (theta + 1) * (r_max + 2) + 2;
 
-                        int rScaled = Math.round((r + halfRAxisSize) / discretizationStepsR);
-
-                        int index = theta * rDim + rScaled;
-
-                        int idx = rScaled + (theta + 1) * (rDim + 2) - 1;
-
-                        accumulator[index]++;
+                        accumulator[idx]++;
                     }
                 }
             }
@@ -278,7 +277,11 @@ public class imageFilter extends PApplet {
 
         System.out.println("Accumulator computation ended");
 
-        PImage houghImg = createImage(rDim + 2, thetaDim + 2, ALPHA);
+        /*
+
+        -----> Used to visualize accumulator content
+
+        PImage houghImg = createImage(r_max + 2, thetaDim + 2, ALPHA);
 
         for (int i = 0; i < accumulator.length; i++) {
             houghImg.pixels[i] = color(min(255, accumulator[i]));
@@ -288,6 +291,7 @@ public class imageFilter extends PApplet {
         houghImg.resize(600, 800);
         houghImg.updatePixels();
         System.out.println("hough image computed");
+        */
 
         PGraphics pg = createGraphics(originalImage.width, originalImage.height);
 
@@ -295,10 +299,10 @@ public class imageFilter extends PApplet {
         pg.image(originalImage, 0, 0);
 
         for (int idx = 0; idx < accumulator.length; idx++) {
-            if (accumulator[idx] > 8) {
+            if (accumulator[idx] > 180) {
                 // first, compute back the (r, phi) polar coordinates:
-                int accPhi = (int) (idx / (rDim + 2)) - 1;
-                int accR = idx - (accPhi + 1) * (rDim + 2) - 1;
+                int accPhi = (int) (idx / (r_max + 2)) - 1;
+                int accR = idx - (accPhi + 1) * (r_max + 2) - 1;
                 float r = (accR - halfRAxisSize) * discretizationStepsR;
                 float phi = accPhi * discretizationStepsPhi;
 
@@ -315,7 +319,7 @@ public class imageFilter extends PApplet {
                 int y1 = 0;
                 int x2 = edgeImg.width;
                 int y2 = (int) (-cos(phi) / sin(phi) * x2 + r / sin(phi));
-                int y3 = edgeImg.width;
+                int y3 = edgeImg.height;
                 int x3 = (int) (-(y3 - r / sin(phi)) * (sin(phi) / cos(phi)));
 
                 // Finally, plot the lines
@@ -342,6 +346,7 @@ public class imageFilter extends PApplet {
         pg.endDraw();
 
         return pg.get();
+//        return houghImg;
     }
 
 
