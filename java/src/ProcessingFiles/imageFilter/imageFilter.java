@@ -72,7 +72,7 @@ public class imageFilter extends PApplet {
     }
 
     public void setup() {
-        img = loadImage("images/board4.jpg");
+        img = loadImage("images/board1.jpg");
         thresholdBar1 = new HScrollbar(0, 0, width, 20);
         thresholdBar2 = new HScrollbar(0, 25, width, 20);
         oldBarValue1 = 0;

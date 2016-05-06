@@ -1,4 +1,4 @@
-package ProcessingFiles.imageFilter.data;
+package ProcessingFiles.VideoCapture;
 
 
 import processing.core.PApplet;
