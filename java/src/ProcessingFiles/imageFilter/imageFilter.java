@@ -7,7 +7,12 @@ import processing.core.PImage;
 
 public class imageFilter extends PApplet {
 
+    /*===============================================================
+        Various constants/value for the visualisation
+      ===============================================================*/
     static final imageFilter INST = new imageFilter();
+    static final int WIDTH = 800;
+    static final int HEIGHT = 600;
     private PImage img;
     int max = 0xFFFFFF;
     private HScrollbar thresholdBar1;
@@ -17,10 +22,18 @@ public class imageFilter extends PApplet {
     private float oldBarValue1;
     private float oldBarValue2;
 
+    /*===============================================================
+        Values for the Sobel operator
+      ===============================================================*/
+
     private final float[] sobelKernel = {1f, 0f, -1f};
     final int SOBEL_LENGTH = sobelKernel.length;
     final float SOBEL_WEIGHT = 1f;
     private final float SOBEL_PERCENTAGE = 0.3f;
+
+    /*===============================================================
+        Values for the convolution
+      ===============================================================*/
 
     private int[][] gaussianKernel =
             {
@@ -42,6 +55,18 @@ public class imageFilter extends PApplet {
                     {0, 1, 0},
             };
 
+    /*===============================================================
+        Values for the Hough transform
+      ===============================================================*/
+    private static float discretizationStepsPhi = 0.06f;
+    private static float discretizationStepsR = 2.5f;
+    private int phiDim;
+    private int rDim;
+    private int rOffset;
+    private float[] sinTable;
+    private float[] cosTable;
+
+
     public void settings() {
         size(800, 600, P2D);
     }
@@ -52,6 +77,19 @@ public class imageFilter extends PApplet {
         thresholdBar2 = new HScrollbar(0, 25, width, 20);
         oldBarValue1 = 0;
         oldBarValue2 = 0;
+
+        // dimensions of the accumulator
+        phiDim = (int) (Math.PI / discretizationStepsPhi);
+        rDim = (int) ((Math.hypot(WIDTH, HEIGHT) * 2 + 1) / discretizationStepsR);
+        rOffset = ((rDim - 1) / 2) + 2; //The +2 from the formula was added directly to the offset for performance purposes
+
+        sinTable = new float[phiDim];
+        cosTable = new float[phiDim];
+        for (int theta = 0; theta < phiDim; theta++) {
+            double thetaRadians = theta * Math.PI / phiDim;
+            sinTable[theta] = (float) Math.sin(thetaRadians);
+            cosTable[theta] = (float) Math.cos(thetaRadians);
+        }
     }
 
     public void draw() {
@@ -89,7 +127,6 @@ public class imageFilter extends PApplet {
         sobel = sobel(toDisplay);
 
         image(hough(sobel, img.copy()), 0, 0);
-
 
         noLoop();
     }
@@ -149,9 +186,9 @@ public class imageFilter extends PApplet {
 
     private float computeWeight(int[][] m) {
         int s = 0;
-        for (int i = 0; i < m.length; i++) {
-            for (int j = 0; j < m[i].length; j++) {
-                s += m[i][j];
+        for (int[] aM : m) {
+            for (int j = 0; j < aM.length; j++) {
+                s += aM[j];
             }
         }
         return s;
@@ -195,7 +232,7 @@ public class imageFilter extends PApplet {
                 sum_h = 0;
                 sum_v = 0;
 
-                //Horiontal convolution
+                //Horizontal convolution
                 int xp = y * img.width + x;
                 sum_h += sobelKernel[0] * brightness(img.pixels[xp - 1]);
                 sum_h += sobelKernel[2] * brightness(img.pixels[xp + 1]);
@@ -230,80 +267,54 @@ public class imageFilter extends PApplet {
 
 
     private PImage hough(PImage edgeImg, PImage originalImage) {
-        float discretizationStepsPhi = 0.06f;
-        float discretizationStepsR = 2.5f;
-
-        // dimensions of the accumulator
-        int thetaDim = (int) (Math.PI / discretizationStepsPhi);
-        int r_max = (int) Math.ceil(Math.hypot(originalImage.width, originalImage.height));
-        int halfRAxisSize = Math.round(r_max / discretizationStepsR);
-
-        System.out.println("phi dimension : " + thetaDim + " r dim " + r_max);
-
-        // source for hough implementation :
-        // https://rosettacode.org/wiki/Hough_transform#Java
-        float[] sinTable = new float[thetaDim];
-        float[] cosTable = new float[thetaDim];
-        for (int theta = 0; theta < thetaDim; theta++) {
-            double thetaRadians = theta * Math.PI / thetaDim;
-            sinTable[theta] = (float) Math.sin(thetaRadians);
-            cosTable[theta] = (float) Math.cos(thetaRadians);
-        }
 
         // our accumulator (with a 1 pix margin around)
-        int[] accumulator = new int[(thetaDim + 2) * (r_max + 2)];
-        System.out.println("accumulator size:" + accumulator.length + " image size : h=" + edgeImg.height + " w=" + edgeImg.width);
-
+        int[] accumulator = new int[(phiDim + 2) * (rDim + 2)];
         // Fill the accumulator: on edge points (ie, white pixels of the edge
         // image), store all possible (r, phi) pairs describing lines going
         // through the point.
         for (int y = 0; y < edgeImg.height; y++) {
-
             for (int x = 0; x < edgeImg.width; x++) {
 
-                if (brightness(edgeImg.pixels[y * edgeImg.width + x]) != 0) {
+                // Are we on an edge? Since image is BLACK/WHITE we can just check the LSB
+                if ((edgeImg.pixels[y * edgeImg.width + x] & 0b1) != 0) {
 
-                    for (int theta = 0; theta < thetaDim; theta++) {
-
-                        float r = cosTable[theta] * x + sinTable[theta] * y;
-                        int rScaled = Math.round((r * halfRAxisSize) / r_max) + halfRAxisSize;
-                        int idx = rScaled + (theta + 1) * (r_max + 2) + 2;
-
+                    // ...determine here all the lines (r, phi) passing through
+                    // pixel (x,y), convert (r,phi) to coordinates in the
+                    // accumulator, and increment accordingly the accumulator.
+                    for (int phi = 0; phi < phiDim; phi++) {
+                        double r = (x * cosTable[phi] + y * sinTable[phi]) / discretizationStepsR;
+                        r += rOffset;
+                        int idx = ((int) r) + (phi + 1) * (rDim + 2);
                         accumulator[idx]++;
                     }
                 }
             }
         }
 
-        System.out.println("Accumulator computation ended");
-
-        /*
-
-        -----> Used to visualize accumulator content
-
-        PImage houghImg = createImage(r_max + 2, thetaDim + 2, ALPHA);
-
+        /*PImage houghImg = createImage(rDim + 2, phiDim + 2, ALPHA);
         for (int i = 0; i < accumulator.length; i++) {
             houghImg.pixels[i] = color(min(255, accumulator[i]));
         }
 
         // You may want to resize the accumulator to make it easier to see:
-        houghImg.resize(600, 800);
+        houghImg.resize(400, 400);
         houghImg.updatePixels();
-        System.out.println("hough image computed");
-        */
+        System.out.println("hough image computed");*/
+
 
         PGraphics pg = createGraphics(originalImage.width, originalImage.height);
 
         pg.beginDraw();
         pg.image(originalImage, 0, 0);
+        //pg.image(houghImg, 0,0);
 
         for (int idx = 0; idx < accumulator.length; idx++) {
             if (accumulator[idx] > 180) {
                 // first, compute back the (r, phi) polar coordinates:
-                int accPhi = (int) (idx / (r_max + 2)) - 1;
-                int accR = idx - (accPhi + 1) * (r_max + 2) - 1;
-                float r = (accR - halfRAxisSize) * discretizationStepsR;
+                int accPhi = (idx / (rDim + 2)) - 1;
+                int accR = idx - (accPhi + 1) * (rDim + 2) - 1;
+                float r = (accR - (rDim - 1) * 0.5f) * discretizationStepsR;
                 float phi = accPhi * discretizationStepsPhi;
 
                 // Cartesian equation of a line: y = ax + b
@@ -346,7 +357,6 @@ public class imageFilter extends PApplet {
         pg.endDraw();
 
         return pg.get();
-//        return houghImg;
     }
 
 
