@@ -72,7 +72,7 @@ public class imageFilter extends PApplet {
     }
 
     public void setup() {
-        img = loadImage("images/board1.jpg");
+        img = loadImage("images/board4.jpg");
         thresholdBar1 = new HScrollbar(0, 0, width, 20);
         thresholdBar2 = new HScrollbar(0, 25, width, 20);
         oldBarValue1 = 0;
@@ -93,14 +93,14 @@ public class imageFilter extends PApplet {
     }
 
     public void draw() {
-      
+
       /*
         if (oldBarValue1 != thresholdBar1.getPos() || oldBarValue2 != thresholdBar2.getPos()) {
             background(0);
             oldBarValue1 = thresholdBar1.getPos();
             oldBarValue2 = thresholdBar2.getPos();
 
-            
+
         }
 
         thresholdBar1.display();
