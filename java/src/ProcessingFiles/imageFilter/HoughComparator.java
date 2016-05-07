@@ -1,6 +1,6 @@
 package ProcessingFiles.imageFilter;
 
-class HoughComparator implements java.util.Comparator<Integer> {
+public class HoughComparator implements java.util.Comparator<Integer> {
     int[] accumulator;
 
     public HoughComparator(int[] accumulator) {

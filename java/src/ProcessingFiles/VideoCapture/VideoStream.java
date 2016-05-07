@@ -1,9 +1,13 @@
 package ProcessingFiles.VideoCapture;
 
+import ProcessingFiles.imageFilter.HoughComparator;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PImage;
+import processing.core.PVector;
 import processing.video.*;
+
+import java.util.*;
 
 public class VideoStream extends PApplet {
 
@@ -24,11 +28,15 @@ public class VideoStream extends PApplet {
       ===============================================================*/
     private static float discretizationStepsPhi = 0.06f;
     private static float discretizationStepsR = 2.5f;
+    private final static int MIN_VOTES = 140;
+    private final static int NEIGHBORHOOD_SIZE = 15;
+    private final static int N_LINES = 16;
     private int phiDim;
     private int rDim;
     private int rOffset;
     private float[] sinTable;
     private float[] cosTable;
+    Comparator<Integer> houghComparator;
 
     static final VideoStream INST = new VideoStream();
     Capture cam;
@@ -82,10 +90,10 @@ public class VideoStream extends PApplet {
                                     hueThreshold(
                                         saturationThreshold(cam.copy(), 80, 255)
                                     , 100, 140)
-                                , 1, false)
+                                , 10, false)
                                 );
-
-            image(hough(toDisplay, cam), 0, 0);
+            image(cam,0,0);
+            getIntersections(hough(toDisplay, N_LINES));
         }
     }
 
@@ -182,10 +190,19 @@ public class VideoStream extends PApplet {
         return result;
     }
 
-    private PImage hough(PImage edgeImg, PImage originalImage) {
+    private List<PVector> hough(PImage edgeImg, int nLines) {
+
+        /*============================================================
+                                     LINE VOTING
+          ============================================================*/
+
+        Set<Integer> bestCandidates = new HashSet<>();
+        List<Integer> bestCandidatesFiltered = new ArrayList<>();
+        List<PVector> resultingLines = new ArrayList<>(4);
 
         // our accumulator (with a 1 pix margin around)
         int[] accumulator = new int[(phiDim + 2) * (rDim + 2)];
+        houghComparator = new HoughComparator(accumulator);
         // Fill the accumulator: on edge points (ie, white pixels of the edge
         // image), store all possible (r, phi) pairs describing lines going
         // through the point.
@@ -203,10 +220,51 @@ public class VideoStream extends PApplet {
                         r += rOffset;
                         int idx = ((int) r) + (phi + 1) * (rDim + 2);
                         accumulator[idx]++;
+
+                        if (accumulator[idx] > MIN_VOTES) {
+                            bestCandidates.add(idx);
+                        }
                     }
                 }
             }
         }
+
+        /*============================================================
+                     LOCAL MAXIMA SELECTION USING SET<INTEGER>
+          ============================================================*/
+        bestCandidatesFiltered = new ArrayList<>();
+        Iterator<Integer> it = bestCandidates.iterator();
+        while (it.hasNext()) {
+            int idx = it.next();
+            int accPhi = (idx / (rDim + 2)) - 1;
+            int accR = (idx % (rDim + 2)) - 1;
+            boolean bestCandidate = true;
+            // iterate over the neighbourhood
+            for (int dPhi = -NEIGHBORHOOD_SIZE / 2; dPhi < NEIGHBORHOOD_SIZE / 2 + 1; dPhi++) {
+                // check we are not outside the image
+                if (accPhi + dPhi < 0 || accPhi + dPhi >= phiDim) continue;
+                for (int dR = -NEIGHBORHOOD_SIZE / 2; dR < NEIGHBORHOOD_SIZE / 2 + 1; dR++) {
+
+                    // check we are not outside the image
+                    if (accR + dR < 0 || accR + dR >= rDim) continue;
+                    int neighbourIdx = (accPhi + dPhi + 1) * (rDim + 2) + accR + dR + 1;
+                    if (accumulator[idx] < accumulator[neighbourIdx]) {
+                        // the current idx is not a local maximum!
+                        bestCandidate = false;
+                        break;
+                    }
+                }
+                if (!bestCandidate) break;
+            }
+            if (bestCandidate) {
+                // the current idx *is* a local maximum
+                bestCandidatesFiltered.add(idx);
+            }
+
+        }
+
+        Collections.sort(bestCandidatesFiltered, houghComparator);
+
 
         /*PImage houghImg = createImage(rDim + 2, phiDim + 2, ALPHA);
         for (int i = 0; i < accumulator.length; i++) {
@@ -219,59 +277,90 @@ public class VideoStream extends PApplet {
         System.out.println("hough image computed");*/
 
 
-        PGraphics pg = createGraphics(originalImage.width, originalImage.height);
+        PGraphics pg = createGraphics(edgeImg.width, edgeImg.height);
 
         pg.beginDraw();
-        pg.image(originalImage, 0, 0);
         //pg.image(houghImg, 0,0);
 
-        for (int idx = 0; idx < accumulator.length; idx++) {
-            if (accumulator[idx] > 180) {
-                // first, compute back the (r, phi) polar coordinates:
-                int accPhi = (idx / (rDim + 2)) - 1;
-                int accR = idx - (accPhi + 1) * (rDim + 2) - 1;
-                float r = (accR - (rDim - 1) * 0.5f) * discretizationStepsR;
-                float phi = accPhi * discretizationStepsPhi;
+        //This is to ensure we can indeed draw nLines
+        int candidatesLength = bestCandidatesFiltered.size();
+        if (candidatesLength < nLines) nLines = candidatesLength;
 
-                // Cartesian equation of a line: y = ax + b
-                // in polar, y = (-cos(phi)/sin(phi))x + (r/sin(phi))
-                // => y = 0 : x = r / cos(phi)
-                // => x = 0 : y = r / sin(phi)
-                // compute the intersection of this line with the 4 borders of
-                // the image
+        for (int i = 0; i < nLines; i++) {
+            int idx = bestCandidatesFiltered.get(i);
+            // first, compute back the (r, phi) polar coordinates:
+            int accPhi = (idx / (rDim + 2)) - 1;
+            //int accR = idx - (accPhi + 1) * (rDim + 2) - 1;
+            int accR = (idx % (rDim + 2)) - 1;
+            float r = (accR - (rDim - 1) * 0.5f) * discretizationStepsR;
+            float phi = accPhi * discretizationStepsPhi;
 
-                int x0 = 0;
-                int y0 = (int) (r / sin(phi));
-                int x1 = (int) (r / cos(phi));
-                int y1 = 0;
-                int x2 = edgeImg.width;
-                int y2 = (int) (-cos(phi) / sin(phi) * x2 + r / sin(phi));
-                int y3 = edgeImg.height;
-                int x3 = (int) (-(y3 - r / sin(phi)) * (sin(phi) / cos(phi)));
+            resultingLines.add(new PVector(r, phi));
+            // Cartesian equation of a line: y = ax + b
+            // in polar, y = (-cos(phi)/sin(phi))x + (r/sin(phi))
+            // => y = 0 : x = r / cos(phi)
+            // => x = 0 : y = r / sin(phi)
+            // compute the intersection of this line with the 4 borders of
+            // the image
 
-                // Finally, plot the lines
-                pg.stroke(204, 102, 0);
-                if (y0 > 0) {
-                    if (x1 > 0)
-                        pg.line(x0, y0, x1, y1);
-                    else if (y2 > 0)
-                        pg.line(x0, y0, x2, y2);
+            int x0 = 0;
+            int y0 = (int) (r / sin(phi));
+            int x1 = (int) (r / cos(phi));
+            int y1 = 0;
+            int x2 = edgeImg.width;
+            int y2 = (int) (-cos(phi) / sin(phi) * x2 + r / sin(phi));
+            int y3 = edgeImg.height;
+            int x3 = (int) (-(y3 - r / sin(phi)) * (sin(phi) / cos(phi)));
+
+            // Finally, plot the lines
+            pg.stroke(204, 102, 0);
+            if (y0 > 0) {
+                if (x1 > 0)
+                    pg.line(x0, y0, x1, y1);
+                else if (y2 > 0)
+                    pg.line(x0, y0, x2, y2);
+                else
+                    pg.line(x0, y0, x3, y3);
+            } else {
+                if (x1 > 0) {
+                    if (y2 > 0)
+                        pg.line(x1, y1, x2, y2);
                     else
-                        pg.line(x0, y0, x3, y3);
-                } else {
-                    if (x1 > 0) {
-                        if (y2 > 0)
-                            pg.line(x1, y1, x2, y2);
-                        else
-                            pg.line(x1, y1, x3, y3);
-                    } else
-                        pg.line(x2, y2, x3, y3);
+                        pg.line(x1, y1, x3, y3);
+                } else
+                    pg.line(x2, y2, x3, y3);
+            }
+        }
+        pg.endDraw();
+        image(pg.get(),0,0);
+        return resultingLines;
+    }
+
+    public ArrayList<PVector> getIntersections(List<PVector> lines) {
+        ArrayList<PVector> intersections = new ArrayList<PVector>();
+
+        //TODO: Voir si on peu optimiser en réutilisant les sinTable et cosTable
+        for (int i = 0; i < lines.size() - 1; i++) {
+            PVector line1 = lines.get(i);
+            for (int j = i + 1; j < lines.size(); j++) {
+                PVector line2 = lines.get(j);
+                float r1 = line1.x;
+                float phi1 = line1.y;
+                float r2 = line2.x;
+                float phi2 = line2.y;
+                float d = cos(phi2) * sin(phi1) - cos(phi1) * sin(phi2);
+                if(d != 0) {
+                    PVector inter = new PVector(
+                            ((r2 * sin(phi1)) - (r1 * sin(phi2))) / d,
+                            ((r1 * cos(phi2)) - (r2 * cos(phi1))) / d
+                    );
+                    intersections.add(inter);
+                    // draw the intersection
+                    fill(255, 128, 0);
+                    ellipse(inter.x, inter.y, 10, 10);
                 }
             }
         }
-
-        pg.endDraw();
-
-        return pg.get();
+        return intersections;
     }
 }
