@@ -80,7 +80,7 @@ public class imageFilter extends PApplet {
     }
 
     public void setup() {
-        img = loadImage("images/board2.jpg");
+        img = loadImage("images/board4.jpg");
         thresholdBar1 = new HScrollbar(0, 0, width, 20);
         thresholdBar2 = new HScrollbar(0, 25, width, 20);
         oldBarValue1 = 0;
@@ -316,43 +316,40 @@ public class imageFilter extends PApplet {
 
 
         /*============================================================
-                            LOCAL MAXIMA SELECTION
+                     LOCAL MAXIMA SELECTION USING SET<INTEGER>
           ============================================================*/
+        List<Integer> bestCandidatesFiltered = new ArrayList<>();
+        Iterator<Integer> it = bestCandidates.iterator();
+        while(it.hasNext()){
+            int idx = it.next();
+            int accPhi = (idx / (rDim + 2)) - 1;
+            int accR = (idx % (rDim + 2))-1;
+            boolean bestCandidate = true;
+            // iterate over the neighbourhood
+            for (int dPhi = -NEIGHBORHOOD_SIZE / 2; dPhi < NEIGHBORHOOD_SIZE / 2 + 1; dPhi++) {
+                // check we are not outside the image
+                if (accPhi + dPhi < 0 || accPhi + dPhi >= phiDim) continue;
+                for (int dR = -NEIGHBORHOOD_SIZE / 2; dR < NEIGHBORHOOD_SIZE / 2 + 1; dR++) {
 
-        for (int accR = 0; accR < rDim; accR++) {
-            for (int accPhi = 0; accPhi < phiDim; accPhi++) {
-                // compute current index in the accumulator
-                int idx = (accPhi + 1) * (rDim + 2) + accR + 1;
-                if (accumulator[idx] > MIN_VOTES) {
-                    boolean bestCandidate = true;
-                    // iterate over the neighbourhood
-                    for (int dPhi = -NEIGHBORHOOD_SIZE / 2; dPhi < NEIGHBORHOOD_SIZE / 2 + 1; dPhi++) {
-                        // check we are not outside the image
-                        if (accPhi + dPhi < 0 || accPhi + dPhi >= phiDim) continue;
-                        for (int dR = -NEIGHBORHOOD_SIZE / 2; dR < NEIGHBORHOOD_SIZE / 2 + 1; dR++) {
-
-                            // check we are not outside the image
-                            if (accR + dR < 0 || accR + dR >= rDim) continue;
-                            int neighbourIdx = (accPhi + dPhi + 1) * (rDim + 2) + accR + dR + 1;
-                            if (accumulator[idx] < accumulator[neighbourIdx]) {
-                                // the current idx is not a local maximum!
-                                bestCandidate = false;
-                                break;
-                            }
-                        }
-                        if (!bestCandidate) break;
-                    }
-                    if (bestCandidate) {
-                        // the current idx *is* a local maximum
-                        bestCandidates.add(idx);
+                    // check we are not outside the image
+                    if (accR + dR < 0 || accR + dR >= rDim) continue;
+                    int neighbourIdx = (accPhi + dPhi + 1) * (rDim + 2) + accR + dR + 1;
+                    if (accumulator[idx] < accumulator[neighbourIdx]) {
+                        // the current idx is not a local maximum!
+                        bestCandidate = false;
+                        break;
                     }
                 }
+                if (!bestCandidate) break;
             }
+            if (bestCandidate) {
+                // the current idx *is* a local maximum
+                bestCandidatesFiltered.add(idx);
+            }
+
         }
 
-
-        List<Integer> bestCandidatesList = new ArrayList<Integer>(bestCandidates);
-        Collections.sort(bestCandidatesList, houghComparator);
+        Collections.sort(bestCandidatesFiltered, houghComparator);
 
 
         /*PImage houghImg = createImage(rDim + 2, phiDim + 2, ALPHA);
@@ -373,15 +370,16 @@ public class imageFilter extends PApplet {
         //pg.image(houghImg, 0,0);
 
         //This is to ensure we can indeed draw nLines
-        int candidatesLength = bestCandidatesList.size();
+        int candidatesLength = bestCandidatesFiltered.size();
         if (candidatesLength < nLines) nLines = candidatesLength;
 
         for (int i = 0; i < nLines; i++) {
-            int idx = bestCandidatesList.get(i);
+            int idx = bestCandidatesFiltered.get(i);
             System.out.println("A line was found, it had " + accumulator[idx] + " votes");
             // first, compute back the (r, phi) polar coordinates:
             int accPhi = (idx / (rDim + 2)) - 1;
-            int accR = idx - (accPhi + 1) * (rDim + 2) - 1;
+            //int accR = idx - (accPhi + 1) * (rDim + 2) - 1;
+            int accR = (idx % (rDim + 2))-1;
             float r = (accR - (rDim - 1) * 0.5f) * discretizationStepsR;
             float phi = accPhi * discretizationStepsPhi;
 
