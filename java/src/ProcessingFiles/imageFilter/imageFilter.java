@@ -5,6 +5,8 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PImage;
 
+import java.util.*;
+
 public class imageFilter extends PApplet {
 
     /*===============================================================
@@ -60,11 +62,16 @@ public class imageFilter extends PApplet {
       ===============================================================*/
     private static float discretizationStepsPhi = 0.06f;
     private static float discretizationStepsR = 2.5f;
+    private final static int MIN_VOTES = 200;
     private int phiDim;
     private int rDim;
     private int rOffset;
     private float[] sinTable;
     private float[] cosTable;
+
+    private int CALLS = 0;
+
+    Comparator<Integer> houghComparator;
 
 
     public void settings() {
@@ -90,6 +97,7 @@ public class imageFilter extends PApplet {
             sinTable[theta] = (float) Math.sin(thetaRadians);
             cosTable[theta] = (float) Math.cos(thetaRadians);
         }
+
     }
 
     public void draw() {
@@ -126,7 +134,7 @@ public class imageFilter extends PApplet {
         //then sobel
         sobel = sobel(toDisplay);
 
-        image(hough(sobel, img.copy()), 0, 0);
+        image(hough(sobel, img.copy(), 6), 0, 0);
 
         noLoop();
     }
@@ -266,10 +274,13 @@ public class imageFilter extends PApplet {
     }
 
 
-    private PImage hough(PImage edgeImg, PImage originalImage) {
+    private PImage hough(PImage edgeImg, PImage originalImage, int nLines) {
+
+        Set<Integer> bestCandidates = new HashSet<>();
 
         // our accumulator (with a 1 pix margin around)
         int[] accumulator = new int[(phiDim + 2) * (rDim + 2)];
+        houghComparator = new HoughComparator(accumulator);
         // Fill the accumulator: on edge points (ie, white pixels of the edge
         // image), store all possible (r, phi) pairs describing lines going
         // through the point.
@@ -287,10 +298,18 @@ public class imageFilter extends PApplet {
                         r += rOffset;
                         int idx = ((int) r) + (phi + 1) * (rDim + 2);
                         accumulator[idx]++;
+
+                        if (accumulator[idx] > MIN_VOTES) {
+                            CALLS++;
+                            bestCandidates.add(idx);
+                        }
                     }
                 }
             }
         }
+        System.out.println(CALLS +" if calls were made to check wheter some index is a good candidate. This value should not be bigger than "+ accumulator.length);
+        List<Integer> bestCandidatesList = new ArrayList<Integer>(bestCandidates);
+        Collections.sort(bestCandidatesList, houghComparator);
 
         /*PImage houghImg = createImage(rDim + 2, phiDim + 2, ALPHA);
         for (int i = 0; i < accumulator.length; i++) {
@@ -309,50 +328,55 @@ public class imageFilter extends PApplet {
         pg.image(originalImage, 0, 0);
         //pg.image(houghImg, 0,0);
 
-        for (int idx = 0; idx < accumulator.length; idx++) {
-            if (accumulator[idx] > 180) {
-                // first, compute back the (r, phi) polar coordinates:
-                int accPhi = (idx / (rDim + 2)) - 1;
-                int accR = idx - (accPhi + 1) * (rDim + 2) - 1;
-                float r = (accR - (rDim - 1) * 0.5f) * discretizationStepsR;
-                float phi = accPhi * discretizationStepsPhi;
+        //This is to ensure we can indeed draw nLines
+        int candidatesLength = bestCandidatesList.size();
+        if(candidatesLength < nLines) nLines = candidatesLength;
 
-                // Cartesian equation of a line: y = ax + b
-                // in polar, y = (-cos(phi)/sin(phi))x + (r/sin(phi))
-                // => y = 0 : x = r / cos(phi)
-                // => x = 0 : y = r / sin(phi)
-                // compute the intersection of this line with the 4 borders of
-                // the image
+        for (int i = 0; i < nLines; i++) {
+            int idx = bestCandidatesList.get(i);
+            System.out.println("A line was found, it had "+ accumulator[idx]+" votes");
+            // first, compute back the (r, phi) polar coordinates:
+            int accPhi = (idx / (rDim + 2)) - 1;
+            int accR = idx - (accPhi + 1) * (rDim + 2) - 1;
+            float r = (accR - (rDim - 1) * 0.5f) * discretizationStepsR;
+            float phi = accPhi * discretizationStepsPhi;
 
-                int x0 = 0;
-                int y0 = (int) (r / sin(phi));
-                int x1 = (int) (r / cos(phi));
-                int y1 = 0;
-                int x2 = edgeImg.width;
-                int y2 = (int) (-cos(phi) / sin(phi) * x2 + r / sin(phi));
-                int y3 = edgeImg.height;
-                int x3 = (int) (-(y3 - r / sin(phi)) * (sin(phi) / cos(phi)));
+            // Cartesian equation of a line: y = ax + b
+            // in polar, y = (-cos(phi)/sin(phi))x + (r/sin(phi))
+            // => y = 0 : x = r / cos(phi)
+            // => x = 0 : y = r / sin(phi)
+            // compute the intersection of this line with the 4 borders of
+            // the image
 
-                // Finally, plot the lines
-                pg.stroke(204, 102, 0);
-                if (y0 > 0) {
-                    if (x1 > 0)
-                        pg.line(x0, y0, x1, y1);
-                    else if (y2 > 0)
-                        pg.line(x0, y0, x2, y2);
+            int x0 = 0;
+            int y0 = (int) (r / sin(phi));
+            int x1 = (int) (r / cos(phi));
+            int y1 = 0;
+            int x2 = edgeImg.width;
+            int y2 = (int) (-cos(phi) / sin(phi) * x2 + r / sin(phi));
+            int y3 = edgeImg.height;
+            int x3 = (int) (-(y3 - r / sin(phi)) * (sin(phi) / cos(phi)));
+
+            // Finally, plot the lines
+            pg.stroke(204, 102, 0);
+            if (y0 > 0) {
+                if (x1 > 0)
+                    pg.line(x0, y0, x1, y1);
+                else if (y2 > 0)
+                    pg.line(x0, y0, x2, y2);
+                else
+                    pg.line(x0, y0, x3, y3);
+            } else {
+                if (x1 > 0) {
+                    if (y2 > 0)
+                        pg.line(x1, y1, x2, y2);
                     else
-                        pg.line(x0, y0, x3, y3);
-                } else {
-                    if (x1 > 0) {
-                        if (y2 > 0)
-                            pg.line(x1, y1, x2, y2);
-                        else
-                            pg.line(x1, y1, x3, y3);
-                    } else
-                        pg.line(x2, y2, x3, y3);
-                }
+                        pg.line(x1, y1, x3, y3);
+                } else
+                    pg.line(x2, y2, x3, y3);
             }
         }
+
 
         pg.endDraw();
 
