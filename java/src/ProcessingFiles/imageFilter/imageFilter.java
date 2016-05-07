@@ -4,6 +4,7 @@ import ch.epfl.cs211.display2D.HScrollbar;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PImage;
+import processing.core.PVector;
 
 import java.util.*;
 
@@ -134,8 +135,8 @@ public class imageFilter extends PApplet {
 
         //then sobel
         sobel = sobel(toDisplay);
-
-        image(hough(sobel, img.copy(), 10), 0, 0);
+        image(img, 0, 0);
+        getIntersections(hough(sobel, 10));
 
         noLoop();
     }
@@ -275,13 +276,15 @@ public class imageFilter extends PApplet {
     }
 
 
-    private PImage hough(PImage edgeImg, PImage originalImage, int nLines) {
+    private List<PVector> hough(PImage edgeImg, int nLines) {
 
         /*============================================================
                                      LINE VOTING
           ============================================================*/
 
         Set<Integer> bestCandidates = new HashSet<>();
+        List<Integer> bestCandidatesFiltered = new ArrayList<>();
+        List<PVector> resultingLines = new ArrayList<>(4);
 
         // our accumulator (with a 1 pix margin around)
         int[] accumulator = new int[(phiDim + 2) * (rDim + 2)];
@@ -318,12 +321,12 @@ public class imageFilter extends PApplet {
         /*============================================================
                      LOCAL MAXIMA SELECTION USING SET<INTEGER>
           ============================================================*/
-        List<Integer> bestCandidatesFiltered = new ArrayList<>();
+        bestCandidatesFiltered = new ArrayList<>();
         Iterator<Integer> it = bestCandidates.iterator();
-        while(it.hasNext()){
+        while (it.hasNext()) {
             int idx = it.next();
             int accPhi = (idx / (rDim + 2)) - 1;
-            int accR = (idx % (rDim + 2))-1;
+            int accR = (idx % (rDim + 2)) - 1;
             boolean bestCandidate = true;
             // iterate over the neighbourhood
             for (int dPhi = -NEIGHBORHOOD_SIZE / 2; dPhi < NEIGHBORHOOD_SIZE / 2 + 1; dPhi++) {
@@ -363,10 +366,9 @@ public class imageFilter extends PApplet {
         System.out.println("hough image computed");*/
 
 
-        PGraphics pg = createGraphics(originalImage.width, originalImage.height);
+        PGraphics pg = createGraphics(edgeImg.width, edgeImg.height);
 
         pg.beginDraw();
-        pg.image(originalImage, 0, 0);
         //pg.image(houghImg, 0,0);
 
         //This is to ensure we can indeed draw nLines
@@ -379,10 +381,11 @@ public class imageFilter extends PApplet {
             // first, compute back the (r, phi) polar coordinates:
             int accPhi = (idx / (rDim + 2)) - 1;
             //int accR = idx - (accPhi + 1) * (rDim + 2) - 1;
-            int accR = (idx % (rDim + 2))-1;
+            int accR = (idx % (rDim + 2)) - 1;
             float r = (accR - (rDim - 1) * 0.5f) * discretizationStepsR;
             float phi = accPhi * discretizationStepsPhi;
 
+            resultingLines.add(new PVector(r, phi));
             // Cartesian equation of a line: y = ax + b
             // in polar, y = (-cos(phi)/sin(phi))x + (r/sin(phi))
             // => y = 0 : x = r / cos(phi)
@@ -418,13 +421,40 @@ public class imageFilter extends PApplet {
                     pg.line(x2, y2, x3, y3);
             }
         }
-
-
         pg.endDraw();
-
-        return pg.get();
+        image(pg.get(),0,0);
+        return resultingLines;
     }
 
+    public ArrayList<PVector> getIntersections(List<PVector> lines) {
+        ArrayList<PVector> intersections = new ArrayList<PVector>();
+
+        //TODO: Voir si on peu optimiser en réutilisant les sinTable et cosTable
+        for (int i = 0; i < lines.size() - 1; i++) {
+            PVector line1 = lines.get(i);
+            for (int j = i + 1; j < lines.size(); j++) {
+                PVector line2 = lines.get(j);
+                float r1 = line1.x;
+                float phi1 = line1.y;
+                float r2 = line2.x;
+                float phi2 = line2.y;
+                float d = cos(phi2) * sin(phi1) - cos(phi1) * sin(phi2);
+                System.out.println("r1: "+r1+" phi1: "+phi1+" r2: "+r2+" phi2: "+phi2+" d: "+d);
+                if(d != 0) {
+                    PVector inter = new PVector(
+                            ((r2 * sin(phi1)) - (r1 * sin(phi2))) / d,
+                            ((r1 * cos(phi2)) - (r2 * cos(phi1))) / d
+                    );
+                    intersections.add(inter);
+                    System.out.println("x: "+inter.x+" y: "+inter.y);
+                    // draw the intersection
+                    fill(255, 128, 0);
+                    ellipse(inter.x, inter.y, 10, 10);
+                }
+            }
+        }
+        return intersections;
+    }
 
     public static void main(String[] args) {
 
