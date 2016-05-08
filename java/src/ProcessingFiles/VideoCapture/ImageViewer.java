@@ -16,7 +16,7 @@ public class ImageViewer extends PApplet {
     private PImage img;
 
     public ImageViewer() {
-        img = new PImage(width, height);
+        img = createImage(width, height, ALPHA);
         String[] args = {"dummyArgs"};
         runSketch(args, this);
     }

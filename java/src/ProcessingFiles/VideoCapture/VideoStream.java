@@ -97,7 +97,7 @@ public class VideoStream extends PApplet {
                             , hsvBounds.getH_min(), hsvBounds.getH_max())
                     , hsvBounds.getV_min(), false);
 
-            image(hsvFiltered.copy(),WIDTH,0);
+            image(hsvFiltered.copy(), WIDTH, 0);
 
             PImage toDisplay = sobel(hsvFiltered);
 
@@ -410,10 +410,13 @@ public class VideoStream extends PApplet {
                             ((r2 * sin(phi1)) - (r1 * sin(phi2))) / d,
                             ((r1 * cos(phi2)) - (r2 * cos(phi1))) / d
                     );
-                    intersections.add(inter);
-                    // draw the intersection
-                    fill(255, 128, 0);
-                    ellipse(inter.x, inter.y, 10, 10);
+
+                    if (inter.x <= WIDTH) {
+                        intersections.add(inter);
+                        // draw the intersection
+                        fill(255, 128, 0);
+                        ellipse(inter.x, inter.y, 10, 10);
+                    }
                 }
             }
         }
