@@ -221,7 +221,7 @@ public class VideoStream extends PApplet {
                         int idx = ((int) r) + (phi + 1) * (rDim + 2);
                         accumulator[idx]++;
 
-                        if (accumulator[idx] > MIN_VOTES) {
+                        if (accumulator[idx] == MIN_VOTES) {
                             bestCandidates.add(idx);
                         }
                     }
