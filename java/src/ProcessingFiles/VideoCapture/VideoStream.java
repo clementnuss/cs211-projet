@@ -1,29 +1,18 @@
-package ProcessingFiles.imageFilter;
+package ProcessingFiles.VideoCapture;
 
-import ch.epfl.cs211.display2D.HScrollbar;
+import ProcessingFiles.imageFilter.HoughComparator;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.core.PVector;
+import processing.video.*;
 
 import java.util.*;
 
-public class imageFilter extends PApplet {
+public class VideoStream extends PApplet {
 
-    /*===============================================================
-        Various constants/value for the visualisation
-      ===============================================================*/
-    static final imageFilter INST = new imageFilter();
-    static final int WIDTH = 800;
-    static final int HEIGHT = 600;
-    private PImage img;
-    int max = 0xFFFFFF;
-    private HScrollbar thresholdBar1;
-    private HScrollbar thresholdBar2;
-    private PImage toDisplay, sobel;
-
-    private float oldBarValue1;
-    private float oldBarValue2;
+    private final static int WIDTH = 640;
+    private final static int HEIGHT = 480;
 
     /*===============================================================
         Values for the Sobel operator
@@ -35,57 +24,29 @@ public class imageFilter extends PApplet {
     private final float SOBEL_PERCENTAGE = 0.3f;
 
     /*===============================================================
-        Values for the convolution
-      ===============================================================*/
-
-    private int[][] gaussianKernel =
-            {
-                    {9, 12, 9},
-                    {12, 15, 12},
-                    {9, 12, 9},};
-
-    private int[][] kernel1 =
-            {
-                    {0, 0, 0},
-                    {0, 2, 0},
-                    {0, 0, 0},
-            };
-
-    private int[][] kernel2 = //<>//
-            {
-                    {0, 1, 0},
-                    {1, 0, 1},
-                    {0, 1, 0},
-            };
-
-    /*===============================================================
         Values for the Hough transform
       ===============================================================*/
     private static float discretizationStepsPhi = 0.06f;
     private static float discretizationStepsR = 2.5f;
-    private final static int MIN_VOTES = 200;
-    private final static int NEIGHBORHOOD_SIZE = 10;
+    private final static int MIN_VOTES = 140;
+    private final static int NEIGHBORHOOD_SIZE = 15;
+    private final static int N_LINES = 16;
     private int phiDim;
     private int rDim;
     private int rOffset;
     private float[] sinTable;
     private float[] cosTable;
-
-    private int CALLS = 0;
-
     Comparator<Integer> houghComparator;
 
+    static final VideoStream INST = new VideoStream();
+    Capture cam;
+    PImage img;
 
     public void settings() {
-        size(800, 600, P2D);
+        size(WIDTH, HEIGHT);
     }
 
     public void setup() {
-        img = loadImage("images/board4.jpg");
-        thresholdBar1 = new HScrollbar(0, 0, width, 20);
-        thresholdBar2 = new HScrollbar(0, 25, width, 20);
-        oldBarValue1 = 0;
-        oldBarValue2 = 0;
 
         // dimensions of the accumulator
         phiDim = (int) (Math.PI / discretizationStepsPhi);
@@ -100,51 +61,52 @@ public class imageFilter extends PApplet {
             cosTable[theta] = (float) Math.cos(thetaRadians);
         }
 
+
+        String[] cameras = Capture.list();
+        if (cameras.length == 0) {
+            System.err.println("There are no cameras available for capture.");
+            exit();
+        } else {
+            println("Available cameras:");
+            for (int i = 0; i < cameras.length; i++) {
+                println(cameras[i]);
+            }
+            cam = new Capture(this, cameras[1]);
+            cam.start();
+        }
     }
 
     public void draw() {
+        if (cam.available() == true) {
+            cam.read();
 
-      /*
-        if (oldBarValue1 != thresholdBar1.getPos() || oldBarValue2 != thresholdBar2.getPos()) {
-            background(0);
-            oldBarValue1 = thresholdBar1.getPos();
-            oldBarValue2 = thresholdBar2.getPos();
-
-
+            //IMAGE TREATMENT PIPELINE
+            // 1. saturation threshold
+            // 2. hue threshold
+            // 3. brightness threshold
+            // 4. sobel operator
+            PImage toDisplay = sobel(
+                                brightnessThreshold(
+                                    hueThreshold(
+                                        saturationThreshold(cam.copy(), 80, 255)
+                                    , 100, 140)
+                                , 10, false)
+                                );
+            image(cam,0,0);
+            getIntersections(hough(toDisplay, N_LINES));
         }
-
-        thresholdBar1.display();
-        thresholdBar1.update();
-        thresholdBar2.display();
-        thresholdBar2.update();
-      */
-
-        background(0);
-        //IMAGE TREATMENT PIPELINE
-        // 1. saturation threshold
-        // 2. hue threshold
-        // 3. gaussian blur
-        // 4. brightness threshold
-        toDisplay = brightnessThreshold(
-                gaussianBlur(
-                        hueThreshold(
-                                saturationThreshold(img.copy(), 80, 255)
-                                , 100, 140)
-                )
-                , 10, false);
-
-        //then sobel
-        sobel = sobel(toDisplay);
-        image(img, 0, 0);
-        getIntersections(hough(sobel, 10));
-
-        noLoop();
     }
+
+    public static void main(String[] args) {
+
+        PApplet.runSketch(new String[]{"ProcessingFiles.VideoStream.VideoStream"}, INST);
+
+    }
+
 
     //A good value to extract the board would be 87 to 255
     private PImage saturationThreshold(PImage img, float t1, float t2) {
         img.loadPixels();
-        System.out.println("[INFO:] SATURATION threshold selection is " + t1 + "-" + t2 + " MIN-MAX");
 
         for (int i = 0; i < img.width * img.height; i++) {
             int originalColor = img.pixels[i];
@@ -170,20 +132,11 @@ public class imageFilter extends PApplet {
         return img;
     }
 
-    PImage hueAsGrayLevel(PImage img) {
-        for (int i = 0; i < img.width * img.height; i++) {
-            img.pixels[i] = color(hue(img.pixels[i]));
-        }
-        return img;
-    }
-
     //A good value to extract the board would be 115 to 132
     private PImage hueThreshold(PImage img, float t1, float t2) {
         img.loadPixels();
         int originalColor;
         float originalColorHue;
-
-        System.out.println("[INFO:] HUE threshold selection is " + t1 + "-" + t2 + " MIN-MAX");
 
         for (int i = 0; i < img.width * img.height; i++) {
             originalColor = img.pixels[i];
@@ -192,40 +145,6 @@ public class imageFilter extends PApplet {
         }
         img.updatePixels();
         return img;
-    }
-
-    private float computeWeight(int[][] m) {
-        int s = 0;
-        for (int[] aM : m) {
-            for (int j = 0; j < aM.length; j++) {
-                s += aM[j];
-            }
-        }
-        return s;
-    }
-
-    private PImage convolve(PImage img, int[][] matrix) {
-        PImage result = createImage(width, height, ALPHA);
-        float sum;
-        float weight = computeWeight(matrix) * 2;
-        int N = matrix.length;
-        int halfN = N / 2;
-
-        for (int y = halfN; y < img.height - halfN; y++) {
-            for (int x = halfN; x < img.width - halfN; x++) {
-                sum = 0;
-                for (int j = 0; j < N; j++) {
-                    for (int i = 0; i < N; i++) {
-                        int xp = x - halfN + i;
-                        int yp = y - halfN + j;
-                        sum += brightness(img.pixels[(yp * img.width) + xp]) * matrix[j][i];
-                    }
-                }
-                sum /= weight;
-                result.pixels[(y * result.width) + x] = color(sum);
-            }
-        }
-        return result;
     }
 
     private PImage sobel(PImage img) {
@@ -271,11 +190,6 @@ public class imageFilter extends PApplet {
         return result;
     }
 
-    private PImage gaussianBlur(PImage img) {
-        return convolve(img, gaussianKernel);
-    }
-
-
     private List<PVector> hough(PImage edgeImg, int nLines) {
 
         /*============================================================
@@ -307,16 +221,13 @@ public class imageFilter extends PApplet {
                         int idx = ((int) r) + (phi + 1) * (rDim + 2);
                         accumulator[idx]++;
 
-                        if (accumulator[idx] > MIN_VOTES) {
-                            CALLS++;
+                        if (accumulator[idx] == MIN_VOTES) {
                             bestCandidates.add(idx);
                         }
                     }
                 }
             }
         }
-        System.out.println(CALLS + " if calls were made to check wheter some index is a good candidate. This value should not be bigger than " + accumulator.length);
-
 
         /*============================================================
                      LOCAL MAXIMA SELECTION USING SET<INTEGER>
@@ -377,7 +288,6 @@ public class imageFilter extends PApplet {
 
         for (int i = 0; i < nLines; i++) {
             int idx = bestCandidatesFiltered.get(i);
-            System.out.println("A line was found, it had " + accumulator[idx] + " votes");
             // first, compute back the (r, phi) polar coordinates:
             int accPhi = (idx / (rDim + 2)) - 1;
             //int accR = idx - (accPhi + 1) * (rDim + 2) - 1;
@@ -439,14 +349,12 @@ public class imageFilter extends PApplet {
                 float r2 = line2.x;
                 float phi2 = line2.y;
                 float d = cos(phi2) * sin(phi1) - cos(phi1) * sin(phi2);
-                System.out.println("r1: "+r1+" phi1: "+phi1+" r2: "+r2+" phi2: "+phi2+" d: "+d);
                 if(d != 0) {
                     PVector inter = new PVector(
                             ((r2 * sin(phi1)) - (r1 * sin(phi2))) / d,
                             ((r1 * cos(phi2)) - (r2 * cos(phi1))) / d
                     );
                     intersections.add(inter);
-                    System.out.println("x: "+inter.x+" y: "+inter.y);
                     // draw the intersection
                     fill(255, 128, 0);
                     ellipse(inter.x, inter.y, 10, 10);
@@ -455,11 +363,4 @@ public class imageFilter extends PApplet {
         }
         return intersections;
     }
-
-    public static void main(String[] args) {
-
-        PApplet.runSketch(new String[]{"ProcessingFiles.imageFilter.imageFilter"}, INST);
-
-    }
-
 }
