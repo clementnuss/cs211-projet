@@ -17,7 +17,6 @@ public class VideoStream extends PApplet {
 
     // HSV bounds container
     private final HSVBounds hsvBounds = new HSVBounds();
-    ImageViewer hsvFilteredViewer = new ImageViewer();
 
     /*===============================================================
         Values for the Sobel operator
@@ -48,7 +47,7 @@ public class VideoStream extends PApplet {
     PImage img;
 
     public void settings() {
-        size(WIDTH, HEIGHT);
+        size(WIDTH * 2, HEIGHT);
     }
 
     public void setup() {
@@ -98,7 +97,7 @@ public class VideoStream extends PApplet {
                             , hsvBounds.getH_min(), hsvBounds.getH_max())
                     , hsvBounds.getV_min(), false);
 
-            hsvFilteredViewer.drawImage(hsvFiltered);
+            image(hsvFiltered.copy(),WIDTH,0);
 
             PImage toDisplay = sobel(hsvFiltered);
 
@@ -111,44 +110,44 @@ public class VideoStream extends PApplet {
         switch (event.getKey()) {
             //Sets the hue threshold
             case 'q':
-                hsvBounds.setH_min(hsvBounds.getH_min()-3);
+                hsvBounds.setH_min(hsvBounds.getH_min() - 3);
                 break;
             case 'w':
-                hsvBounds.setH_min(hsvBounds.getH_min()+3);
+                hsvBounds.setH_min(hsvBounds.getH_min() + 3);
                 break;
             case 'a':
-                hsvBounds.setH_max(hsvBounds.getH_max()-3);
+                hsvBounds.setH_max(hsvBounds.getH_max() - 3);
                 break;
             case 's':
-                hsvBounds.setH_max(hsvBounds.getH_max()+3);
+                hsvBounds.setH_max(hsvBounds.getH_max() + 3);
                 break;
 
             // Sets the saturation threshold
             case 'e':
-                hsvBounds.setS_min(hsvBounds.getS_min()-3);
+                hsvBounds.setS_min(hsvBounds.getS_min() - 3);
                 break;
             case 'r':
-                hsvBounds.setS_min(hsvBounds.getS_min()+3);
+                hsvBounds.setS_min(hsvBounds.getS_min() + 3);
                 break;
             case 'd':
-                hsvBounds.setS_max(hsvBounds.getS_max()-3);
+                hsvBounds.setS_max(hsvBounds.getS_max() - 3);
                 break;
             case 'f':
-                hsvBounds.setS_max(hsvBounds.getS_max()+3);
+                hsvBounds.setS_max(hsvBounds.getS_max() + 3);
                 break;
 
             // Sets the value threshold
             case 't':
-                hsvBounds.setV_min(hsvBounds.getV_min()-3);
+                hsvBounds.setV_min(hsvBounds.getV_min() - 3);
                 break;
             case 'z':
-                hsvBounds.setV_min(hsvBounds.getV_min()+3);
+                hsvBounds.setV_min(hsvBounds.getV_min() + 3);
                 break;
             case 'g':
-                hsvBounds.setV_max(hsvBounds.getV_max()-3);
+                hsvBounds.setV_max(hsvBounds.getV_max() - 3);
                 break;
             case 'h':
-                hsvBounds.setV_max(hsvBounds.getV_max()+3);
+                hsvBounds.setV_max(hsvBounds.getV_max() + 3);
                 break;
         }
 
