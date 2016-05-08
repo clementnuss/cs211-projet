@@ -14,7 +14,7 @@ elseif (WIN32)
     find_package(OpenCV REQUIRED)
 endif ()
 
-set(SOURCE_FILES main.cpp)
+set(SOURCE_FILES src/main.cpp src/imageProcessing.cpp src/imageProcessing.h src/Camera.cpp src/Camera.h)
 add_executable(imageProcessing ${SOURCE_FILES})
 
 if (UNIX)
