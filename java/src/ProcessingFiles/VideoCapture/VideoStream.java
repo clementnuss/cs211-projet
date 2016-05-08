@@ -5,7 +5,8 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.core.PVector;
-import processing.video.*;
+import processing.event.KeyEvent;
+import processing.video.Capture;
 
 import java.util.*;
 
@@ -13,6 +14,10 @@ public class VideoStream extends PApplet {
 
     private final static int WIDTH = 640;
     private final static int HEIGHT = 480;
+
+    // HSV bounds container
+    private final HSVBounds hsvBounds = new HSVBounds();
+    ImageViewer hsvFilteredViewer = new ImageViewer();
 
     /*===============================================================
         Values for the Sobel operator
@@ -68,16 +73,17 @@ public class VideoStream extends PApplet {
             exit();
         } else {
             println("Available cameras:");
-            for (int i = 0; i < cameras.length; i++) {
-                println(cameras[i]);
-            }
+            for (String camera : cameras)
+                println(camera);
+
             cam = new Capture(this, cameras[1]);
             cam.start();
+            println("===========================================");
         }
     }
 
     public void draw() {
-        if (cam.available() == true) {
+        if (cam.available()) {
             cam.read();
 
             //IMAGE TREATMENT PIPELINE
@@ -85,16 +91,68 @@ public class VideoStream extends PApplet {
             // 2. hue threshold
             // 3. brightness threshold
             // 4. sobel operator
-            PImage toDisplay = sobel(
-                                brightnessThreshold(
-                                    hueThreshold(
-                                        saturationThreshold(cam.copy(), 80, 255)
-                                    , 100, 140)
-                                , 10, false)
-                                );
-            image(cam,0,0);
+
+            PImage hsvFiltered = brightnessThreshold(
+                    hueThreshold(
+                            saturationThreshold(cam.copy(), hsvBounds.getS_min(), hsvBounds.getS_max())
+                            , hsvBounds.getH_min(), hsvBounds.getH_max())
+                    , hsvBounds.getV_min(), false);
+
+            hsvFilteredViewer.drawImage(hsvFiltered);
+
+            PImage toDisplay = sobel(hsvFiltered);
+
+            image(cam, 0, 0);
             getIntersections(hough(toDisplay, N_LINES));
         }
+    }
+
+    public void keyPressed(KeyEvent event) {
+        switch (event.getKey()) {
+            //Sets the hue threshold
+            case 'q':
+                hsvBounds.setH_min(hsvBounds.getH_min()-3);
+                break;
+            case 'w':
+                hsvBounds.setH_min(hsvBounds.getH_min()+3);
+                break;
+            case 'a':
+                hsvBounds.setH_max(hsvBounds.getH_max()-3);
+                break;
+            case 's':
+                hsvBounds.setH_max(hsvBounds.getH_max()+3);
+                break;
+
+            // Sets the saturation threshold
+            case 'e':
+                hsvBounds.setS_min(hsvBounds.getS_min()-3);
+                break;
+            case 'r':
+                hsvBounds.setS_min(hsvBounds.getS_min()+3);
+                break;
+            case 'd':
+                hsvBounds.setS_max(hsvBounds.getS_max()-3);
+                break;
+            case 'f':
+                hsvBounds.setS_max(hsvBounds.getS_max()+3);
+                break;
+
+            // Sets the value threshold
+            case 't':
+                hsvBounds.setV_min(hsvBounds.getV_min()-3);
+                break;
+            case 'z':
+                hsvBounds.setV_min(hsvBounds.getV_min()+3);
+                break;
+            case 'g':
+                hsvBounds.setV_max(hsvBounds.getV_max()-3);
+                break;
+            case 'h':
+                hsvBounds.setV_max(hsvBounds.getV_max()+3);
+                break;
+        }
+
+        println(hsvBounds);
     }
 
     public static void main(String[] args) {
@@ -276,7 +334,6 @@ public class VideoStream extends PApplet {
         houghImg.updatePixels();
         System.out.println("hough image computed");*/
 
-
         PGraphics pg = createGraphics(edgeImg.width, edgeImg.height);
 
         pg.beginDraw();
@@ -332,7 +389,7 @@ public class VideoStream extends PApplet {
             }
         }
         pg.endDraw();
-        image(pg.get(),0,0);
+        image(pg.get(), 0, 0);
         return resultingLines;
     }
 
@@ -349,7 +406,7 @@ public class VideoStream extends PApplet {
                 float r2 = line2.x;
                 float phi2 = line2.y;
                 float d = cos(phi2) * sin(phi1) - cos(phi1) * sin(phi2);
-                if(d != 0) {
+                if (d != 0) {
                     PVector inter = new PVector(
                             ((r2 * sin(phi1)) - (r1 * sin(phi2))) / d,
                             ((r1 * cos(phi2)) - (r2 * cos(phi1))) / d
