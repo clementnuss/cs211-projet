@@ -10,10 +10,15 @@ import processing.video.Capture;
 
 import java.util.*;
 
+import static ProcessingFiles.VideoCapture.QuadGraph.build;
+import static ProcessingFiles.VideoCapture.QuadGraph.findCycles;
+
 public class VideoStream extends PApplet {
 
     private final static int WIDTH = 640;
     private final static int HEIGHT = 480;
+
+    private boolean pause = false;
 
     // HSV bounds container
     private final HSVBounds hsvBounds = new HSVBounds();
@@ -82,33 +87,79 @@ public class VideoStream extends PApplet {
     }
 
     public void draw() {
-        if (cam.available()) {
-            cam.read();
+        if (pause) {
+            System.out.println("The program is paused .. press p to start it again");
+        } else {
+            if (cam.available()) {
+                cam.read();
 
-            //IMAGE TREATMENT PIPELINE
-            // 1. saturation threshold
-            // 2. hue threshold
-            // 3. brightness threshold
-            // 4. sobel operator
+                //IMAGE TREATMENT PIPELINE
+                // 1. saturation threshold
+                // 2. hue threshold
+                // 3. brightness threshold
+                // 4. sobel operator
 
-            PImage hsvFiltered = brightnessThreshold(
-                    hueThreshold(
-                            saturationThreshold(cam.copy(), hsvBounds.getS_min(), hsvBounds.getS_max())
-                            , hsvBounds.getH_min(), hsvBounds.getH_max())
-                    , hsvBounds.getV_min(), false);
+                PImage hsvFiltered = brightnessThreshold(
+                        hueThreshold(
+                                saturationThreshold(cam.copy(), hsvBounds.getS_min(), hsvBounds.getS_max())
+                                , hsvBounds.getH_min(), hsvBounds.getH_max())
+                        , hsvBounds.getV_min(), false);
 
-            background(0);
-            image(hsvFiltered.copy(), WIDTH, 0);
+                background(0);
+                image(hsvFiltered.copy(), WIDTH, 0);
 
-            PImage toDisplay = sobel(hsvFiltered);
+                PImage toDisplay = sobel(hsvFiltered);
 
-            image(cam, 0, 0);
-            getIntersections(hough(toDisplay, N_LINES));
+                image(cam, 0, 0);
+
+//                List<PVector> intersections = getIntersections(hough(toDisplay, N_LINES));
+                List<PVector> lines = hough(toDisplay, N_LINES);
+
+                if (lines != null && !lines.isEmpty()) {
+                    build(lines, cam.width, cam.height);
+
+                    List<int []> quads = findCycles();
+
+
+                    for (int[] quad : quads) {
+                        PVector l1 = lines.get(quad[0]);
+                        PVector l2 = lines.get(quad[1]);
+                        PVector l3 = lines.get(quad[2]);
+                        PVector l4 = lines.get(quad[3]);
+
+                        // (intersection() is a simplified version of the
+                        // intersections() method you wrote last week, that simply
+                        // return the coordinates of the intersection between 2 lines)
+
+                        PVector c12 = intersection(l1, l2);
+                        PVector c23 = intersection(l2, l3);
+                        PVector c34 = intersection(l3, l4);
+                        PVector c41 = intersection(l4, l1);
+                        // Choose a random, semi-transparent colour
+                        Random random = new Random();
+                        fill(color(min(255, random.nextInt(300)),
+                                min(255, random.nextInt(300)),
+                                min(255, random.nextInt(300)), 50));
+                        quad(c12.x, c12.y, c23.x, c23.y, c34.x, c34.y, c41.x, c41.y);
+                    }
+                }
+            }
         }
     }
 
     public void keyPressed(KeyEvent event) {
         switch (event.getKey()) {
+            //Pause the webcam
+            case 'p':
+                if (pause)
+                    loop();
+                else
+                    noLoop();
+
+                pause = !pause;
+                System.out.println("The program is paused, press p to resume it");
+                break;
+
             //Sets the hue threshold
             case 'q':
                 hsvBounds.setH_min(hsvBounds.getH_min() - 3);
@@ -393,7 +444,7 @@ public class VideoStream extends PApplet {
         return resultingLines;
     }
 
-    public ArrayList<PVector> getIntersections(List<PVector> lines) {
+    private ArrayList<PVector> getIntersections(List<PVector> lines) {
         ArrayList<PVector> intersections = new ArrayList<PVector>();
 
         //TODO: Voir si on peu optimiser en réutilisant les sinTable et cosTable
@@ -422,5 +473,10 @@ public class VideoStream extends PApplet {
             }
         }
         return intersections;
+    }
+
+    private PVector intersection(PVector l1, PVector l2) {
+        //TODO: continue this definition
+        return null;
     }
 }
