@@ -7,7 +7,7 @@ PImage displayedImage;
 float oldBarValue1;
 float oldBarValue2;
 
-int[][] kernel1 = 
+int[][] kernel1 =
 { {0,0,0},
   {0,2,0},
   {0,0,0},
@@ -40,7 +40,7 @@ PImage filterThreshold(PImage img, float threshold, boolean inverted) {
   PImage result = createImage(width, height, RGB);
   // create a new, initially transparent, 'result' image
   for (int i = 0; i < img.width * img.height; i++) {
-    
+
     if(inverted)
        result.pixels[i] = (brightness(img.pixels[i]) < threshold) ? 0xFFFFFF : 0x0;
     else
@@ -62,7 +62,7 @@ PImage selectedHue(PImage img, float threshold1, float threshold2){
   int originalColor;
   float originalColorHue;
   // create a new, initially transparent, 'result' image
-  for (int i = 0; i < img.width * img.height; i++) { 
+  for (int i = 0; i < img.width * img.height; i++) {
        originalColor = img.pixels[i];
        originalColorHue = hue(originalColor);
        result.pixels[i] = (threshold1 <= originalColorHue && originalColorHue <= threshold2) ? originalColor : 0x0;
@@ -75,8 +75,8 @@ public PImage convolve(PImage img, int N, float coeff) {
   float sum;
   float weight = 2.2 * coeff+0.3;
   int halfN = N/2;
-  
-  float[][] kernel2 = 
+
+  float[][] kernel2 =
 { {0,0,0,0,0},
   {0,0,0,0,0},
   {0.3*coeff,0.8*coeff,0.3,0.8*coeff,0.3*coeff},
@@ -109,4 +109,4 @@ public PImage convolve(PImage img, int N, float coeff) {
     }
   }
   return result;
-} 
+}
