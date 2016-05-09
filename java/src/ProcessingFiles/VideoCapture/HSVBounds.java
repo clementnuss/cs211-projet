@@ -9,7 +9,7 @@ public class HSVBounds {
     HSVBounds() {
 
         h_min = 0;
-        h_max = 360;
+        h_max = 255;
         s_min = 0;
         s_max = 255;
         v_min = 0;

@@ -32,9 +32,9 @@ public class VideoStream extends PApplet {
       ===============================================================*/
     private static float discretizationStepsPhi = 0.06f;
     private static float discretizationStepsR = 2.5f;
-    private final static int MIN_VOTES = 140;
+    private final static int MIN_VOTES = 180;
     private final static int NEIGHBORHOOD_SIZE = 15;
-    private final static int N_LINES = 16;
+    private final static int N_LINES = 8;
     private int phiDim;
     private int rDim;
     private int rOffset;
@@ -97,6 +97,7 @@ public class VideoStream extends PApplet {
                             , hsvBounds.getH_min(), hsvBounds.getH_max())
                     , hsvBounds.getV_min(), false);
 
+            background(0);
             image(hsvFiltered.copy(), WIDTH, 0);
 
             PImage toDisplay = sobel(hsvFiltered);
