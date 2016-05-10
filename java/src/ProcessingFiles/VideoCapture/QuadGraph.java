@@ -243,7 +243,7 @@ public class QuadGraph {
 
         boolean valid = (area < max_area && area > min_area);
 
-        if (!valid) System.out.println("Area out of range: "+area);
+       // if (!valid) System.out.println("Area out of range: "+area);
 
         return valid;
     }

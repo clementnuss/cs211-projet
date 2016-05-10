@@ -41,7 +41,7 @@ public class VideoStream extends PApplet {
       ===============================================================*/
     private static float discretizationStepsPhi = 0.06f;
     private static float discretizationStepsR = 2.5f;
-    private final static int MIN_VOTES = 180;
+    private final static int MIN_VOTES = 130;
     private final static int NEIGHBORHOOD_SIZE = 15;
     private final static int N_LINES = 6;
     private int phiDim;
@@ -94,6 +94,7 @@ public class VideoStream extends PApplet {
         }
     }
 
+    // 44-141   57-255  87-255 246
     public void draw() {
         if (pause) {
             System.out.println("The program is paused .. press p to start it again");
@@ -118,7 +119,7 @@ public class VideoStream extends PApplet {
 
                 PImage hsvFiltered =
                         intensityFilter(
-                        gaussianBlur(
+                            gaussianBlur(
                                 brightnessExtract(
                                         hueThreshold(
                                                 saturationThreshold(cam.copy(), hsvBounds.getS_min(), hsvBounds.getS_max())
@@ -220,10 +221,10 @@ public class VideoStream extends PApplet {
                 hsvBounds.setV_max(hsvBounds.getV_max() + 3);
                 break;
             case 'u':
-                hsvBounds.set_intensity(hsvBounds.getIntensity() - 3);
+                hsvBounds.set_intensity(hsvBounds.getIntensity() - 1);
                 break;
             case 'i':
-                hsvBounds.set_intensity(hsvBounds.getIntensity() + 3);
+                hsvBounds.set_intensity(hsvBounds.getIntensity() + 1);
                 break;
         }
 
@@ -300,7 +301,7 @@ public class VideoStream extends PApplet {
     private PImage directedGaussianBlur(PImage img, boolean performHorizontally){
         float sum;
         img.loadPixels();
-        /* Convolve operation is separeted in two rectangular matrices to save computations, namely 2*n instead of n^2 per image pixel  */
+        /* Convolve operation is separated in two rectangular matrices to save computations, namely 2*n instead of n^2 per image pixel  */
         //Vertical convolution
         for (int y = 1; y < img.height - 1; y++) {
             for (int x = 1; x < img.width - 1; x++) {
