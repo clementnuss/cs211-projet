@@ -10,8 +10,8 @@ import java.util.List;
 public class QuadGraph {
 
 
-    public static final float QUAD_MAX_AREA = 150000;
-    public static final float QUAD_MIN_AREA = 80000;
+    public static final float QUAD_MAX_AREA = 200000;
+    public static final float QUAD_MIN_AREA = 40000;
 
     private static List<int[]> cycles = new ArrayList<int[]>();
     private static int[][] graph;

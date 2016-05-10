@@ -14,6 +14,7 @@ public class HSVBounds {
         s_max = 255;
         v_min = 81;
         v_max = 255;
+        intensity = 250;
     }
 
     public float getH_min() {
@@ -39,6 +40,8 @@ public class HSVBounds {
     public float getV_max() {
         return v_max;
     }
+
+    public float getIntensity(){ return intensity; }
 
 
     public void setH_min(float h_min) {
@@ -71,13 +74,19 @@ public class HSVBounds {
             this.v_max = v_max;
     }
 
+    public void set_intensity(float intensity){
+        if(0 < intensity && intensity < 255)
+            this.intensity = intensity;
+    }
+
     private float h_min, s_min, v_min,
-            h_max, s_max, v_max;
+            h_max, s_max, v_max, intensity;
 
     public String toString() {
         return "Hue : [" + h_min + "," + h_max + "]\t" +
                 "Saturation : [" + s_min + "," + s_max + "]\t" +
-                "Value : [" + v_min + "," + v_max + "]";
+                "Value : [" + v_min + "," + v_max + "]" +
+                "Intensity: ["+intensity+"]";
     }
 
 }

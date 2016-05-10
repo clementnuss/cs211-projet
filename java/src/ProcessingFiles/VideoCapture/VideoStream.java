@@ -31,6 +31,12 @@ public class VideoStream extends PApplet {
     private final float SOBEL_PERCENTAGE = 0.3f;
 
     /*===============================================================
+        Values for the Sobel operator
+      ===============================================================*/
+
+    private final float[] gaussKernel = {0.33f, 0.33f, 0.33f};
+
+    /*===============================================================
         Values for the Hough transform
       ===============================================================*/
     private static float discretizationStepsPhi = 0.06f;
@@ -101,12 +107,25 @@ public class VideoStream extends PApplet {
                 // 3. brightness threshold
                 // 4. sobel operator
 
-                PImage hsvFiltered = brightnessThreshold(
-                        hueThreshold(
+                /*PImage hsvFiltered =
+                        intensityFilter(
+                           brightnessExtract(
+                            hueThreshold(
                                 saturationThreshold(cam.copy(), hsvBounds.getS_min(), hsvBounds.getS_max())
                                 , hsvBounds.getH_min(), hsvBounds.getH_max())
-                        , hsvBounds.getV_min(), false);
+                            , hsvBounds.getV_min(), hsvBounds.getV_max())
+                        , hsvBounds.getIntensity()); */
 
+                PImage hsvFiltered =
+                        intensityFilter(
+                        gaussianBlur(
+                                brightnessExtract(
+                                        hueThreshold(
+                                                saturationThreshold(cam.copy(), hsvBounds.getS_min(), hsvBounds.getS_max())
+                                                , hsvBounds.getH_min(), hsvBounds.getH_max())
+                                        , hsvBounds.getV_min(), hsvBounds.getV_max())
+                        )
+                        ,hsvBounds.getIntensity());
                 background(0);
                 image(hsvFiltered.copy(), WIDTH, 0);
 
@@ -200,6 +219,12 @@ public class VideoStream extends PApplet {
             case 'h':
                 hsvBounds.setV_max(hsvBounds.getV_max() + 3);
                 break;
+            case 'u':
+                hsvBounds.set_intensity(hsvBounds.getIntensity() - 3);
+                break;
+            case 'i':
+                hsvBounds.set_intensity(hsvBounds.getIntensity() + 3);
+                break;
         }
 
         println(hsvBounds);
@@ -225,16 +250,30 @@ public class VideoStream extends PApplet {
         return img;
     }
 
-
-    //Takes an image, a threshold between 0 and 1 and it will set all pixels above the threshold to WHITE and the others to BLACK
-    private PImage brightnessThreshold(PImage img, float t, boolean inverted) {
+    /**
+     * Filter the image based on its brightness. Every pixel
+     * whose brightness is between the lower threshold and the upper threshold is painted
+     * WHITE, otherwise it is painted BLACK.
+     * @param img
+     * @param t1 The lower threshold
+     * @param t2 The upper threshold
+     * @return A reference to the input image (the input is modified)
+     */
+    private PImage brightnessExtract(PImage img, float t1, float t2){
         img.loadPixels();
         for (int i = 0; i < img.width * img.height; i++) {
+            float b = brightness(img.pixels[i]);
+            img.pixels[i] = (t1 < b && b < t2) ? 0xFFFFFFFF : 0x0;
+        }
+        img.updatePixels();
+        return img;
+    }
 
-            if (inverted)
-                img.pixels[i] = (brightness(img.pixels[i]) < t) ? 0xFFFFFFFF : 0x0;
-            else
-                img.pixels[i] = (brightness(img.pixels[i]) > t) ? 0xFFFFFFFF : 0x0;
+    //Takes an image, a threshold between 0 and 255 and it will set all pixels above the threshold to WHITE and the others to BLACK
+    private PImage intensityFilter(PImage img, float t) {
+        img.loadPixels();
+        for (int i = 0; i < img.width * img.height; i++) {
+            img.pixels[i] = (brightness(img.pixels[i]) > t) ? 0xFFFFFFFF : 0x0;
         }
         img.updatePixels();
         return img;
@@ -255,6 +294,37 @@ public class VideoStream extends PApplet {
         return img;
     }
 
+    private PImage gaussianBlur(PImage img){
+        return directedGaussianBlur(directedGaussianBlur(img, true), false);
+    }
+    private PImage directedGaussianBlur(PImage img, boolean performHorizontally){
+        float sum;
+        img.loadPixels();
+        /* Convolve operation is separeted in two rectangular matrices to save computations, namely 2*n instead of n^2 per image pixel  */
+        //Vertical convolution
+        for (int y = 1; y < img.height - 1; y++) {
+            for (int x = 1; x < img.width - 1; x++) {
+                sum = 0;
+
+                if(performHorizontally){
+                    int xp = y * img.width + x;
+                    //TODO: Image is probably already in BW here, so just compare last bit
+                    sum += gaussKernel[0] * brightness(img.pixels[xp - 1]);
+                    sum += gaussKernel[1] * brightness(img.pixels[xp]);
+                    sum += gaussKernel[2] * brightness(img.pixels[xp + 1]);
+                } else{
+                    sum += gaussKernel[0] * brightness(img.pixels[(y - 1) * img.width + x]);
+                    sum += gaussKernel[1] * brightness(img.pixels[(y) * img.width + x]);
+                    sum += gaussKernel[2] * brightness(img.pixels[(y + 1) * img.width + x]);
+                }
+
+                img.pixels[(y * img.width) + x] = color(round(sum));
+            }
+        }
+        img.updatePixels();
+        return img;
+    }
+
     private PImage sobel(PImage img) {
         float sum_h;
         float sum_v;
@@ -262,7 +332,7 @@ public class VideoStream extends PApplet {
         float[][] buffer = new float[img.height][img.width];
         PImage result = createImage(img.width, img.height, ALPHA);
 
-/* Convolve operation is separeted in two rectangular matrices to save computations, namely 2*n instead of n^2 per image pixel  */
+        /* Convolve operation is separeted in two rectangular matrices to save computations, namely 2*n instead of n^2 per image pixel  */
         //Vertical convolution
         for (int y = 1; y < img.height - 1; y++) {
             for (int x = 1; x < img.width - 1; x++) {
