@@ -31,6 +31,12 @@ public class VideoStream extends PApplet {
     private final float SOBEL_PERCENTAGE = 0.3f;
 
     /*===============================================================
+      Values for the Gaussian operator
+    ===============================================================*/
+    private final float[] gaussianKernel = {0.003836f, 0.992327f, 0.003836f};
+    final int GAUSSIAN_LENGTH = gaussianKernel.length;
+
+    /*===============================================================
         Values for the Hough transform
       ===============================================================*/
     private static float discretizationStepsPhi = 0.06f;
@@ -253,6 +259,42 @@ public class VideoStream extends PApplet {
         }
         img.updatePixels();
         return img;
+    }
+
+    private PImage gaussianBlur(PImage img, float weight) {
+
+        PImage result = createImage(img.width, img.height, ALPHA);
+        float sum;
+        for(int y = 1; y < img.height - 1; y++) {
+            for (int x = 1; x < img.width - 1; x++) {
+
+                sum = 0;
+                int xp = y * img.width + x;
+                //sum = brightness(img.pixels(xp));
+                sum += gaussianKernel[0] * brightness(img.pixels[xp - 1]);
+                sum += gaussianKernel[2] * brightness(img.pixels[xp + 1]);
+                sum += gaussianKernel[1] * brightness(img.pixels[xp]);
+                sum /= weight;
+
+                result.pixels[xp] = color(sum);
+            }
+        }
+
+        for(int y = 1; y < img.height - 1; y++) {
+            for (int x = 1; x < img.width - 1; x++) {
+
+                sum = 0;
+                int xp = y * img.width + x;
+                sum += gaussianKernel[0]*brightness(result.pixels[(y-1)*img.width + x]);
+                sum += gaussianKernel[2]*brightness(result.pixels[(y+1)*img.width + x]);
+                sum += gaussianKernel[1]*brightness(result.pixels[y*img.width + x]);
+                sum /= weight;
+
+                result.pixels[xp] = color(sum);
+            }
+        }
+
+        return result;
     }
 
     private PImage sobel(PImage img) {
