@@ -21,6 +21,12 @@ public class VideoStream extends PApplet {
     // HSV bounds container
     private final HSVBounds hsvBounds = new HSVBounds();
 
+    private int[][] gaussianKernel =
+            {
+                    {9, 12, 9},
+                    {12, 15, 12},
+                    {9, 12, 9},};
+
     /*===============================================================
         Values for the Sobel operator
       ===============================================================*/
@@ -118,18 +124,16 @@ public class VideoStream extends PApplet {
                         , hsvBounds.getIntensity()); */
 
                 PImage hsvFiltered =
-                        intensityFilter(
-                            gaussianBlur(
+                            convolve(
                                 brightnessExtract(
                                         hueThreshold(
                                                 saturationThreshold(cam.copy(), hsvBounds.getS_min(), hsvBounds.getS_max())
                                                 , hsvBounds.getH_min(), hsvBounds.getH_max())
                                         , hsvBounds.getV_min(), hsvBounds.getV_max())
-                        )
-                        ,hsvBounds.getIntensity());
+                        , gaussianKernel);
                 background(0);
-                image(hsvFiltered.copy(), WIDTH, 0);
 
+                image(hsvFiltered, WIDTH, 0);
                 PImage toDisplay = sobel(hsvFiltered);
 
                 image(cam, 0, 0);
@@ -157,13 +161,47 @@ public class VideoStream extends PApplet {
                         if(QuadGraph.validArea(c12,c23,c34,c41, QuadGraph.QUAD_MAX_AREA, QuadGraph.QUAD_MIN_AREA)
                                 && QuadGraph.isConvex(c12,c23,c34,c41)
                                 && QuadGraph.nonFlatQuad(c12,c23,c34,c41)){
-                            fill(color(168, 204, 155));
+                            fill(color(250, 102, 7));
                             quad(c12.x, c12.y, c23.x, c23.y, c34.x, c34.y, c41.x, c41.y);
                         }
                     }
                 }
             }
         }
+    }
+
+    private float computeWeight(int[][] m) {
+        int s = 0;
+        for (int[] aM : m) {
+            for (int j = 0; j < aM.length; j++) {
+                s += aM[j];
+            }
+        }
+        return s;
+    }
+
+    private PImage convolve(PImage img, int[][] matrix) {
+        PImage result = createImage(width, height, ALPHA);
+        float sum;
+        float weight = computeWeight(matrix) * 2;
+        int N = matrix.length;
+        int halfN = N / 2;
+
+        for (int y = halfN; y < img.height - halfN; y++) {
+            for (int x = halfN; x < img.width - halfN; x++) {
+                sum = 0;
+                for (int j = 0; j < N; j++) {
+                    for (int i = 0; i < N; i++) {
+                        int xp = x - halfN + i;
+                        int yp = y - halfN + j;
+                        sum += brightness(img.pixels[(yp * img.width) + xp]) * matrix[j][i];
+                    }
+                }
+                sum /= weight;
+                result.pixels[(y * result.width) + x] = color(sum);
+            }
+        }
+        return result;
     }
 
     public void keyPressed(KeyEvent event) {
