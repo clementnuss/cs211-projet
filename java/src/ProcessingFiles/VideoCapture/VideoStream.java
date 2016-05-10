@@ -10,8 +10,6 @@ import processing.video.Capture;
 
 import java.util.*;
 
-import static ProcessingFiles.VideoCapture.QuadGraph.build;
-import static ProcessingFiles.VideoCapture.QuadGraph.findCycles;
 
 public class VideoStream extends PApplet {
 
@@ -39,13 +37,17 @@ public class VideoStream extends PApplet {
     private static float discretizationStepsR = 2.5f;
     private final static int MIN_VOTES = 180;
     private final static int NEIGHBORHOOD_SIZE = 15;
-    private final static int N_LINES = 8;
+    private final static int N_LINES = 6;
     private int phiDim;
     private int rDim;
     private int rOffset;
     private float[] sinTable;
     private float[] cosTable;
     Comparator<Integer> houghComparator;
+
+     /*===============================================================
+        Values for the Quad selection
+      ===============================================================*/
 
     static final VideoStream INST = new VideoStream();
     Capture cam;
@@ -116,9 +118,9 @@ public class VideoStream extends PApplet {
                 List<PVector> lines = hough(toDisplay, N_LINES);
 
                 if (lines != null && !lines.isEmpty()) {
-                    build(lines, cam.width, cam.height);
+                    QuadGraph.build(lines, cam.width, cam.height);
 
-                    List<int []> quads = findCycles();
+                    List<int []> quads = QuadGraph.findCycles();
 
 
                     for (int[] quad : quads) {
@@ -127,20 +129,17 @@ public class VideoStream extends PApplet {
                         PVector l3 = lines.get(quad[2]);
                         PVector l4 = lines.get(quad[3]);
 
-                        // (intersection() is a simplified version of the
-                        // intersections() method you wrote last week, that simply
-                        // return the coordinates of the intersection between 2 lines)
-
                         PVector c12 = intersection(l1, l2);
                         PVector c23 = intersection(l2, l3);
                         PVector c34 = intersection(l3, l4);
                         PVector c41 = intersection(l4, l1);
-                        // Choose a random, semi-transparent colour
-                        Random random = new Random();
-                        fill(color(min(255, random.nextInt(300)),
-                                min(255, random.nextInt(300)),
-                                min(255, random.nextInt(300)), 50));
-                        quad(c12.x, c12.y, c23.x, c23.y, c34.x, c34.y, c41.x, c41.y);
+
+                        if(QuadGraph.validArea(c12,c23,c34,c41, QuadGraph.QUAD_MAX_AREA, QuadGraph.QUAD_MIN_AREA)
+                                && QuadGraph.isConvex(c12,c23,c34,c41)
+                                && QuadGraph.nonFlatQuad(c12,c23,c34,c41)){
+                            fill(color(168, 204, 155));
+                            quad(c12.x, c12.y, c23.x, c23.y, c34.x, c34.y, c41.x, c41.y);
+                        }
                     }
                 }
             }
@@ -476,7 +475,16 @@ public class VideoStream extends PApplet {
     }
 
     private PVector intersection(PVector l1, PVector l2) {
-        //TODO: continue this definition
-        return null;
+        float r1 = l1.x;
+        float phi1 = l1.y;
+        float r2 = l2.x;
+        float phi2 = l2.y;
+        float d = cos(phi2) * sin(phi1) - cos(phi1) * sin(phi2);
+        PVector inter = new PVector(0,0);
+        if (d != 0) {
+            inter.x = ((r2 * sin(phi1)) - (r1 * sin(phi2))) / d;
+            inter.y = ((r1 * cos(phi2)) - (r2 * cos(phi1))) / d;
+        }
+        return inter;
     }
 }

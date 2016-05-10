@@ -10,8 +10,12 @@ import java.util.List;
 public class QuadGraph {
 
 
+    public static final float QUAD_MAX_AREA = 150000;
+    public static final float QUAD_MIN_AREA = 80000;
+
     private static List<int[]> cycles = new ArrayList<int[]>();
     private static int[][] graph;
+
 
     static void build(List<PVector> lines, int width, int height) {
 
@@ -31,7 +35,7 @@ public class QuadGraph {
             }
         }
 
-        System.out.println("Graph buildgind complete");
+       // System.out.println("Graph building complete");
     }
 
     /**
@@ -63,13 +67,14 @@ public class QuadGraph {
                 findNewCycles(new int[]{graph[i][j]});
             }
         }
+        /*
         for (int[] cy : cycles) {
             String s = "" + cy[0];
             for (int i = 1; i < cy.length; i++) {
                 s += "," + cy[i];
             }
             System.out.println(s);
-        }
+        } */
         return cycles;
     }
 
@@ -197,7 +202,7 @@ public class QuadGraph {
      *
      * @param c1
      */
-    boolean isConvex(PVector c1, PVector c2, PVector c3, PVector c4) {
+    public static boolean isConvex(PVector c1, PVector c2, PVector c3, PVector c4) {
 
         PVector v21 = PVector.sub(c1, c2);
         PVector v32 = PVector.sub(c2, c3);
@@ -220,7 +225,7 @@ public class QuadGraph {
     /**
      * Compute the area of a quad, and check it lays within a specific range
      */
-    boolean validArea(PVector c1, PVector c2, PVector c3, PVector c4, float max_area, float min_area) {
+    public static boolean validArea(PVector c1, PVector c2, PVector c3, PVector c4, float max_area, float min_area) {
 
         PVector v21 = PVector.sub(c1, c2);
         PVector v32 = PVector.sub(c2, c3);
@@ -238,7 +243,7 @@ public class QuadGraph {
 
         boolean valid = (area < max_area && area > min_area);
 
-        if (!valid) System.out.println("Area out of range");
+        if (!valid) System.out.println("Area out of range: "+area);
 
         return valid;
     }
@@ -247,7 +252,7 @@ public class QuadGraph {
      * Compute the (cosine) of the four angles of the quad, and check they are all large enough
      * (the quad representing our board should be close to a rectangle)
      */
-    boolean nonFlatQuad(PVector c1, PVector c2, PVector c3, PVector c4) {
+    public static boolean nonFlatQuad(PVector c1, PVector c2, PVector c3, PVector c4) {
 
         // cos(70deg) ~= 0.3
         float min_cos = 0.5f;
