@@ -111,17 +111,12 @@ public class VideoStream extends PApplet {
                 //IMAGE TREATMENT PIPELINE
                 // 1. saturation threshold
                 // 2. hue threshold
-                // 3. brightness threshold
-                // 4. sobel operator
-
-                /*PImage hsvFiltered =
-                        intensityFilter(
-                           brightnessExtract(
-                            hueThreshold(
-                                saturationThreshold(cam.copy(), hsvBounds.getS_min(), hsvBounds.getS_max())
-                                , hsvBounds.getH_min(), hsvBounds.getH_max())
-                            , hsvBounds.getV_min(), hsvBounds.getV_max())
-                        , hsvBounds.getIntensity()); */
+                // 3. brightness B/W extraction
+                // 4. Gaussian blurring
+                // 5. intensity filtering
+                // 6. Sobel
+                // 7. Hough
+                // 8. Quad selection
 
                 PImage hsvFiltered =
                         intensityFilter(
@@ -139,7 +134,7 @@ public class VideoStream extends PApplet {
 
                 image(cam, 0, 0);
 
-//                List<PVector> intersections = getIntersections(hough(toDisplay, N_LINES));
+
                 List<PVector> lines = hough(toDisplay, N_LINES);
 
                 if (lines != null && !lines.isEmpty()) {
@@ -147,6 +142,7 @@ public class VideoStream extends PApplet {
 
                     List<int []> quads = QuadGraph.findCycles();
 
+                    //TODO: filter and retain only the best quad
 
                     for (int[] quad : quads) {
                         PVector l1 = lines.get(quad[0]);
@@ -203,71 +199,6 @@ public class VideoStream extends PApplet {
             }
         }
         return result;
-    }
-
-    public void keyPressed(KeyEvent event) {
-        switch (event.getKey()) {
-            //Pause the webcam
-            case 'p':
-                if (pause)
-                    loop();
-                else
-                    noLoop();
-
-                pause = !pause;
-                System.out.println("The program is paused, press p to resume it");
-                break;
-
-            //Sets the hue threshold
-            case 'q':
-                hsvBounds.setH_min(hsvBounds.getH_min() - 3);
-                break;
-            case 'w':
-                hsvBounds.setH_min(hsvBounds.getH_min() + 3);
-                break;
-            case 'a':
-                hsvBounds.setH_max(hsvBounds.getH_max() - 3);
-                break;
-            case 's':
-                hsvBounds.setH_max(hsvBounds.getH_max() + 3);
-                break;
-
-            // Sets the saturation threshold
-            case 'e':
-                hsvBounds.setS_min(hsvBounds.getS_min() - 3);
-                break;
-            case 'r':
-                hsvBounds.setS_min(hsvBounds.getS_min() + 3);
-                break;
-            case 'd':
-                hsvBounds.setS_max(hsvBounds.getS_max() - 3);
-                break;
-            case 'f':
-                hsvBounds.setS_max(hsvBounds.getS_max() + 3);
-                break;
-
-            // Sets the value threshold
-            case 't':
-                hsvBounds.setV_min(hsvBounds.getV_min() - 3);
-                break;
-            case 'z':
-                hsvBounds.setV_min(hsvBounds.getV_min() + 3);
-                break;
-            case 'g':
-                hsvBounds.setV_max(hsvBounds.getV_max() - 3);
-                break;
-            case 'h':
-                hsvBounds.setV_max(hsvBounds.getV_max() + 3);
-                break;
-            case 'u':
-                hsvBounds.set_intensity(hsvBounds.getIntensity() - 1);
-                break;
-            case 'i':
-                hsvBounds.set_intensity(hsvBounds.getIntensity() + 1);
-                break;
-        }
-
-        println(hsvBounds);
     }
 
     public static void main(String[] args) {
@@ -596,4 +527,76 @@ public class VideoStream extends PApplet {
         }
         return inter;
     }
+
+    public void keyPressed(KeyEvent event) {
+        switch (event.getKey()) {
+            //Pause the webcam
+            case 'p':
+                if (pause)
+                    loop();
+                else
+                    noLoop();
+
+                pause = !pause;
+                System.out.println("The program is paused, press p to resume it");
+                break;
+
+            //Sets the hue threshold
+            case 'q':
+                hsvBounds.setH_min(hsvBounds.getH_min() - 3);
+                break;
+            case 'w':
+                hsvBounds.setH_min(hsvBounds.getH_min() + 3);
+                break;
+            case 'a':
+                hsvBounds.setH_max(hsvBounds.getH_max() - 3);
+                break;
+            case 's':
+                hsvBounds.setH_max(hsvBounds.getH_max() + 3);
+                break;
+
+            // Sets the saturation threshold
+            case 'e':
+                hsvBounds.setS_min(hsvBounds.getS_min() - 3);
+                break;
+            case 'r':
+                hsvBounds.setS_min(hsvBounds.getS_min() + 3);
+                break;
+            case 'd':
+                hsvBounds.setS_max(hsvBounds.getS_max() - 3);
+                break;
+            case 'f':
+                hsvBounds.setS_max(hsvBounds.getS_max() + 3);
+                break;
+
+            // Sets the value threshold
+            case 't':
+                hsvBounds.setV_min(hsvBounds.getV_min() - 3);
+                break;
+            case 'z':
+                hsvBounds.setV_min(hsvBounds.getV_min() + 3);
+                break;
+            case 'g':
+                hsvBounds.setV_max(hsvBounds.getV_max() - 3);
+                break;
+            case 'h':
+                hsvBounds.setV_max(hsvBounds.getV_max() + 3);
+                break;
+            case 'u':
+                hsvBounds.set_intensity(hsvBounds.getIntensity() - 1);
+                break;
+            case 'i':
+                hsvBounds.set_intensity(hsvBounds.getIntensity() + 1);
+                break;
+            case 'j':
+                hsvBounds.set_intensity(hsvBounds.getIntensity() - 0.05f);
+                break;
+            case 'k':
+                hsvBounds.set_intensity(hsvBounds.getIntensity() + 0.05f);
+                break;
+        }
+
+        println(hsvBounds);
+    }
+
 }
