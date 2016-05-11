@@ -35,7 +35,7 @@ public class QuadGraph {
             }
         }
 
-       // System.out.println("Graph building complete");
+        // System.out.println("Graph building complete");
     }
 
     /**
@@ -109,7 +109,7 @@ public class QuadGraph {
     }
 
     //  check of both arrays have same lengths and contents
-    private static  boolean equals(int[] a, int[] b) {
+    private static boolean equals(int[] a, int[] b) {
         Boolean ret = (a[0] == b[0]) && (a.length == b.length);
 
         for (int i = 1; ret && (i < a.length); i++) {
@@ -209,10 +209,11 @@ public class QuadGraph {
         PVector v43 = PVector.sub(c3, c4);
         PVector v14 = PVector.sub(c4, c1);
 
-        float i1 = v21.cross(v32).z;
-        float i2 = v32.cross(v43).z;
-        float i3 = v43.cross(v14).z;
-        float i4 = v14.cross(v21).z;
+        // Expanded cross product
+        float i1 = v21.x * v32.y - v21.y * v32.x;
+        float i2 = v32.x * v43.y - v32.y * v43.x;
+        float i3 = v43.x * v14.y - v43.y * v14.x;
+        float i4 = v14.x * v21.y - v14.y * v21.x;
 
         if ((i1 > 0 && i2 > 0 && i3 > 0 && i4 > 0)
                 || (i1 < 0 && i2 < 0 && i3 < 0 && i4 < 0))
@@ -222,22 +223,22 @@ public class QuadGraph {
         return false;
     }
 
-    //TODO: manually perform cross product to optimise
-    public static float quadArea(PVector c1, PVector c2, PVector c3, PVector c4){
+    public static float quadArea(PVector c1, PVector c2, PVector c3, PVector c4) {
         PVector v21 = PVector.sub(c1, c2);
         PVector v32 = PVector.sub(c2, c3);
         PVector v43 = PVector.sub(c3, c4);
         PVector v14 = PVector.sub(c4, c1);
 
-        float i1 = v21.cross(v32).z;
-        float i2 = v32.cross(v43).z;
-        float i3 = v43.cross(v14).z;
-        float i4 = v14.cross(v21).z;
+        // Expanded cross product
+        float i1 = v21.x * v32.y - v21.y * v32.x;
+        float i2 = v32.x * v43.y - v32.y * v43.x;
+        float i3 = v43.x * v14.y - v43.y * v14.x;
+        float i4 = v14.x * v21.y - v14.y * v21.x;
 
         return Math.abs(0.5f * (i1 + i2 + i3 + i4));
     }
 
-    public static boolean areaIsValid(float area){
+    public static boolean areaIsValid(float area) {
         return (QUAD_MIN_AREA < area && area < QUAD_MAX_AREA);
     }
 
@@ -262,7 +263,7 @@ public class QuadGraph {
 
         boolean valid = (area < max_area && area > min_area);
 
-       // if (!valid) System.out.println("Area out of range: "+area);
+        // if (!valid) System.out.println("Area out of range: "+area);
 
         return valid;
     }
