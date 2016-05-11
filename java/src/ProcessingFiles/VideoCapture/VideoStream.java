@@ -40,7 +40,7 @@ public class VideoStream extends PApplet {
         Values for the Sobel operator
       ===============================================================*/
 
-    private final float[] gaussKernel = {0.33f, 0.33f, 0.33f};
+    private final float[] gaussKernel = {0.3f, 0.4f, 0.3f};
 
     /*===============================================================
         Values for the Hough transform
@@ -124,15 +124,16 @@ public class VideoStream extends PApplet {
                         , hsvBounds.getIntensity()); */
 
                 PImage hsvFiltered =
-                            convolve(
+                        intensityFilter(
+                            gaussianBlur(
                                 brightnessExtract(
                                         hueThreshold(
                                                 saturationThreshold(cam.copy(), hsvBounds.getS_min(), hsvBounds.getS_max())
                                                 , hsvBounds.getH_min(), hsvBounds.getH_max())
                                         , hsvBounds.getV_min(), hsvBounds.getV_max())
-                        , gaussianKernel);
+                            )
+                        , hsvBounds.getIntensity());
                 background(0);
-
                 image(hsvFiltered, WIDTH, 0);
                 PImage toDisplay = sobel(hsvFiltered);
 
@@ -347,7 +348,6 @@ public class VideoStream extends PApplet {
 
                 if(performHorizontally){
                     int xp = y * img.width + x;
-                    //TODO: Image is probably already in BW here, so just compare last bit
                     sum += gaussKernel[0] * brightness(img.pixels[xp - 1]);
                     sum += gaussKernel[1] * brightness(img.pixels[xp]);
                     sum += gaussKernel[2] * brightness(img.pixels[xp + 1]);
@@ -357,7 +357,7 @@ public class VideoStream extends PApplet {
                     sum += gaussKernel[2] * brightness(img.pixels[(y + 1) * img.width + x]);
                 }
 
-                img.pixels[(y * img.width) + x] = color(round(sum));
+                img.pixels[(y * img.width) + x] = color(sum);
             }
         }
         img.updatePixels();
