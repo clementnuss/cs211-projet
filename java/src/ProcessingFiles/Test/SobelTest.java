@@ -1,15 +1,11 @@
 package ProcessingFiles.Test;
 
-import ProcessingFiles.VideoCapture.QuadGraph;
 import processing.core.PApplet;
 import processing.core.PImage;
-import processing.core.PVector;
-import processing.video.Capture;
 
-import java.util.List;
 import java.util.function.BiFunction;
 
-public class SobelTest extends PApplet{
+public class SobelTest extends PApplet {
 
     public static final SobelTest INST = new SobelTest();
 
@@ -24,17 +20,22 @@ public class SobelTest extends PApplet{
 
     private final static float sobelKernelY[][] = {
             {-1, -2, -1},
-            {0,  0,  0},
-            {1,  2,  1}};
+            {0, 0, 0},
+            {1, 2, 1}};
 
     public void settings() {
-        size(800, 600);
+        size(1600, 600);
     }
 
     public void setup() {
 
         PImage img = loadImage("images/board4.jpg");
-        image(trueSobel(img),0,0);
+
+        PImage trueSobel = trueSobel(img);
+        PImage sobel = sobel(img);
+
+        image(trueSobel, 0, 0);
+        image(sobel, 800, 0);
         noLoop();
     }
 
@@ -48,8 +49,8 @@ public class SobelTest extends PApplet{
 
     }
 
-    private PImage trueSobel(PImage img){
-        BiFunction<Integer, Integer, Integer> indexAt = (Integer x, Integer y) -> (y*img.width) + x;
+    private PImage trueSobel(PImage img) {
+        BiFunction<Integer, Integer, Integer> indexAt = (Integer x, Integer y) -> (y * img.width) + x;
         float sum_h;
         float sum_v;
         float max = 0f;
@@ -63,29 +64,29 @@ public class SobelTest extends PApplet{
                 sum_v = 0;
 
                 //Horizontal convolution
-                sum_h += sobelKernelX[0][0] * brightness(img.pixels[indexAt.apply(x-1,y-1)]);
-                sum_h += sobelKernelX[0][2] * brightness(img.pixels[indexAt.apply(x+1,y-1)]);
+                sum_h += sobelKernelX[0][0] * brightness(img.pixels[indexAt.apply(x - 1, y - 1)]);
+                sum_h += sobelKernelX[0][2] * brightness(img.pixels[indexAt.apply(x + 1, y - 1)]);
 
-                sum_h += sobelKernelX[1][0] * brightness(img.pixels[indexAt.apply(x-1,y)]);
-                sum_h += sobelKernelX[1][2] * brightness(img.pixels[indexAt.apply(x+1,y)]);
+                sum_h += sobelKernelX[1][0] * brightness(img.pixels[indexAt.apply(x - 1, y)]);
+                sum_h += sobelKernelX[1][2] * brightness(img.pixels[indexAt.apply(x + 1, y)]);
 
-                sum_h += sobelKernelX[2][0] * brightness(img.pixels[indexAt.apply(x-1,y+1)]);
-                sum_h += sobelKernelX[2][2] * brightness(img.pixels[indexAt.apply(x+1,y+1)]);
+                sum_h += sobelKernelX[2][0] * brightness(img.pixels[indexAt.apply(x - 1, y + 1)]);
+                sum_h += sobelKernelX[2][2] * brightness(img.pixels[indexAt.apply(x + 1, y + 1)]);
 
                 //Vertical convolution
-                sum_v += sobelKernelY[0][0] * brightness(img.pixels[indexAt.apply(x-1,y-1)]);
-                sum_v += sobelKernelY[0][2] * brightness(img.pixels[indexAt.apply(x+1,y-1)]);
+                sum_v += sobelKernelY[0][0] * brightness(img.pixels[indexAt.apply(x - 1, y - 1)]);
+                sum_v += sobelKernelY[0][2] * brightness(img.pixels[indexAt.apply(x + 1, y - 1)]);
 
-                sum_v += sobelKernelY[1][0] * brightness(img.pixels[indexAt.apply(x-1,y)]);
-                sum_v += sobelKernelY[1][2] * brightness(img.pixels[indexAt.apply(x+1,y)]);
+                sum_v += sobelKernelY[1][0] * brightness(img.pixels[indexAt.apply(x - 1, y)]);
+                sum_v += sobelKernelY[1][2] * brightness(img.pixels[indexAt.apply(x + 1, y)]);
 
-                sum_v += sobelKernelY[2][0] * brightness(img.pixels[indexAt.apply(x-1,y+1)]);
-                sum_v += sobelKernelY[2][2] * brightness(img.pixels[indexAt.apply(x+1,y+1)]);
+                sum_v += sobelKernelY[2][0] * brightness(img.pixels[indexAt.apply(x - 1, y + 1)]);
+                sum_v += sobelKernelY[2][2] * brightness(img.pixels[indexAt.apply(x + 1, y + 1)]);
 
-                //Compute de gradient
-                float sum = ceil(sqrt(pow(sum_h, 2) + pow(sum_v, 2)));
+                //Compute the gradient
+                float sum = ceil(sqrt(sum_h * sum_h + sum_v * sum_v));
 
-                result.pixels[indexAt.apply(x,y)] = color(sum);
+                result.pixels[indexAt.apply(x, y)] = color(sum);
             }
         }
         return result;
@@ -114,8 +115,8 @@ public class SobelTest extends PApplet{
                 sum_v += sobelKernel[0] * brightness(img.pixels[(y - 1) * img.width + x]);
                 sum_v += sobelKernel[2] * brightness(img.pixels[(y + 1) * img.width + x]);
 
-                //Compute de gradient
-                float sum = sqrt(pow(sum_h, 2) + pow(sum_v, 2));
+                //Compute the gradient
+                float sum = sqrt(sum_h * sum_h + sum_v * sum_v);
                 if (sum > max) {
                     max = sum;
                 }

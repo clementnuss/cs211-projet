@@ -3,7 +3,7 @@ package ProcessingFiles.Test;
 import processing.core.PApplet;
 import processing.core.PImage;
 
-public class BlurTest extends PApplet{
+public class BlurTest extends PApplet {
 
     public static final BlurTest INST = new BlurTest();
 
@@ -16,7 +16,7 @@ public class BlurTest extends PApplet{
                     {9, 12, 9},};
 
     public void settings() {
-        size(800, 600);
+        size(2 * 800, 600);
     }
 
     public void setup() {
@@ -24,7 +24,9 @@ public class BlurTest extends PApplet{
         PImage img = loadImage("images/board4.jpg");
         PImage blurred = gaussianBlur(img);
 
-        image(blurred,0,0);
+        image(img, 0, 0);
+        image(blurred, 800, 0);
+
         //save("blur.png");
         noLoop();
     }
@@ -39,32 +41,43 @@ public class BlurTest extends PApplet{
 
     }
 
-    private PImage gaussianBlur(PImage img){
+    private PImage gaussianBlur(PImage img) {
         return directedGaussianBlur(directedGaussianBlur(img, true), false);
     }
-    private PImage directedGaussianBlur(PImage img, boolean performHorizontally){
+
+    private PImage directedGaussianBlur(PImage img, boolean performHorizontally) {
         float sum;
         img.loadPixels();
         /* Convolve operation is separated in two rectangular matrices to save computations, namely 2*n instead of n^2 per image pixel  */
         //Vertical convolution
-        for (int y = 1; y < img.height - 1; y++) {
-            for (int x = 1; x < img.width - 1; x++) {
-                sum = 0;
 
-                if(performHorizontally){
+        if (performHorizontally) {
+            for (int y = 1; y < img.height - 1; y++) {
+                for (int x = 1; x < img.width - 1; x++) {
+                    sum = 0;
                     int xp = y * img.width + x;
+
                     sum += gaussKernel[0] * brightness(img.pixels[xp - 1]);
                     sum += gaussKernel[1] * brightness(img.pixels[xp]);
                     sum += gaussKernel[2] * brightness(img.pixels[xp + 1]);
-                } else{
+
+                    img.pixels[(y * img.width) + x] = color(sum);
+                }
+            }
+        } else {
+            for (int y = 1; y < img.height - 1; y++) {
+                for (int x = 1; x < img.width - 1; x++) {
+                    sum = 0;
+
                     sum += gaussKernel[0] * brightness(img.pixels[(y - 1) * img.width + x]);
                     sum += gaussKernel[1] * brightness(img.pixels[(y) * img.width + x]);
                     sum += gaussKernel[2] * brightness(img.pixels[(y + 1) * img.width + x]);
-                }
 
-                img.pixels[(y * img.width) + x] = color(sum);
+                    img.pixels[(y * img.width) + x] = color(sum);
+                }
             }
         }
+
         img.updatePixels();
         return img;
     }
