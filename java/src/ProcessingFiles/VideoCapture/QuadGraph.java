@@ -9,9 +9,8 @@ import java.util.List;
 
 public class QuadGraph {
 
-
-    public static final float QUAD_MAX_AREA = 250000;
-    public static final float QUAD_MIN_AREA = 40000;
+    static final float QUAD_MAX_AREA = 250000;
+    static final float QUAD_MIN_AREA = 40000;
 
     private static List<int[]> cycles = new ArrayList<int[]>();
     private static int[][] graph;
@@ -282,10 +281,15 @@ public class QuadGraph {
         PVector v43 = PVector.sub(c3, c4);
         PVector v14 = PVector.sub(c4, c1);
 
-        float cos1 = Math.abs(v21.dot(v32) / (v21.mag() * v32.mag()));
-        float cos2 = Math.abs(v32.dot(v43) / (v32.mag() * v43.mag()));
-        float cos3 = Math.abs(v43.dot(v14) / (v43.mag() * v14.mag()));
-        float cos4 = Math.abs(v14.dot(v21) / (v14.mag() * v21.mag()));
+        float v21_mag = v21.mag();
+        float v32_mag = v32.mag();
+        float v43_mag = v43.mag();
+        float v14_mag = v14.mag();
+
+        float cos1 = Math.abs(v21.dot(v32) / (v21_mag * v32_mag));
+        float cos2 = Math.abs(v32.dot(v43) / (v32_mag * v43_mag));
+        float cos3 = Math.abs(v43.dot(v14) / (v43_mag * v14_mag));
+        float cos4 = Math.abs(v14.dot(v21) / (v14_mag * v21_mag));
 
         if (cos1 < min_cos && cos2 < min_cos && cos3 < min_cos && cos4 < min_cos)
             return true;
