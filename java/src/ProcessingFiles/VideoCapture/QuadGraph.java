@@ -1,17 +1,17 @@
 package ProcessingFiles.VideoCapture;
 
+import processing.core.PApplet;
 import processing.core.PVector;
 
 import java.util.*;
 
-import static ProcessingFiles.VideoCapture.VideoStream.INST;
 
 public class QuadGraph {
 
     static final float QUAD_MAX_AREA = 250000;
     static final float QUAD_MIN_AREA = 40000;
 
-    private static List<int[]> cycles = new ArrayList<int[]>();
+    private static List<int[]> cycles = new ArrayList<>();
     private static int[][] graph;
 
 
@@ -107,11 +107,11 @@ public class QuadGraph {
         float phi1 = l1.y;
         float r2 = l2.x;
         float phi2 = l2.y;
-        float d = INST.cos(phi2) * INST.sin(phi1) - INST.cos(phi1) * INST.sin(phi2);
+        float d = PApplet.cos(phi2) * PApplet.sin(phi1) - PApplet.cos(phi1) * PApplet.sin(phi2);
         PVector inter = new PVector(0,0);
         if (d != 0) {
-            inter.x = ((r2 * INST.sin(phi1)) - (r1 * INST.sin(phi2))) / d;
-            inter.y = ((r1 * INST.cos(phi2)) - (r2 * INST.cos(phi1))) / d;
+            inter.x = ((r2 * PApplet.sin(phi1)) - (r1 * PApplet.sin(phi2))) / d;
+            inter.y = ((r1 * PApplet.cos(phi2)) - (r2 * PApplet.cos(phi1))) / d;
         }
         return inter;
     }

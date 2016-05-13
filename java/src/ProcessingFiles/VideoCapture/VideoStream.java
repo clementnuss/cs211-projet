@@ -48,7 +48,7 @@ public class VideoStream extends PApplet {
     private static float discretizationStepsPhi = 0.06f;
     private static float discretizationStepsR = 2.5f;
     private final static int MIN_VOTES = 130;
-    private final static int NEIGHBORHOOD_SIZE = 15;
+    private final static int NEIGHBORHOOD_SIZE = 10;
     private final static int N_LINES = 6;
     private int phiDim;
     private int rDim;
@@ -143,7 +143,8 @@ public class VideoStream extends PApplet {
                     List<Quad> quads = QuadGraph.getQuads(lines);
                     int i = QuadGraph.indexOfBestQuad(quads);
                     if(i != -1){
-                        quads.get(i).drawQuad();
+                        quads.get(i).drawSurface();
+                        quads.get(i).drawCorners();
                     }
                 }
             }

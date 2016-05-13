@@ -84,8 +84,16 @@ public class Quad {
         return hasValidArea;
     }
 
-    public void drawQuad(){
+    public void drawSurface(){
         INST.fill(INST.color(250, 102, 7));
         INST.quad(c1.x, c1.y, c2.x, c2.y, c3.x, c3.y, c4.x, c4.y);
+    }
+
+    public void drawCorners(){
+        INST.fill(255, 128, 0);
+        INST.ellipse(c1.x, c1.y, 10, 10);
+        INST.ellipse(c2.x, c2.y, 10, 10);
+        INST.ellipse(c3.x, c3.y, 10, 10);
+        INST.ellipse(c4.x, c4.y, 10, 10);
     }
 }
