@@ -2,10 +2,9 @@ package ProcessingFiles.VideoCapture;
 
 import processing.core.PVector;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+
+import static ProcessingFiles.VideoCapture.VideoStream.INST;
 
 public class QuadGraph {
 
@@ -16,7 +15,7 @@ public class QuadGraph {
     private static int[][] graph;
 
 
-    static void build(List<PVector> lines, int width, int height) {
+    public static void build(List<PVector> lines, int width, int height) {
 
         int n = lines.size();
 
@@ -58,7 +57,66 @@ public class QuadGraph {
         return 0 <= x && 0 <= y && width >= x && height >= y;
     }
 
-    public static List<int[]> findCycles() {
+    public static List<Quad> getQuads(List<PVector> lines){
+        findCycles();
+        List<Quad> quads = new ArrayList<>();
+        for (int[] quad : cycles) {
+            PVector l1 = lines.get(quad[0]);
+            PVector l2 = lines.get(quad[1]);
+            PVector l3 = lines.get(quad[2]);
+            PVector l4 = lines.get(quad[3]);
+
+            PVector c12 = intersection(l1, l2);
+            PVector c23 = intersection(l2, l3);
+            PVector c34 = intersection(l3, l4);
+            PVector c41 = intersection(l4, l1);
+
+            List<PVector> cList = sortCorners(Arrays.asList(c12,c23,c34,c41));
+            quads.add(new Quad(cList.get(0), cList.get(1), cList.get(2), cList.get(3)));
+        }
+
+        return quads;
+    }
+
+    /**
+     *
+     * @param l a list from which to select the best quad
+     * @return -1 if all quads were invalid, the index of the best quad otherwise
+     */
+    public static int indexOfBestQuad(List<Quad> l){
+
+        int indexOfBestQuad = -1;
+        int i = 0;
+        float biggestArea = 0;
+
+        for(Quad q : l){
+            if(q.isConvex() && q.isNonFlat() && q.hasValidArea()){
+                float a = q.getArea();
+                if(a > biggestArea){
+                    biggestArea = a;
+                    indexOfBestQuad = i;
+                }
+            }
+            i++;
+        }
+        return indexOfBestQuad;
+    }
+
+    private static PVector intersection(PVector l1, PVector l2) {
+        float r1 = l1.x;
+        float phi1 = l1.y;
+        float r2 = l2.x;
+        float phi2 = l2.y;
+        float d = INST.cos(phi2) * INST.sin(phi1) - INST.cos(phi1) * INST.sin(phi2);
+        PVector inter = new PVector(0,0);
+        if (d != 0) {
+            inter.x = ((r2 * INST.sin(phi1)) - (r1 * INST.sin(phi2))) / d;
+            inter.y = ((r1 * INST.cos(phi2)) - (r2 * INST.cos(phi1))) / d;
+        }
+        return inter;
+    }
+
+    private static List<int[]> findCycles() {
 
         cycles.clear();
         for (int i = 0; i < graph.length; i++) {
@@ -300,7 +358,7 @@ public class QuadGraph {
     }
 
 
-    List<PVector> sortCorners(List<PVector> quad) {
+    private static List<PVector> sortCorners(List<PVector> quad) {
 
         // 1 - Sort corners so that they are ordered clockwise
         PVector a = quad.get(0);
