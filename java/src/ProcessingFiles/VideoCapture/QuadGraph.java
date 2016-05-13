@@ -124,14 +124,6 @@ public class QuadGraph {
                 findNewCycles(new int[]{graph[i][j]});
             }
         }
-        /*
-        for (int[] cy : cycles) {
-            String s = "" + cy[0];
-            for (int i = 1; i < cy.length; i++) {
-                s += "," + cy[i];
-            }
-            System.out.println(s);
-        } */
         return cycles;
     }
 
@@ -245,118 +237,6 @@ public class QuadGraph {
 
         return ret;
     }
-
-
-    /**
-     * Check if a quad is convex or not.
-     * <p>
-     * Algo: take two adjacent edges and compute their cross-product.
-     * The sign of the z-component of all the cross-products is the
-     * same for a convex polygon.
-     * <p>
-     * See http://debian.fmi.uni-sofia.bg/~sergei/cgsr/docs/clockwise.htm
-     * for justification.
-     *
-     * @param c1
-     */
-    public static boolean isConvex(PVector c1, PVector c2, PVector c3, PVector c4) {
-
-        PVector v21 = PVector.sub(c1, c2);
-        PVector v32 = PVector.sub(c2, c3);
-        PVector v43 = PVector.sub(c3, c4);
-        PVector v14 = PVector.sub(c4, c1);
-
-        // Expanded cross product
-        float i1 = v21.x * v32.y - v21.y * v32.x;
-        float i2 = v32.x * v43.y - v32.y * v43.x;
-        float i3 = v43.x * v14.y - v43.y * v14.x;
-        float i4 = v14.x * v21.y - v14.y * v21.x;
-
-        if ((i1 > 0 && i2 > 0 && i3 > 0 && i4 > 0)
-                || (i1 < 0 && i2 < 0 && i3 < 0 && i4 < 0))
-            return true;
-        else
-            System.out.println("Eliminating non-convex quad");
-        return false;
-    }
-
-    public static float quadArea(PVector c1, PVector c2, PVector c3, PVector c4) {
-        PVector v21 = PVector.sub(c1, c2);
-        PVector v32 = PVector.sub(c2, c3);
-        PVector v43 = PVector.sub(c3, c4);
-        PVector v14 = PVector.sub(c4, c1);
-
-        // Expanded cross product
-        float i1 = v21.x * v32.y - v21.y * v32.x;
-        float i2 = v32.x * v43.y - v32.y * v43.x;
-        float i3 = v43.x * v14.y - v43.y * v14.x;
-        float i4 = v14.x * v21.y - v14.y * v21.x;
-
-        return Math.abs(0.5f * (i1 + i2 + i3 + i4));
-    }
-
-    public static boolean areaIsValid(float area) {
-        return (QUAD_MIN_AREA < area && area < QUAD_MAX_AREA);
-    }
-
-    /**
-     * Compute the area of a quad, and check it lays within a specific range
-     */
-    public static boolean validArea(PVector c1, PVector c2, PVector c3, PVector c4, float max_area, float min_area) {
-
-        PVector v21 = PVector.sub(c1, c2);
-        PVector v32 = PVector.sub(c2, c3);
-        PVector v43 = PVector.sub(c3, c4);
-        PVector v14 = PVector.sub(c4, c1);
-
-        float i1 = v21.cross(v32).z;
-        float i2 = v32.cross(v43).z;
-        float i3 = v43.cross(v14).z;
-        float i4 = v14.cross(v21).z;
-
-        float area = Math.abs(0.5f * (i1 + i2 + i3 + i4));
-
-        //System.out.println(area);
-
-        boolean valid = (area < max_area && area > min_area);
-
-        // if (!valid) System.out.println("Area out of range: "+area);
-
-        return valid;
-    }
-
-    /**
-     * Compute the (cosine) of the four angles of the quad, and check they are all large enough
-     * (the quad representing our board should be close to a rectangle)
-     */
-    public static boolean nonFlatQuad(PVector c1, PVector c2, PVector c3, PVector c4) {
-
-        // cos(70deg) ~= 0.3
-        float min_cos = 0.5f;
-
-        PVector v21 = PVector.sub(c1, c2);
-        PVector v32 = PVector.sub(c2, c3);
-        PVector v43 = PVector.sub(c3, c4);
-        PVector v14 = PVector.sub(c4, c1);
-
-        float v21_mag = v21.mag();
-        float v32_mag = v32.mag();
-        float v43_mag = v43.mag();
-        float v14_mag = v14.mag();
-
-        float cos1 = Math.abs(v21.dot(v32) / (v21_mag * v32_mag));
-        float cos2 = Math.abs(v32.dot(v43) / (v32_mag * v43_mag));
-        float cos3 = Math.abs(v43.dot(v14) / (v43_mag * v14_mag));
-        float cos4 = Math.abs(v14.dot(v21) / (v14_mag * v21_mag));
-
-        if (cos1 < min_cos && cos2 < min_cos && cos3 < min_cos && cos4 < min_cos)
-            return true;
-        else {
-            System.out.println("Flat quad");
-            return false;
-        }
-    }
-
 
     private static List<PVector> sortCorners(List<PVector> quad) {
 
