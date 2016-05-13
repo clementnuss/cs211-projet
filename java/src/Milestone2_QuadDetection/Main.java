@@ -4,7 +4,6 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.core.PVector;
-import processing.event.KeyEvent;
 
 import java.util.*;
 
@@ -14,29 +13,18 @@ public class Main extends PApplet {
     private final static int WIDTH = 560;
     private final static int HEIGHT = 420;
 
-    private boolean pause = false;
-    private int imageNum = 1;
-
     // HSV bounds container
     private final HSVBounds hsvBounds = new HSVBounds();
-
-    private int[][] gaussianKernel =
-            {
-                    {9, 12, 9},
-                    {12, 15, 12},
-                    {9, 12, 9},};
 
     /*===============================================================
         Values for the Sobel operator
       ===============================================================*/
 
     private final float[] sobelKernel = {1f, 0f, -1f};
-    final int SOBEL_LENGTH = sobelKernel.length;
-    final float SOBEL_WEIGHT = 1f;
-    private final float SOBEL_PERCENTAGE = 0.3f;
+    private final static float SOBEL_PERCENTAGE = 0.3f;
 
     /*===============================================================
-        Values for the Sobel operator
+        Values for the Gaussian operator
       ===============================================================*/
 
     private final float[] gaussKernel = {0.33f, 0.33f, 0.33f};
@@ -44,7 +32,7 @@ public class Main extends PApplet {
     /*===============================================================
         Values for the Hough transform
       ===============================================================*/
-    private static float discretizationStepsPhi = 0.06f;
+    private static float discretizationStepsPhi = 0.04f;
     private static float discretizationStepsR = 2.5f;
     private final static int MIN_VOTES = 160;
     private final static int NEIGHBORHOOD_SIZE = 16;
@@ -62,10 +50,6 @@ public class Main extends PApplet {
 
     public static final Main INST = new Main();
     PImage img;
-    PImage img1;
-    PImage img2;
-    PImage img3;
-    PImage img4;
 
     public static void main(String[] args) {
 
@@ -74,18 +58,12 @@ public class Main extends PApplet {
     }
 
     public void settings() {
-        size(2*WIDTH+200, HEIGHT);
+        size(2 * WIDTH + 200, HEIGHT);
     }
 
     public void setup() {
-        img1 = loadImage("images/board1.jpg");
-        img1.resize(WIDTH, HEIGHT);
-        img2 = loadImage("images/board2.jpg");
-        img2.resize(WIDTH, HEIGHT);
-        img3 = loadImage("images/board3.jpg");
-        img3.resize(WIDTH, HEIGHT);
-        img4 = loadImage("images/board4.jpg");
-        img4.resize(WIDTH, HEIGHT);
+        img = loadImage("images/board1.jpg");
+        img.resize(WIDTH, HEIGHT);
 
         // dimensions of the accumulator
         phiDim = (int) (Math.PI / discretizationStepsPhi);
@@ -99,106 +77,59 @@ public class Main extends PApplet {
             sinTable[theta] = (float) Math.sin(thetaRadians);
             cosTable[theta] = (float) Math.cos(thetaRadians);
         }
+        noLoop();
     }
 
     public void draw() {
 
-        switch(imageNum){
-            case 1:
-                img = img1;
-                break;
-            case 2:
-                img = img2;
-                break;
-            case 3:
-                img = img3;
-                break;
-            case 4:
-                img = img4;
-                break;
-        }
+        //IMAGE TREATMENT PIPELINE
+        // 1. saturation threshold
+        // 2. hue threshold
+        // 3. brightness B/W extraction
+        // 4. Gaussian blurring
+        // 5. intensity filtering
+        // 6. Sobel
+        // 7. Hough
+        // 8. Quad selection
 
-        if (pause) {
-            System.out.println("The program is paused .. press p to start it again");
-        } else {
+        PImage hsvFiltered =
+                intensityFilter(
+                        gaussianBlur(
+                                brightnessExtract(
+                                        hueThreshold(
+                                                saturationThreshold(img.copy(), hsvBounds.getS_min(), hsvBounds.getS_max())
+                                                , hsvBounds.getH_min(), hsvBounds.getH_max())
+                                        , hsvBounds.getV_min(), hsvBounds.getV_max())
+                        )
+                        , hsvBounds.getIntensity());
+        background(0);
+        PImage toDisplay = sobel(hsvFiltered);
 
-            //IMAGE TREATMENT PIPELINE
-            // 1. saturation threshold
-            // 2. hue threshold
-            // 3. brightness B/W extraction
-            // 4. Gaussian blurring
-            // 5. intensity filtering
-            // 6. Sobel
-            // 7. Hough
-            // 8. Quad selection
-
-            PImage hsvFiltered =
-                    intensityFilter(
-                            gaussianBlur(
-                                    brightnessExtract(
-                                            hueThreshold(
-                                                    saturationThreshold(img.copy(), hsvBounds.getS_min(), hsvBounds.getS_max())
-                                                    , hsvBounds.getH_min(), hsvBounds.getH_max())
-                                            , hsvBounds.getV_min(), hsvBounds.getV_max())
-                            )
-                            , hsvBounds.getIntensity());
-            background(0);
-            PImage toDisplay = sobel(hsvFiltered);
-
-            image(toDisplay, 200 + WIDTH, 0);
+        image(toDisplay, 200 + WIDTH, 0);
 
 
-            List<PVector> lines = hough(toDisplay, N_LINES);
+        List<PVector> lines = hough(toDisplay, N_LINES);
 
-            if (lines != null && !lines.isEmpty()) {
-                QuadGraph.build(lines, WIDTH, HEIGHT);
+        if (lines != null && !lines.isEmpty()) {
+            QuadGraph.build(lines, WIDTH, HEIGHT);
 
-                List<Quad> quads = QuadGraph.getQuads(lines);
-                int i = QuadGraph.indexOfBestQuad(quads);
-                if (i != -1) {
-                    //quads.get(i).drawSurface();
-                    quads.get(i).drawCorners();
-                }
-            }
-
-        }
-    }
-
-    private float computeWeight(int[][] m) {
-        int s = 0;
-        for (int[] aM : m) {
-            for (int j = 0; j < aM.length; j++) {
-                s += aM[j];
+            List<Quad> quads = QuadGraph.getQuads(lines);
+            int i = QuadGraph.indexOfBestQuad(quads);
+            if (i != -1) {
+                //quads.get(i).drawSurface();
+                quads.get(i).drawCorners();
             }
         }
-        return s;
+
     }
 
-    private PImage convolve(PImage img, int[][] matrix) {
-        PImage result = createImage(width, height, ALPHA);
-        float sum;
-        float weight = computeWeight(matrix) * 2;
-        int N = matrix.length;
-        int halfN = N / 2;
-
-        for (int y = halfN; y < img.height - halfN; y++) {
-            for (int x = halfN; x < img.width - halfN; x++) {
-                sum = 0;
-                for (int j = 0; j < N; j++) {
-                    for (int i = 0; i < N; i++) {
-                        int xp = x - halfN + i;
-                        int yp = y - halfN + j;
-                        sum += brightness(img.pixels[(yp * img.width) + xp]) * matrix[j][i];
-                    }
-                }
-                sum /= weight;
-                result.pixels[(y * result.width) + x] = color(sum);
-            }
-        }
-        return result;
-    }
-
-    //A good value to extract the board would be 87 to 255
+    /**
+     * Turn black every pixel outside the thresholds
+     * @param img
+     * @param t1 Lower threshold
+     * @param t2 Upper threshold
+     * @return The reference to the input image (the input is modified)
+     */
     private PImage saturationThreshold(PImage img, float t1, float t2) {
         img.loadPixels();
 
@@ -217,8 +148,8 @@ public class Main extends PApplet {
      * WHITE, otherwise it is painted BLACK.
      *
      * @param img
-     * @param t1  The lower threshold
-     * @param t2  The upper threshold
+     * @param t1  Lower threshold
+     * @param t2  Upper threshold
      * @return A reference to the input image (the input is modified)
      */
     private PImage brightnessExtract(PImage img, float t1, float t2) {
@@ -231,7 +162,12 @@ public class Main extends PApplet {
         return img;
     }
 
-    //Takes an image, a threshold between 0 and 255 and it will set all pixels above the threshold to WHITE and the others to BLACK
+    /**
+     * Turn black every pixel lower than the given threshold
+     * @param img
+     * @param t Threshold
+     * @return The reference to the input image (the input is modified)
+     */
     private PImage intensityFilter(PImage img, float t) {
         img.loadPixels();
         for (int i = 0; i < img.width * img.height; i++) {
@@ -241,7 +177,13 @@ public class Main extends PApplet {
         return img;
     }
 
-    //A good value to extract the board would be 115 to 132
+    /**
+     * Turn black every pixel outside the thresholds
+     * @param img
+     * @param t1 Lower threshold
+     * @param t2 Upper threshold
+     * @return The reference to the input image (the input is modified)
+     */
     private PImage hueThreshold(PImage img, float t1, float t2) {
         img.loadPixels();
         int originalColor;
@@ -256,15 +198,27 @@ public class Main extends PApplet {
         return img;
     }
 
+    /**
+     * Perform separately a horizontal and vertical gaussian blur
+     * @param img
+     * @return The reference to the input image (the input is modified)
+     */
     private PImage gaussianBlur(PImage img) {
         return directedGaussianBlur(directedGaussianBlur(img, true), false);
     }
 
+    /**
+     * Perform a gaussian blur along one direction
+     * @param img
+     * @param performHorizontally
+     * @return The reference to the input image (the input is modified)
+     */
     private PImage directedGaussianBlur(PImage img, boolean performHorizontally) {
         float sum;
         img.loadPixels();
-        /* Convolve operation is separated in two rectangular matrices to save computations, namely 2*n instead of n^2 per image pixel  */
-        //Vertical convolution
+
+        /* Convolve operation is separated in two rectangular matrices to save computations,
+        namely 2*n instead of n^2 per image pixel  */
         for (int y = 1; y < img.height - 1; y++) {
             for (int x = 1; x < img.width - 1; x++) {
                 sum = 0;
@@ -287,6 +241,11 @@ public class Main extends PApplet {
         return img;
     }
 
+    /**
+     * Perform the sobel operator
+     * @param img
+     * @return A new PImage containing the result of the sobel operator
+     */
     private PImage sobel(PImage img) {
         float sum_h;
         float sum_v;
@@ -294,7 +253,8 @@ public class Main extends PApplet {
         float[][] buffer = new float[img.height][img.width];
         PImage result = createImage(img.width, img.height, ALPHA);
 
-        /* Convolve operation is separeted in two rectangular matrices to save computations, namely 2*n instead of n^2 per image pixel  */
+        /* Convolve operation is separeted in two rectangular matrices to save computations,
+        namely 2*n instead of n^2 per image pixel  */
         //Vertical convolution
         for (int y = 1; y < img.height - 1; y++) {
             for (int x = 1; x < img.width - 1; x++) {
@@ -330,6 +290,12 @@ public class Main extends PApplet {
         return result;
     }
 
+    /**
+     * Perform a Hough transform
+     * @param edgeImg A sobel-transformed image
+     * @param nLines The number of lines to pick amoung the best returned by the transform
+     * @return  A list of lines in polar coordinates
+     */
     private List<PVector> hough(PImage edgeImg, int nLines) {
 
         /*============================================================
@@ -343,18 +309,11 @@ public class Main extends PApplet {
         // our accumulator (with a 1 pix margin around)
         int[] accumulator = new int[(phiDim + 2) * (rDim + 2)];
         houghComparator = new HoughComparator(accumulator);
-        // Fill the accumulator: on edge points (ie, white pixels of the edge
-        // image), store all possible (r, phi) pairs describing lines going
-        // through the point.
         for (int y = 0; y < edgeImg.height; y++) {
             for (int x = 0; x < edgeImg.width; x++) {
 
                 // Are we on an edge? Since image is BLACK/WHITE we can just check the LSB
                 if ((edgeImg.pixels[y * edgeImg.width + x] & 0b1) != 0) {
-
-                    // ...determine here all the lines (r, phi) passing through
-                    // pixel (x,y), convert (r,phi) to coordinates in the
-                    // accumulator, and increment accordingly the accumulator.
                     for (int phi = 0; phi < phiDim; phi++) {
                         double r = (x * cosTable[phi] + y * sinTable[phi]) / discretizationStepsR;
                         r += rOffset;
@@ -372,9 +331,7 @@ public class Main extends PApplet {
         /*============================================================
                      LOCAL MAXIMA SELECTION USING SET<INTEGER>
           ============================================================*/
-        Iterator<Integer> it = bestCandidates.iterator();
-        while (it.hasNext()) {
-            int idx = it.next();
+        for (Integer idx : bestCandidates) {
             int accPhi = (idx / (rDim + 2)) - 1;
             int accR = (idx % (rDim + 2)) - 1;
             boolean bestCandidate = true;
@@ -383,7 +340,6 @@ public class Main extends PApplet {
                 // check we are not outside the image
                 if (accPhi + dPhi < 0 || accPhi + dPhi >= phiDim) continue;
                 for (int dR = -NEIGHBORHOOD_SIZE / 2; dR < NEIGHBORHOOD_SIZE / 2 + 1; dR++) {
-
                     // check we are not outside the image
                     if (accR + dR < 0 || accR + dR >= rDim) continue;
                     int neighbourIdx = (accPhi + dPhi + 1) * (rDim + 2) + accR + dR + 1;
@@ -403,7 +359,6 @@ public class Main extends PApplet {
         }
 
         Collections.sort(bestCandidatesFiltered, houghComparator);
-
 
         PImage houghImg = createImage(rDim + 2, phiDim + 2, ALPHA);
         for (int i = 0; i < accumulator.length; i++) {
@@ -461,126 +416,9 @@ public class Main extends PApplet {
             }
         }
         pg.endDraw();
-        image(img,0,0);
+        image(img, 0, 0);
         image(pg.get(), 0, 0);
-        image(houghImg, WIDTH,0);
+        image(houghImg, WIDTH, 0);
         return resultingLines;
     }
-
-    private ArrayList<PVector> getIntersections(List<PVector> lines) {
-        ArrayList<PVector> intersections = new ArrayList<PVector>();
-
-        //TODO: Voir si on peu optimiser en réutilisant les sinTable et cosTable
-        for (int i = 0; i < lines.size() - 1; i++) {
-            PVector line1 = lines.get(i);
-            for (int j = i + 1; j < lines.size(); j++) {
-                PVector line2 = lines.get(j);
-                float r1 = line1.x;
-                float phi1 = line1.y;
-                float r2 = line2.x;
-                float phi2 = line2.y;
-                float d = cos(phi2) * sin(phi1) - cos(phi1) * sin(phi2);
-                if (d != 0) {
-                    PVector inter = new PVector(
-                            ((r2 * sin(phi1)) - (r1 * sin(phi2))) / d,
-                            ((r1 * cos(phi2)) - (r2 * cos(phi1))) / d
-                    );
-
-                    if (inter.x <= WIDTH) {
-                        intersections.add(inter);
-                        // draw the intersection
-                        fill(255, 128, 0);
-                        ellipse(inter.x, inter.y, 10, 10);
-                    }
-                }
-            }
-        }
-        return intersections;
-    }
-
-
-    public void keyPressed(KeyEvent event) {
-        switch (event.getKey()) {
-            case '1':
-                imageNum = 1;
-                break;
-            case '2':
-                imageNum = 2;
-                break;
-            case '3':
-                imageNum = 3;
-                break;
-            case '4':
-                imageNum = 4;
-                break;
-
-            //Pause the webcam
-            case 'p':
-                if (pause)
-                    loop();
-                else
-                    noLoop();
-
-                pause = !pause;
-                System.out.println("The program is paused, press p to resume it");
-                break;
-
-            //Sets the hue threshold
-            case 'q':
-                hsvBounds.setH_min(hsvBounds.getH_min() - 3);
-                break;
-            case 'w':
-                hsvBounds.setH_min(hsvBounds.getH_min() + 3);
-                break;
-            case 'a':
-                hsvBounds.setH_max(hsvBounds.getH_max() - 3);
-                break;
-            case 's':
-                hsvBounds.setH_max(hsvBounds.getH_max() + 3);
-                break;
-
-            // Sets the saturation threshold
-            case 'e':
-                hsvBounds.setS_min(hsvBounds.getS_min() - 3);
-                break;
-            case 'r':
-                hsvBounds.setS_min(hsvBounds.getS_min() + 3);
-                break;
-            case 'd':
-                hsvBounds.setS_max(hsvBounds.getS_max() - 3);
-                break;
-            case 'f':
-                hsvBounds.setS_max(hsvBounds.getS_max() + 3);
-                break;
-
-            // Sets the value threshold
-            case 't':
-                hsvBounds.setV_min(hsvBounds.getV_min() - 3);
-                break;
-            case 'z':
-                hsvBounds.setV_min(hsvBounds.getV_min() + 3);
-                break;
-            case 'g':
-                hsvBounds.setV_max(hsvBounds.getV_max() - 3);
-                break;
-            case 'h':
-                hsvBounds.setV_max(hsvBounds.getV_max() + 3);
-                break;
-            case 'u':
-                hsvBounds.set_intensity(hsvBounds.getIntensity() - 1);
-                break;
-            case 'i':
-                hsvBounds.set_intensity(hsvBounds.getIntensity() + 1);
-                break;
-            case 'j':
-                hsvBounds.set_intensity(hsvBounds.getIntensity() - 0.05f);
-                break;
-            case 'k':
-                hsvBounds.set_intensity(hsvBounds.getIntensity() + 0.05f);
-                break;
-        }
-
-        println(hsvBounds);
-    }
-
 }
