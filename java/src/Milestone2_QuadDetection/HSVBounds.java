@@ -8,11 +8,11 @@ public class HSVBounds {
 
     HSVBounds() {
 
-        h_min = 94;
+        h_min = 91;
         h_max = 141;
-        s_min = 65;
+        s_min = 62;
         s_max = 255;
-        v_min = 21;
+        v_min = 30;
         v_max = 184;
         intensity = 195;
     }

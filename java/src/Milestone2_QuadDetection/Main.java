@@ -11,8 +11,8 @@ import java.util.*;
 
 public class Main extends PApplet {
 
-    private final static int WIDTH = 400;
-    private final static int HEIGHT = 400;
+    private final static int WIDTH = 560;
+    private final static int HEIGHT = 420;
 
     private boolean pause = false;
     private int imageNum = 1;
@@ -46,8 +46,8 @@ public class Main extends PApplet {
       ===============================================================*/
     private static float discretizationStepsPhi = 0.06f;
     private static float discretizationStepsR = 2.5f;
-    private final static int MIN_VOTES = 120;
-    private final static int NEIGHBORHOOD_SIZE = 10;
+    private final static int MIN_VOTES = 160;
+    private final static int NEIGHBORHOOD_SIZE = 16;
     private final static int N_LINES = 6;
     private int phiDim;
     private int rDim;
@@ -74,7 +74,7 @@ public class Main extends PApplet {
     }
 
     public void settings() {
-        size(3*WIDTH, HEIGHT);
+        size(2*WIDTH+200, HEIGHT);
     }
 
     public void setup() {
@@ -145,7 +145,7 @@ public class Main extends PApplet {
             background(0);
             PImage toDisplay = sobel(hsvFiltered);
 
-            image(toDisplay, 2 * WIDTH, 0);
+            image(toDisplay, 200 + WIDTH, 0);
 
 
             List<PVector> lines = hough(toDisplay, N_LINES);
@@ -411,7 +411,7 @@ public class Main extends PApplet {
         }
 
         // You may want to resize the accumulator to make it easier to see:
-        houghImg.resize(WIDTH, HEIGHT);
+        houghImg.resize(200, HEIGHT);
         houghImg.updatePixels();
 
         PGraphics pg = createGraphics(edgeImg.width, edgeImg.height);
