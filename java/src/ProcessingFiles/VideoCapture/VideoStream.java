@@ -9,12 +9,16 @@ import processing.event.KeyEvent;
 import processing.video.Capture;
 
 import java.util.*;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 
 
 public class VideoStream extends PApplet {
 
     private final static int WIDTH = 640;
     private final static int HEIGHT = 480;
+
+    private ForkJoinPool execPool;
 
     private boolean pause = false;
 
@@ -64,12 +68,14 @@ public class VideoStream extends PApplet {
     public static final VideoStream INST = new VideoStream();
     Capture cam;
     PImage img;
+    PImage img2;
 
     public void settings() {
         size(WIDTH * 2, HEIGHT);
     }
 
     public void setup() {
+        execPool = new ForkJoinPool();
 
         // dimensions of the accumulator
         phiDim = (int) (Math.PI / discretizationStepsPhi);
@@ -83,7 +89,6 @@ public class VideoStream extends PApplet {
             sinTable[theta] = (float) Math.sin(thetaRadians);
             cosTable[theta] = (float) Math.cos(thetaRadians);
         }
-
 
         String[] cameras = Capture.list();
         if (cameras.length == 0) {
@@ -118,23 +123,28 @@ public class VideoStream extends PApplet {
                 // 7. Hough
                 // 8. Quad selection
 
-                PImage hsvFiltered =
+                //Parallelized HSV filtering
+                img = cam.copy();
+                img.loadPixels();
+                execPool.invoke(new ParHSVFiltering(img, 0, img.pixels.length, hsvBounds));
+                img.updatePixels();
+
+                PImage sequentialImage = brightnessExtract(
+                        hueThreshold(
+                                saturationThreshold(cam.copy(), hsvBounds.getS_min(), hsvBounds.getS_max())
+                                , hsvBounds.getH_min(), hsvBounds.getH_max())
+                        , hsvBounds.getV_min(), hsvBounds.getV_max());
+
+                /* PImage hsvFiltered =
                         intensityFilter(
-                            gaussianBlur(
-                                brightnessExtract(
-                                        hueThreshold(
-                                                saturationThreshold(cam.copy(), hsvBounds.getS_min(), hsvBounds.getS_max())
-                                                , hsvBounds.getH_min(), hsvBounds.getH_max())
-                                        , hsvBounds.getV_min(), hsvBounds.getV_max())
-                            )
-                        , hsvBounds.getIntensity());
+                            gaussianBlur(img)
+                        , hsvBounds.getIntensity());*/
                 background(0);
-                image(hsvFiltered, WIDTH, 0);
+                image(img, WIDTH, 0);
+                image(sequentialImage, 0, 0);
+
+                /*
                 PImage toDisplay = sobel(hsvFiltered);
-
-                image(cam, 0, 0);
-
-
                 List<PVector> lines = hough(toDisplay, N_LINES);
 
                 if (lines != null && !lines.isEmpty()) {
@@ -147,6 +157,7 @@ public class VideoStream extends PApplet {
                         quads.get(i).drawCorners();
                     }
                 }
+                */
             }
         }
     }
