@@ -1,12 +1,11 @@
 package ch.epfl.cs211.VideoCapture;
 
 
+import processing.core.PApplet;
 import processing.core.PVector;
-
 import java.util.Arrays;
 import java.util.List;
 
-import static ProcessingFiles.VideoCapture.VideoStream.INST;
 
 public class Quad {
 
@@ -18,6 +17,7 @@ public class Quad {
     private final boolean nonFlat;
     private final boolean isConvex;
     private final boolean hasValidArea;
+    private final PApplet parentWindow;
 
     public PVector c1() {
         return c1;
@@ -41,7 +41,8 @@ public class Quad {
 
     private final PVector c1,c2,c3,c4;
 
-    public Quad(PVector c1, PVector c2, PVector c3, PVector c4) {
+    public Quad(PVector c1, PVector c2, PVector c3, PVector c4, PApplet parentWindow) {
+        this.parentWindow = parentWindow;
         this.c1 = c1;
         this.c2 = c2;
         this.c3 = c3;
@@ -92,15 +93,15 @@ public class Quad {
     }
 
     public void drawSurface(){
-        INST.fill(INST.color(250, 102, 7));
-        INST.quad(c1.x, c1.y, c2.x, c2.y, c3.x, c3.y, c4.x, c4.y);
+        parentWindow.fill(parentWindow.color(250, 102, 7));
+        parentWindow.quad(c1.x, c1.y, c2.x, c2.y, c3.x, c3.y, c4.x, c4.y);
     }
 
     public void drawCorners(){
-        INST.fill(255, 128, 0);
-        INST.ellipse(c1.x, c1.y, 10, 10);
-        INST.ellipse(c2.x, c2.y, 10, 10);
-        INST.ellipse(c3.x, c3.y, 10, 10);
-        INST.ellipse(c4.x, c4.y, 10, 10);
+        parentWindow.fill(255, 128, 0);
+        parentWindow.ellipse(c1.x, c1.y, 10, 10);
+        parentWindow.ellipse(c2.x, c2.y, 10, 10);
+        parentWindow.ellipse(c3.x, c3.y, 10, 10);
+        parentWindow.ellipse(c4.x, c4.y, 10, 10);
     }
 }

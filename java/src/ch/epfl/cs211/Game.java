@@ -101,13 +101,17 @@ public class Game extends PApplet {
     }
 
     public void settings() {
-        size(WINDOW_WIDTH, WINDOW_HEIGHT + 480, P3D);
+        size(WINDOW_WIDTH, WINDOW_HEIGHT, P3D);
     }
 
     public void setup() {
         stroke(Color.STROKE_COLOR);
         videoCaptureManager = new VideoStream();
         from2Dto3Dtransformer = new TwoDThreeD(WINDOW_WIDTH, WINDOW_HEIGHT);
+
+        String []args = {"Image processing window"};
+        PApplet.runSketch(args, videoCaptureManager);
+
         plate = new Plate(0, 0, 0, Color.PLATE_COLOR);
         hudPlate = new HUD(25, 25, 150, 300, Color.HUD_COLOR);
         hudBall = new HUD(200, 25, 200, 300, Color.HUD_COLOR);
@@ -127,12 +131,6 @@ public class Game extends PApplet {
         background(210);
         ambientLight(80, 80, 80);
         spotLight(255, 255, 255, 200, -500, -250, 0, 1, 0, PI / 4f, 2);
-
-        Quad capturedBoard = videoCaptureManager.captureQuad();
-        if(capturedBoard != null){
-            PVector boardRotation = from2Dto3Dtransformer.get3DRotations(capturedBoard.cornersAsList());
-            plate.setRotation(boardRotation);
-        }
 
         switch (mode) {
             case REGULAR:
@@ -156,6 +154,15 @@ public class Game extends PApplet {
             plate.restoreState();
             perspective();
             modeHasChanged = false;
+        }
+
+
+
+        Quad capturedBoard = videoCaptureManager.getCapturedBoard();
+        if(capturedBoard != null){
+            PVector boardRotation = from2Dto3Dtransformer.get3DRotations(capturedBoard.cornersAsList());
+            //println("Got a rotation: ", boardRotation.x, boardRotation.y, boardRotation.z);
+            plate.setRotation(boardRotation);
         }
 
         plate.display();

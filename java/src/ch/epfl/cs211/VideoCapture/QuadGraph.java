@@ -14,8 +14,14 @@ public class QuadGraph {
     private static List<int[]> cycles = new ArrayList<>();
     private static int[][] graph;
 
+    private final PApplet parentWindow;
 
-    public static void build(List<PVector> lines, int width, int height) {
+    public QuadGraph(PApplet parentWindow){
+        this.parentWindow = parentWindow;
+    }
+
+
+    public  void build(List<PVector> lines, int width, int height) {
 
         int n = lines.size();
 
@@ -40,7 +46,7 @@ public class QuadGraph {
      * Returns true if polar lines 1 and 2 intersect
      * inside an area of size (width, height)
      */
-    private static boolean intersect(PVector line1, PVector line2, int width, int height) {
+    private  boolean intersect(PVector line1, PVector line2, int width, int height) {
 
         double sin_t1 = Math.sin(line1.y);
         double sin_t2 = Math.sin(line2.y);
@@ -57,7 +63,7 @@ public class QuadGraph {
         return 0 <= x && 0 <= y && width >= x && height >= y;
     }
 
-    public static List<Quad> getQuads(List<PVector> lines){
+    public  List<Quad> getQuads(List<PVector> lines){
         findCycles();
         List<Quad> quads = new ArrayList<>();
         for (int[] quad : cycles) {
@@ -72,7 +78,7 @@ public class QuadGraph {
             PVector c41 = intersection(l4, l1);
 
             List<PVector> cList = sortCorners(Arrays.asList(c12,c23,c34,c41));
-            quads.add(new Quad(cList.get(0), cList.get(1), cList.get(2), cList.get(3)));
+            quads.add(new Quad(cList.get(0), cList.get(1), cList.get(2), cList.get(3), parentWindow));
         }
 
         return quads;
@@ -83,7 +89,7 @@ public class QuadGraph {
      * @param l a list from which to select the best quad
      * @return -1 if all quads were invalid, the index of the best quad otherwise
      */
-    public static int indexOfBestQuad(List<Quad> l){
+    public  int indexOfBestQuad(List<Quad> l){
 
         int indexOfBestQuad = -1;
         int i = 0;
@@ -102,7 +108,7 @@ public class QuadGraph {
         return indexOfBestQuad;
     }
 
-    private static PVector intersection(PVector l1, PVector l2) {
+    private  PVector intersection(PVector l1, PVector l2) {
         float r1 = l1.x;
         float phi1 = l1.y;
         float r2 = l2.x;
@@ -116,7 +122,7 @@ public class QuadGraph {
         return inter;
     }
 
-    private static List<int[]> findCycles() {
+    private  List<int[]> findCycles() {
 
         cycles.clear();
         for (int i = 0; i < graph.length; i++) {
@@ -127,7 +133,7 @@ public class QuadGraph {
         return cycles;
     }
 
-    private static void findNewCycles(int[] path) {
+    private  void findNewCycles(int[] path) {
         int n = path[0];
         int x;
         int[] sub = new int[path.length + 1];
@@ -158,7 +164,7 @@ public class QuadGraph {
     }
 
     //  check of both arrays have same lengths and contents
-    private static boolean equals(int[] a, int[] b) {
+    private  boolean equals(int[] a, int[] b) {
         Boolean ret = (a[0] == b[0]) && (a.length == b.length);
 
         for (int i = 1; ret && (i < a.length); i++) {
@@ -171,7 +177,7 @@ public class QuadGraph {
     }
 
     //  create a path array with reversed order
-    private static int[] invert(int[] path) {
+    private  int[] invert(int[] path) {
         int[] p = new int[path.length];
 
         for (int i = 0; i < path.length; i++) {
@@ -182,7 +188,7 @@ public class QuadGraph {
     }
 
     //  rotate cycle path such that it begins with the smallest node
-    private static int[] normalize(int[] path) {
+    private  int[] normalize(int[] path) {
         int[] p = new int[path.length];
         int x = smallest(path);
         int n;
@@ -200,7 +206,7 @@ public class QuadGraph {
 
     //  compare path against known cycles
     //  return true, iff path is not a known cycle
-    private static boolean isNew(int[] path) {
+    private  boolean isNew(int[] path) {
         Boolean ret = true;
 
         for (int[] p : cycles) {
@@ -214,7 +220,7 @@ public class QuadGraph {
     }
 
     //  return the int of the array which is the smallest
-    private static int smallest(int[] path) {
+    private  int smallest(int[] path) {
         int min = path[0];
 
         for (int p : path)
@@ -225,7 +231,7 @@ public class QuadGraph {
     }
 
     //  check if vertex n is contained in path
-    private static boolean visited(int n, int[] path) {
+    private  boolean visited(int n, int[] path) {
         Boolean ret = false;
 
         for (int p : path) {
@@ -238,7 +244,7 @@ public class QuadGraph {
         return ret;
     }
 
-    private static List<PVector> sortCorners(List<PVector> quad) {
+    private  List<PVector> sortCorners(List<PVector> quad) {
 
         // 1 - Sort corners so that they are ordered clockwise
         PVector a = quad.get(0);

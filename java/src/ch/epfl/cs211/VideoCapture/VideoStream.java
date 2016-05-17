@@ -1,16 +1,16 @@
 package ch.epfl.cs211.VideoCapture;
 
-import ProcessingFiles.imageFilter.HoughComparator;
+import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.core.PVector;
+import processing.event.KeyEvent;
 import processing.video.Capture;
-import static ch.epfl.cs211.Game.GAME;
 
 import java.util.*;
 
 
-public class VideoStream{
+public class VideoStream extends PApplet {
 
     private final static int WIDTH = 640;
     private final static int HEIGHT = 480;
@@ -52,13 +52,17 @@ public class VideoStream{
         Values for the Quad selection
       ===============================================================*/
 
-    public static final VideoStream INST = new VideoStream();
     Capture cam;
-    PImage img;
+    Quad capturedBoard;
+    QuadGraph qGraph;
 
-    public VideoStream(){
+    public void settings() {
+        size(WIDTH * 2, HEIGHT);
+    }
 
+    public void setup() {
 
+        qGraph = new QuadGraph(this);
         // dimensions of the accumulator
         phiDim = (int) (Math.PI / discretizationStepsPhi);
         rDim = (int) ((Math.hypot(WIDTH, HEIGHT) * 2 + 1) / discretizationStepsR);
@@ -76,20 +80,20 @@ public class VideoStream{
         String[] cameras = Capture.list();
         if (cameras.length == 0) {
             System.err.println("There are no cameras available for capture.");
-            GAME.exit();
+            exit();
         } else {
-            GAME.println("Available cameras:");
+            println("Available cameras:");
             for (String camera : cameras)
-                GAME.println(camera);
+                println(camera);
 
-            cam = new Capture(GAME, cameras[1]);
+            cam = new Capture(this, cameras[1]);
             cam.start();
-            GAME.println("===========================================");
+            println("===========================================");
         }
     }
 
-
-    public Quad captureQuad() {
+    
+    public void draw() {
         if (pause) {
             System.out.println("The program is paused .. press p to start it again");
         } else {
@@ -116,31 +120,32 @@ public class VideoStream{
                                         , hsvBounds.getV_min(), hsvBounds.getV_max())
                             )
                         , hsvBounds.getIntensity());
-                GAME.background(0);
-                GAME.image(hsvFiltered, WIDTH, GAME.WINDOW_HEIGHT);
+                background(0);
+                image(hsvFiltered, WIDTH, 0);
                 PImage toDisplay = sobel(hsvFiltered);
 
-                GAME.image(cam, 0, GAME.WINDOW_HEIGHT);
+                image(cam, 0, 0);
 
 
                 List<PVector> lines = hough(toDisplay, N_LINES);
 
                 if (lines != null && !lines.isEmpty()) {
-                    QuadGraph.build(lines, cam.width, cam.height);
+                    qGraph.build(lines, cam.width, cam.height);
 
-                    List<Quad> quads = QuadGraph.getQuads(lines);
-                    int i = QuadGraph.indexOfBestQuad(quads);
+                    List<Quad> quads = qGraph.getQuads(lines);
+                    int i = qGraph.indexOfBestQuad(quads);
                     if(i != -1){
-                        Quad bestQuad = quads.get(i);
-                        bestQuad.drawSurface();
-                        bestQuad.drawCorners();
-                        return bestQuad;
+                        capturedBoard = quads.get(i);
+                        capturedBoard.drawSurface();
+                        capturedBoard.drawCorners();
                     }
                 }
             }
         }
+    }
 
-        return null;
+    public Quad getCapturedBoard(){
+        return capturedBoard;
     }
 
     /**
@@ -155,7 +160,7 @@ public class VideoStream{
 
         for (int i = 0; i < img.width * img.height; i++) {
             int originalColor = img.pixels[i];
-            float sat = GAME.saturation(originalColor);
+            float sat = saturation(originalColor);
             img.pixels[i] = (t1 <= sat && sat <= t2) ? originalColor : 0x0;
         }
         img.updatePixels();
@@ -175,7 +180,7 @@ public class VideoStream{
     private PImage brightnessExtract(PImage img, float t1, float t2) {
         img.loadPixels();
         for (int i = 0; i < img.width * img.height; i++) {
-            float b = GAME.brightness(img.pixels[i]);
+            float b = brightness(img.pixels[i]);
             img.pixels[i] = (t1 < b && b < t2) ? 0xFFFFFFFF : 0x0;
         }
         img.updatePixels();
@@ -191,7 +196,7 @@ public class VideoStream{
     private PImage intensityFilter(PImage img, float t) {
         img.loadPixels();
         for (int i = 0; i < img.width * img.height; i++) {
-            img.pixels[i] = (GAME.brightness(img.pixels[i]) > t) ? 0xFFFFFFFF : 0x0;
+            img.pixels[i] = (brightness(img.pixels[i]) > t) ? 0xFFFFFFFF : 0x0;
         }
         img.updatePixels();
         return img;
@@ -211,7 +216,7 @@ public class VideoStream{
 
         for (int i = 0; i < img.width * img.height; i++) {
             originalColor = img.pixels[i];
-            originalColorHue = GAME.hue(originalColor);
+            originalColorHue = hue(originalColor);
             img.pixels[i] = (t1 <= originalColorHue && originalColorHue <= t2) ? originalColor : 0x0;
         }
         img.updatePixels();
@@ -245,16 +250,16 @@ public class VideoStream{
 
                 if (performHorizontally) {
                     int xp = y * img.width + x;
-                    sum += gaussKernel[0] * GAME.brightness(img.pixels[xp - 1]);
-                    sum += gaussKernel[1] * GAME.brightness(img.pixels[xp]);
-                    sum += gaussKernel[2] * GAME.brightness(img.pixels[xp + 1]);
+                    sum += gaussKernel[0] * brightness(img.pixels[xp - 1]);
+                    sum += gaussKernel[1] * brightness(img.pixels[xp]);
+                    sum += gaussKernel[2] * brightness(img.pixels[xp + 1]);
                 } else {
-                    sum += gaussKernel[0] * GAME.brightness(img.pixels[(y - 1) * img.width + x]);
-                    sum += gaussKernel[1] * GAME.brightness(img.pixels[(y) * img.width + x]);
-                    sum += gaussKernel[2] * GAME.brightness(img.pixels[(y + 1) * img.width + x]);
+                    sum += gaussKernel[0] * brightness(img.pixels[(y - 1) * img.width + x]);
+                    sum += gaussKernel[1] * brightness(img.pixels[(y) * img.width + x]);
+                    sum += gaussKernel[2] * brightness(img.pixels[(y + 1) * img.width + x]);
                 }
 
-                img.pixels[(y * img.width) + x] = GAME.color(sum);
+                img.pixels[(y * img.width) + x] = color(sum);
             }
         }
         img.updatePixels();
@@ -271,7 +276,7 @@ public class VideoStream{
         float sum_v;
         float max = 0f;
         float[][] buffer = new float[img.height][img.width];
-        PImage result = GAME.createImage(img.width, img.height, GAME.ALPHA);
+        PImage result = createImage(img.width, img.height, ALPHA);
 
         /* Convolve operation is separeted in two rectangular matrices to save computations,
         namely 2*n instead of n^2 per image pixel  */
@@ -283,15 +288,15 @@ public class VideoStream{
 
                 //Horizontal convolution
                 int xp = y * img.width + x;
-                sum_h += sobelKernel[0] * GAME.brightness(img.pixels[xp - 1]);
-                sum_h += sobelKernel[2] * GAME.brightness(img.pixels[xp + 1]);
+                sum_h += sobelKernel[0] * brightness(img.pixels[xp - 1]);
+                sum_h += sobelKernel[2] * brightness(img.pixels[xp + 1]);
 
                 //Vertical convolution
-                sum_v += sobelKernel[0] * GAME.brightness(img.pixels[(y - 1) * img.width + x]);
-                sum_v += sobelKernel[2] * GAME.brightness(img.pixels[(y + 1) * img.width + x]);
+                sum_v += sobelKernel[0] * brightness(img.pixels[(y - 1) * img.width + x]);
+                sum_v += sobelKernel[2] * brightness(img.pixels[(y + 1) * img.width + x]);
 
                 //Compute de gradient
-                float sum = GAME.sqrt(GAME.pow(sum_h, 2) + GAME.pow(sum_v, 2));
+                float sum = sqrt(pow(sum_h, 2) + pow(sum_v, 2));
                 if (sum > max) {
                     max = sum;
                 }
@@ -380,16 +385,17 @@ public class VideoStream{
 
         Collections.sort(bestCandidatesFiltered, houghComparator);
 
-        PImage houghImg = GAME.createImage(rDim + 2, phiDim + 2, GAME.ALPHA);
+        /*
+        PImage houghImg = createImage(rDim + 2, phiDim + 2, ALPHA);
         for (int i = 0; i < accumulator.length; i++) {
-            houghImg.pixels[i] = GAME.color(GAME.min(255, accumulator[i]));
+            houghImg.pixels[i] = color(min(255, accumulator[i]));
         }
 
         // You may want to resize the accumulator to make it easier to see:
         houghImg.resize(200, HEIGHT);
         houghImg.updatePixels();
-
-        PGraphics pg = GAME.createGraphics(edgeImg.width, edgeImg.height);
+*/
+        PGraphics pg = createGraphics(edgeImg.width, edgeImg.height);
         pg.beginDraw();
 
         //This is to ensure we can indeed draw nLines
@@ -408,13 +414,13 @@ public class VideoStream{
             resultingLines.add(new PVector(r, phi));
 
             int x0 = 0;
-            int y0 = (int) (r / GAME.sin(phi));
-            int x1 = (int) (r / GAME.cos(phi));
+            int y0 = (int) (r / sin(phi));
+            int x1 = (int) (r / cos(phi));
             int y1 = 0;
             int x2 = edgeImg.width;
-            int y2 = (int) (-GAME.cos(phi) / GAME.sin(phi) * x2 + r / GAME.sin(phi));
+            int y2 = (int) (-cos(phi) / sin(phi) * x2 + r / sin(phi));
             int y3 = edgeImg.height;
-            int x3 = (int) (-(y3 - r / GAME.sin(phi)) * (GAME.sin(phi) / GAME.cos(phi)));
+            int x3 = (int) (-(y3 - r / sin(phi)) * (sin(phi) / cos(phi)));
 
             // Finally, plot the lines
             pg.stroke(204, 102, 0);
@@ -436,10 +442,79 @@ public class VideoStream{
             }
         }
         pg.endDraw();
-        GAME.image(img, 0, 0);
-        GAME.image(pg.get(), 0, 0);
-        GAME.image(houghImg, WIDTH, 0);
+        image(cam, 0, 0);
+        image(pg.get(), 0, 0);
         return resultingLines;
     }
 
+    public void keyPressed(KeyEvent event) {
+        switch (event.getKey()) {
+            //Pause the webcam
+            case 'p':
+                if (pause)
+                    loop();
+                else
+                    noLoop();
+
+                pause = !pause;
+                System.out.println("The program is paused, press p to resume it");
+                break;
+
+            //Sets the hue threshold
+            case 'q':
+                hsvBounds.setH_min(hsvBounds.getH_min() - 3);
+                break;
+            case 'w':
+                hsvBounds.setH_min(hsvBounds.getH_min() + 3);
+                break;
+            case 'a':
+                hsvBounds.setH_max(hsvBounds.getH_max() - 3);
+                break;
+            case 's':
+                hsvBounds.setH_max(hsvBounds.getH_max() + 3);
+                break;
+
+            // Sets the saturation threshold
+            case 'e':
+                hsvBounds.setS_min(hsvBounds.getS_min() - 3);
+                break;
+            case 'r':
+                hsvBounds.setS_min(hsvBounds.getS_min() + 3);
+                break;
+            case 'd':
+                hsvBounds.setS_max(hsvBounds.getS_max() - 3);
+                break;
+            case 'f':
+                hsvBounds.setS_max(hsvBounds.getS_max() + 3);
+                break;
+
+            // Sets the value threshold
+            case 't':
+                hsvBounds.setV_min(hsvBounds.getV_min() - 3);
+                break;
+            case 'z':
+                hsvBounds.setV_min(hsvBounds.getV_min() + 3);
+                break;
+            case 'g':
+                hsvBounds.setV_max(hsvBounds.getV_max() - 3);
+                break;
+            case 'h':
+                hsvBounds.setV_max(hsvBounds.getV_max() + 3);
+                break;
+            case 'u':
+                hsvBounds.set_intensity(hsvBounds.getIntensity() - 1);
+                break;
+            case 'i':
+                hsvBounds.set_intensity(hsvBounds.getIntensity() + 1);
+                break;
+            case 'j':
+                hsvBounds.set_intensity(hsvBounds.getIntensity() - 0.05f);
+                break;
+            case 'k':
+                hsvBounds.set_intensity(hsvBounds.getIntensity() + 0.05f);
+                break;
+        }
+
+        println(hsvBounds);
+    }
 }
