@@ -54,7 +54,7 @@ public class QuadDetection extends PApplet {
     }
 
     public void setup() {
-        img = loadImage("images/board4.jpg");
+        img = loadImage("board1.jpg");
         img.resize(WIDTH, HEIGHT);
 
         // dimensions of the accumulator
