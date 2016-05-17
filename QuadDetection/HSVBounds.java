@@ -11,8 +11,8 @@ public class HSVBounds {
         h_max = 141;
         s_min = 62;
         s_max = 255;
-        v_min = 30;
-        v_max = 184;
+        v_min = 31;
+        v_max = 183;
         intensity = 195;
     }
 
