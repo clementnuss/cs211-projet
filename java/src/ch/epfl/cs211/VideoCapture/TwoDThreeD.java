@@ -1,4 +1,4 @@
-package ch.epfl.cs211;
+package ch.epfl.cs211.VideoCapture;
 
 import java.util.List;
 
@@ -16,8 +16,8 @@ public class TwoDThreeD {
                    {0,0,1}};
   
   // Real physical coordinates of the Lego board in mm
-   float boardSize = 380.f; // large Duplo board
-  // float boardSize = 255.f; // smaller Lego board
+  //float boardSize = 380.f; // large Duplo board
+   float boardSize = 255.f; // smaller Lego board
   
   // the 3D coordinates of the physical board corners, clockwise
    float [][] physicalCorners = {
@@ -35,7 +35,7 @@ public class TwoDThreeD {
       
   }
 
-   PVector get3DRotations(List<PVector> points2D) {
+   public PVector get3DRotations(List<PVector> points2D) {
     
     // 1- Solve the extrinsic matrix from the projected 2D points
     double[][] E = solveExtrinsicMatrix(points2D);
@@ -67,7 +67,7 @@ public class TwoDThreeD {
   }
     
     
-   double[][] solveExtrinsicMatrix(List<PVector> points2D) {
+   public double[][] solveExtrinsicMatrix(List<PVector> points2D) {
   
     // p ~= K · [R|t] · P
     // with P the (3D) corners of the physical board, p the (2D) 
@@ -149,7 +149,7 @@ public class TwoDThreeD {
 
   }
     
-   PVector rotationFromMatrix(float[][]  mat) {
+   public PVector rotationFromMatrix(float[][]  mat) {
 
     // Assuming rotation order is around x,y,z
     PVector rot = new PVector();

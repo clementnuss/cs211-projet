@@ -7,6 +7,7 @@ package ch.epfl.cs211.objects;
 
 import ch.epfl.cs211.tools.Color;
 import ch.epfl.cs211.tools.ValueUtils;
+import processing.core.PVector;
 
 import static ch.epfl.cs211.Game.abs;
 import static ch.epfl.cs211.tools.ValueUtils.*;
@@ -127,5 +128,11 @@ public class Plate {
         savedAngleX = angleX;
         savedAngleY = angleY;
         savedAngleZ = angleZ;
+    }
+
+    public void setRotation(PVector rot){
+        angleX = rot.x;
+        angleY = rot.y;
+        angleZ = rot.z;
     }
 }

@@ -3,6 +3,9 @@ package ch.epfl.cs211.VideoCapture;
 
 import processing.core.PVector;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static ProcessingFiles.VideoCapture.VideoStream.INST;
 
 public class Quad {
@@ -30,6 +33,10 @@ public class Quad {
 
     public PVector c4() {
         return c4;
+    }
+
+    public List<PVector> cornersAsList(){
+        return Arrays.asList(c1,c2,c3,c4);
     }
 
     private final PVector c1,c2,c3,c4;

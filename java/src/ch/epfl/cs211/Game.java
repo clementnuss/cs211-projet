@@ -1,5 +1,8 @@
 package ch.epfl.cs211;
 
+import ch.epfl.cs211.VideoCapture.Quad;
+import ch.epfl.cs211.VideoCapture.TwoDThreeD;
+import ch.epfl.cs211.VideoCapture.VideoStream;
 import ch.epfl.cs211.display2D.HUD;
 import ch.epfl.cs211.display2D.SubScreen;
 import ch.epfl.cs211.objects.ClosedCylinder;
@@ -50,6 +53,8 @@ public class Game extends PApplet {
     public static final Game GAME = new Game();
 
     //Game constants
+    public final static int WINDOW_WIDTH = 1024;
+    public final static int WINDOW_HEIGHT = 576;
     private final static float SCORE_LIMIT = 1000f;
     private final static float MIN_SCORE = 0;
     private final static float PLATE_OFFSET = Plate.PLATE_WIDTH / 2;
@@ -58,6 +63,10 @@ public class Game extends PApplet {
     private final static float SCORE_COEFFICIENT = 3f;
 
     public static float maxScore = 0f;
+
+    //Video capture
+    private VideoStream videoCaptureManager;
+    private TwoDThreeD from2Dto3Dtransformer;
 
     //2D
     private SubScreen subView;
@@ -92,11 +101,13 @@ public class Game extends PApplet {
     }
 
     public void settings() {
-        size(1024, 576, P3D);
+        size(WINDOW_WIDTH, WINDOW_HEIGHT + 480, P3D);
     }
 
     public void setup() {
         stroke(Color.STROKE_COLOR);
+        videoCaptureManager = new VideoStream();
+        from2Dto3Dtransformer = new TwoDThreeD(WINDOW_WIDTH, WINDOW_HEIGHT);
         plate = new Plate(0, 0, 0, Color.PLATE_COLOR);
         hudPlate = new HUD(25, 25, 150, 300, Color.HUD_COLOR);
         hudBall = new HUD(200, 25, 200, 300, Color.HUD_COLOR);
@@ -116,6 +127,12 @@ public class Game extends PApplet {
         background(210);
         ambientLight(80, 80, 80);
         spotLight(255, 255, 255, 200, -500, -250, 0, 1, 0, PI / 4f, 2);
+
+        Quad capturedBoard = videoCaptureManager.captureQuad();
+        if(capturedBoard != null){
+            PVector boardRotation = from2Dto3Dtransformer.get3DRotations(capturedBoard.cornersAsList());
+            plate.setRotation(boardRotation);
+        }
 
         switch (mode) {
             case REGULAR:
