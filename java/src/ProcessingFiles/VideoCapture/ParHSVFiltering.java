@@ -8,11 +8,12 @@ import static ProcessingFiles.VideoCapture.VideoStream.INST;
 /**
  * Created by Leandro on 16.05.2016.
  */
-public class ParHSVFiltering extends RecursiveAction {
+public class ParHSVFiltering extends Thread {
 
     private final static int PAR_THRESHOLD = 50000;
 
-    private PImage img;
+    private int[] img;
+    private int[] dest;
     private int start;
     private int length;
     private HSVBounds bounds;
@@ -26,16 +27,17 @@ public class ParHSVFiltering extends RecursiveAction {
      * @param start The index in the image array where to start work (INCLUDED)
      * @param length   The index in the image array where to length work (EXCLUDED)
      */
-    public ParHSVFiltering(PImage img, int start, int length, HSVBounds bounds){
+    public ParHSVFiltering(int[] img, int start, int length, HSVBounds bounds, int[] dest){
         this.img = img;
         this.start = start;
         this.length = length;
         this.bounds = bounds;
+        this.dest = dest;
     }
 
 
     @Override
-    protected void compute() {
+    public void run(){
         if(length < PAR_THRESHOLD) {
             computeSequentially();
             return;
@@ -46,8 +48,19 @@ public class ParHSVFiltering extends RecursiveAction {
 
         //System.out.println("From "+start+" with length "+split+" and from "+(start+split)+" of length "+(length-split));
 
-        invokeAll(  new ParHSVFiltering(img, start, split, bounds),
-                    new ParHSVFiltering(img, start + split, length - split, bounds));
+        Thread t1 = new ParHSVFiltering(img, start, split, bounds, dest);
+        Thread t2 = new ParHSVFiltering(img, start + split, length - split, bounds, dest);
+
+        t1.start();
+        t2.start();
+        //System.out.println("started 2 threads");
+        try {
+            t1.join();
+            t2.join();
+        } catch (InterruptedException e){
+
+        }
+
     }
 
     private void computeSequentially(){
@@ -59,7 +72,7 @@ public class ParHSVFiltering extends RecursiveAction {
         float maxV = bounds.getV_max();
 
         for (int i = start; i < start + length; i++) {
-            int originalColor = img.pixels[i];
+            int originalColor = img[i];
             float h = INST.hue(originalColor);
 
             if(minH < h && h < maxH){
@@ -67,13 +80,13 @@ public class ParHSVFiltering extends RecursiveAction {
                 if(minS < s && s < maxS){
                     float v = INST.brightness(originalColor);
                     if(minV < v && v < maxV){
-                        img.pixels[i] = 0xFFFFFFFF;
+                        dest[i] = 0xFFFFFFFF;
                         continue;
                     }
                 }
             }
 
-            img.pixels[i] = 0x0;
+            dest[i] = 0x0;
         }
     }
 }

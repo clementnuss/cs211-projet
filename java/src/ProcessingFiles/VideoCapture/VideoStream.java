@@ -9,8 +9,9 @@ import processing.event.KeyEvent;
 import processing.video.Capture;
 
 import java.util.*;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 
 public class VideoStream extends PApplet {
@@ -18,7 +19,8 @@ public class VideoStream extends PApplet {
     private final static int WIDTH = 640;
     private final static int HEIGHT = 480;
 
-    private ForkJoinPool execPool;
+    private ExecutorService execPool;
+    public boolean taskFinished;
 
     private boolean pause = false;
 
@@ -75,7 +77,7 @@ public class VideoStream extends PApplet {
     }
 
     public void setup() {
-        execPool = new ForkJoinPool();
+        execPool = Executors.newCachedThreadPool();
 
         // dimensions of the accumulator
         phiDim = (int) (Math.PI / discretizationStepsPhi);
@@ -124,14 +126,26 @@ public class VideoStream extends PApplet {
                 // 8. Quad selection
 
                 //Parallelized HSV filtering
-                img = cam.copy();
-                img.loadPixels();
-                execPool.invoke(new ParHSVFiltering(img, 0, img.pixels.length, hsvBounds));
-                img.updatePixels();
+                img = loadImage("images/board1.jpg");
+                PImage img2 = img.copy();
+
+                if(taskFinished){
+                    img.loadPixels();
+                    for (int i = 0; i < img.pixels.length; i++) {
+                        img.pixels[i] = destination[i];
+                    }
+                    img.updatePixels();
+                    int[] test = Arrays.copyOf(img.pixels, img.pixels.length);
+                    int[] destination = new int[img.pixels.length];
+                    Thread t = new ParHSVFiltering(test, 0, test.length, hsvBounds, destination);
+
+                    t.start();
+                    taskFinished = false;
+                }
 
                 PImage sequentialImage = brightnessExtract(
                         hueThreshold(
-                                saturationThreshold(cam.copy(), hsvBounds.getS_min(), hsvBounds.getS_max())
+                                saturationThreshold(img2, hsvBounds.getS_min(), hsvBounds.getS_max())
                                 , hsvBounds.getH_min(), hsvBounds.getH_max())
                         , hsvBounds.getV_min(), hsvBounds.getV_max());
 
@@ -140,8 +154,8 @@ public class VideoStream extends PApplet {
                             gaussianBlur(img)
                         , hsvBounds.getIntensity());*/
                 background(0);
-                image(img, WIDTH, 0);
-                image(sequentialImage, 0, 0);
+                image(img, 0, 0);
+                image(sequentialImage, WIDTH, 0);
 
                 /*
                 PImage toDisplay = sobel(hsvFiltered);
