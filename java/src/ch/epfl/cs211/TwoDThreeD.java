@@ -21,10 +21,10 @@ public class TwoDThreeD {
   
   // the 3D coordinates of the physical board corners, clockwise
    float [][] physicalCorners = {
-              // TODO:
-              // Store here the 3D coordinates of the corners of
-              // the real Lego board, in homogenous coordinates
-              // and clockwise.
+          {-128,-128,0,1},
+          {128, -128,0,1},
+          {128, 128, 0,1},
+          {-128, 128, 0,1}
               };
   
   public TwoDThreeD(int width, int height) {
@@ -82,10 +82,12 @@ public class TwoDThreeD {
     float[][] projectedCorners = new float[4][3];
     
     for(int i=0;i<4;i++){
-        // TODO:
         // store in projectedCorners the result of (K^(-1) · p), for each 
         // corner p found in the webcam image.
         // You can use Mat.multiply to multiply a matrix with a vector.
+        PVector tmp = points2D.get(i);
+        float[] p = {tmp.x, tmp.y, 1};
+        projectedCorners[i] = Mat.multiply(invK, p);
     }
     
     // 'A' contains the cross-product (K^(-1) · p) X P
