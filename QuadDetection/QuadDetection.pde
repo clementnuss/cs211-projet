@@ -84,7 +84,7 @@ public class QuadDetection extends PApplet {
         // 7. Hough
         // 8. Quad selection
 
-        PImage hsvFiltered =
+        /*PImage hsvFiltered =
                 intensityFilter(
                         gaussianBlur(
                                 brightnessExtract(
@@ -93,6 +93,12 @@ public class QuadDetection extends PApplet {
                                                 , hsvBounds.getH_min(), hsvBounds.getH_max())
                                         , hsvBounds.getV_min(), hsvBounds.getV_max())
                         )
+                        , hsvBounds.getIntensity());*/
+                        
+        PImage hsvFiltered = intensityFilter(
+                                gaussianBlur(
+                                    hsvFilter(img.copy(), hsvBounds)
+                                            )
                         , hsvBounds.getIntensity());
         background(0);
         PImage toDisplay = sobel(hsvFiltered);
@@ -116,6 +122,55 @@ public class QuadDetection extends PApplet {
             }
         }
 
+    }
+
+    /**
+     * Filters img using the given HSV bounds.
+     * @param img
+     * @param bounds the HSV bounds
+     * @return The reference to the input image (the input is modified)
+     */
+    private PImage hsvFilter(PImage img, HSVBounds bounds) {
+      
+        float minH = bounds.getH_min();
+        float maxH = bounds.getH_max();
+        float minS = bounds.getS_min();
+        float maxS = bounds.getS_max();
+        float minV = bounds.getV_min();
+        float maxV = bounds.getV_max();
+      
+        img.loadPixels();
+
+        for (int i = 0; i < img.width * img.height; i++) {
+          
+          
+            int originalColor = img.pixels[i];
+            float s = saturation(originalColor);
+
+
+            if(minS <= s && s <= maxS){
+                float h = hue(originalColor);
+
+                if(minH <= h && h <= maxH){
+                    float v = brightness(originalColor);
+                    if(minV <= v && v <= maxV){
+                        img.pixels[i] = 0xFFFFFFFF;
+                        continue;
+                    } else {
+                      img.pixels[i] = 0x0;
+                    }
+                  } else {
+                  img.pixels[i] = 0x0;
+                }
+            
+            } else {
+              img.pixels[i] = 0x0;
+            }
+            
+            
+        }
+        img.updatePixels();
+        return img;
     }
 
     /**
@@ -151,7 +206,7 @@ public class QuadDetection extends PApplet {
         img.loadPixels();
         for (int i = 0; i < img.width * img.height; i++) {
             float b = brightness(img.pixels[i]);
-            img.pixels[i] = (t1 < b && b < t2) ? 0xFFFFFFFF : 0x0;
+            img.pixels[i] = (t1 <= b && b <= t2) ? 0xFFFFFFFF : 0x0;
         }
         img.updatePixels();
         return img;
@@ -192,6 +247,8 @@ public class QuadDetection extends PApplet {
         img.updatePixels();
         return img;
     }
+    
+
 
     /**
      * Perform separately a horizontal and vertical gaussian blur
