@@ -30,8 +30,8 @@ public class QuadDetection extends PApplet {
     /*===============================================================
         Values for the Hough transform
       ===============================================================*/
-    private static float discretizationStepsPhi = 0.04f;
-    private static float discretizationStepsR = 2.5f;
+    private static float discretizationStepsPhi = 0.02f;
+    private static float discretizationStepsR = 1.8f;
     private final static int MIN_VOTES = 160;
     private final static int NEIGHBORHOOD_SIZE = 16;
     private final static int N_LINES = 6;
@@ -54,7 +54,7 @@ public class QuadDetection extends PApplet {
     }
 
     public void setup() {
-        img = loadImage("images/board4.jpg");
+        img = loadImage("images/board1.jpg");
         img.resize(WIDTH, HEIGHT);
 
         // dimensions of the accumulator
