@@ -150,24 +150,15 @@ public class QuadDetection extends PApplet {
 
             if(minS <= s && s <= maxS){
                 float h = hue(originalColor);
-
                 if(minH <= h && h <= maxH){
                     float v = brightness(originalColor);
                     if(minV <= v && v <= maxV){
                         img.pixels[i] = 0xFFFFFFFF;
                         continue;
-                    } else {
-                      img.pixels[i] = 0x0;
                     }
-                  } else {
-                  img.pixels[i] = 0x0;
-                }
-            
-            } else {
-              img.pixels[i] = 0x0;
+                 } 
             }
-            
-            
+              img.pixels[i] = 0x0;
         }
         img.updatePixels();
         return img;
