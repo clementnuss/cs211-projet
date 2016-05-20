@@ -17,7 +17,7 @@ import static ch.epfl.cs211.Game.GAME;
 
 public class Mover {
 
-    private final static float SPHERE_RADIUS = 20f;
+    public final static float SPHERE_RADIUS = 20f;
     public final static float CYLINDER_RADIUS = 25f;
     public final static float GROUND_OFFSET = -Plate.PLATE_THICKNESS/2 - SPHERE_RADIUS;
     public final static float SPHERE_TO_CYLINDER_DISTANCE = SPHERE_RADIUS + CYLINDER_RADIUS;
@@ -82,10 +82,12 @@ public class Mover {
         if (pos.x > upperBoundX || pos.x < lowerBoundX) {
             pos.x = clamp(pos.x, lowerBoundX, upperBoundX);
             velocity.x = velocity.x * -0.8f;
+            GAME.decScore(velocity.mag());
         }
         if (pos.z > upperBoundZ || pos.z < lowerBoundZ) {
             pos.z = clamp(pos.z, -bound, bound);
             velocity.z = velocity.z * -0.8f;
+            GAME.decScore(velocity.mag());
         }
     }
 
@@ -122,9 +124,11 @@ public class Mover {
         }
 
         if (collisionOccured) {
+            float magVel = velocity.mag();
             pos.x = correctedPos.x;
             pos.z = correctedPos.z;
-            velocity = correctedVel.normalize().mult(velocity.mag() * 0.8f);
+            velocity = correctedVel.normalize().mult(magVel * 0.8f);
+            GAME.incScore(magVel);
         }
     }
 
@@ -147,4 +151,9 @@ public class Mover {
     public PVector getVelocity() {
         return velocity;
     }
+
+    public float getBound() {
+        return bound;
+    }
+
 }

@@ -1,5 +1,4 @@
-out/
-build/
+bin/
 
 ### Java template
 *.class
