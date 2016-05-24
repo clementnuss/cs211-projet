@@ -9,13 +9,27 @@ import processing.video.Capture;
 
 import java.util.*;
 
+import static ch.epfl.cs211.Game.WINDOW_HEIGHT;
+import static ch.epfl.cs211.Game.WINDOW_WIDTH;
+
 
 public class VideoStream extends PApplet {
 
     private final static int WIDTH = 640;
     private final static int HEIGHT = 480;
+    private static final float SMOOTHING_STEPS = 5;
 
     private boolean pause = false;
+
+    // Rotation of the plate
+    private PVector smoothedRotation = new PVector(0, 0, 0), rotation = new PVector(0, 0, 0);
+    private long lastSmoothRotationUpdate = 0;
+    private float smoothingCoeffX, smoothingCoeffY;
+
+    private TwoDThreeD from2Dto3Dtransformer;
+    private boolean newBoardValue;
+    private int smoothSteps = 0;
+
 
     // HSV bounds container
     private final HSVBounds hsvBounds = new HSVBounds();
@@ -62,6 +76,8 @@ public class VideoStream extends PApplet {
 
     public void setup() {
 
+        from2Dto3Dtransformer = new TwoDThreeD(WINDOW_WIDTH, WINDOW_HEIGHT);
+
         qGraph = new QuadGraph(this);
         // dimensions of the accumulator
         phiDim = (int) (Math.PI / discretizationStepsPhi);
@@ -92,7 +108,7 @@ public class VideoStream extends PApplet {
         }
     }
 
-    
+
     public void draw() {
         if (pause) {
             System.out.println("The program is paused .. press p to start it again");
@@ -130,22 +146,49 @@ public class VideoStream extends PApplet {
 
                     List<Quad> quads = qGraph.getQuads(lines);
                     int i = qGraph.indexOfBestQuad(quads);
-                    if(i != -1){
+                    if (i != -1) {
                         capturedBoard = quads.get(i);
                         capturedBoard.drawSurface();
                         capturedBoard.drawCorners();
+                        newBoardValue = true;
                     }
                 }
+
+            }
+
+            if (newBoardValue) {
+                PVector newRotation = from2Dto3Dtransformer.get3DRotations(capturedBoard.cornersAsList());
+                //            println("Got a rotation: ", boardRotation.x, boardRotation.y, boardRotation.z);
+
+                smoothingCoeffX = (newRotation.x - rotation.x) / SMOOTHING_STEPS;
+                smoothingCoeffY = (newRotation.y - rotation.y) / SMOOTHING_STEPS;
+
+                rotation = newRotation;
+                smoothSteps = 0;
+
+                newBoardValue = false;
+            }
+
+            // We want to (smoothly) update the position of the plate at a 20 FPS rate
+            if ((System.currentTimeMillis() - lastSmoothRotationUpdate) >= 50) {
+
+                if (smoothSteps++ < SMOOTHING_STEPS) {
+                    smoothedRotation.x += smoothingCoeffX;
+                    smoothedRotation.y += smoothingCoeffY;
+                    lastSmoothRotationUpdate = System.currentTimeMillis();
+                }
+
             }
         }
     }
 
-    public Quad getCapturedBoard(){
+    public Quad getCapturedBoard() {
         return capturedBoard;
     }
 
     /**
      * Filters img using the given HSV bounds.
+     *
      * @param img
      * @param bounds the HSV bounds
      * @return The reference to the input image (the input is modified)
@@ -168,11 +211,11 @@ public class VideoStream extends PApplet {
             float s = saturation(originalColor);
 
 
-            if(minS <= s && s <= maxS){
+            if (minS <= s && s <= maxS) {
                 float h = hue(originalColor);
-                if(minH <= h && h <= maxH){
+                if (minH <= h && h <= maxH) {
                     float v = brightness(originalColor);
-                    if(minV <= v && v <= maxV){
+                    if (minV <= v && v <= maxV) {
                         img.pixels[i] = 0xFFFFFFFF;
                         continue;
                     }
@@ -186,9 +229,10 @@ public class VideoStream extends PApplet {
 
     /**
      * Turn black every pixel outside the thresholds
+     *
      * @param img
-     * @param t1 Lower threshold
-     * @param t2 Upper threshold
+     * @param t1  Lower threshold
+     * @param t2  Upper threshold
      * @return The reference to the input image (the input is modified)
      */
     private PImage saturationThreshold(PImage img, float t1, float t2) {
@@ -225,8 +269,9 @@ public class VideoStream extends PApplet {
 
     /**
      * Turn black every pixel lower than the given threshold
+     *
      * @param img
-     * @param t Threshold
+     * @param t   Threshold
      * @return The reference to the input image (the input is modified)
      */
     private PImage intensityFilter(PImage img, float t) {
@@ -240,9 +285,10 @@ public class VideoStream extends PApplet {
 
     /**
      * Turn black every pixel outside the thresholds
+     *
      * @param img
-     * @param t1 Lower threshold
-     * @param t2 Upper threshold
+     * @param t1  Lower threshold
+     * @param t2  Upper threshold
      * @return The reference to the input image (the input is modified)
      */
     private PImage hueThreshold(PImage img, float t1, float t2) {
@@ -261,6 +307,7 @@ public class VideoStream extends PApplet {
 
     /**
      * Perform separately a horizontal and vertical gaussian blur
+     *
      * @param img
      * @return The reference to the input image (the input is modified)
      */
@@ -270,6 +317,7 @@ public class VideoStream extends PApplet {
 
     /**
      * Perform a gaussian blur along one direction
+     *
      * @param img
      * @param performHorizontally
      * @return The reference to the input image (the input is modified)
@@ -304,6 +352,7 @@ public class VideoStream extends PApplet {
 
     /**
      * Perform the sobel operator
+     *
      * @param img
      * @return A new PImage containing the result of the sobel operator
      */
@@ -353,9 +402,10 @@ public class VideoStream extends PApplet {
 
     /**
      * Perform a Hough transform
+     *
      * @param edgeImg A sobel-transformed image
-     * @param nLines The number of lines to pick amoung the best returned by the transform
-     * @return  A list of lines in polar coordinates
+     * @param nLines  The number of lines to pick amoung the best returned by the transform
+     * @return A list of lines in polar coordinates
      */
     private List<PVector> hough(PImage edgeImg, int nLines) {
 
@@ -552,5 +602,9 @@ public class VideoStream extends PApplet {
         }
 
         println(hsvBounds);
+    }
+
+    public PVector getRotation() {
+        return smoothedRotation;
     }
 }

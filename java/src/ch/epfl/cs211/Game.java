@@ -1,7 +1,5 @@
 package ch.epfl.cs211;
 
-import ch.epfl.cs211.VideoCapture.Quad;
-import ch.epfl.cs211.VideoCapture.TwoDThreeD;
 import ch.epfl.cs211.VideoCapture.VideoStream;
 import ch.epfl.cs211.display2D.HUD;
 import ch.epfl.cs211.display2D.SubScreen;
@@ -66,7 +64,6 @@ public class Game extends PApplet {
 
     //Video capture
     private VideoStream videoCaptureManager;
-    private TwoDThreeD from2Dto3Dtransformer;
 
     //2D
     private SubScreen subView;
@@ -107,9 +104,8 @@ public class Game extends PApplet {
     public void setup() {
         stroke(Color.STROKE_COLOR);
         videoCaptureManager = new VideoStream();
-        from2Dto3Dtransformer = new TwoDThreeD(WINDOW_WIDTH, WINDOW_HEIGHT);
 
-        String []args = {"Image processing window"};
+        String[] args = {"Image processing window"};
         PApplet.runSketch(args, videoCaptureManager);
 
         plate = new Plate(0, 0, 0, Color.PLATE_COLOR);
@@ -156,14 +152,7 @@ public class Game extends PApplet {
             modeHasChanged = false;
         }
 
-
-
-        Quad capturedBoard = videoCaptureManager.getCapturedBoard();
-        if(capturedBoard != null){
-            PVector boardRotation = from2Dto3Dtransformer.get3DRotations(capturedBoard.cornersAsList());
-            //println("Got a rotation: ", boardRotation.x, boardRotation.y, boardRotation.z);
-            plate.setRotation(boardRotation);
-        }
+        plate.setRotation(videoCaptureManager.getRotation());
 
         plate.display();
         mover.update();
