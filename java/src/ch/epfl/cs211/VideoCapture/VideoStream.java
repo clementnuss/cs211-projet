@@ -36,10 +36,10 @@ public class VideoStream extends PApplet {
     /*===============================================================
         Values for the Hough transform
       ===============================================================*/
-    private static float discretizationStepsPhi = 0.06f;
-    private static float discretizationStepsR = 2.5f;
+    private static float discretizationStepsPhi = 0.04f;
+    private static float discretizationStepsR = 2.2f;
     private final static int MIN_VOTES = 130;
-    private final static int NEIGHBORHOOD_SIZE = 10;
+    private final static int NEIGHBORHOOD_SIZE = 16;
     private final static int N_LINES = 6;
     private int phiDim;
     private int rDim;
@@ -110,16 +110,12 @@ public class VideoStream extends PApplet {
                 // 7. Hough
                 // 8. Quad selection
 
-                PImage hsvFiltered =
-                        intensityFilter(
-                            gaussianBlur(
-                                brightnessExtract(
-                                        hueThreshold(
-                                                saturationThreshold(cam.copy(), hsvBounds.getS_min(), hsvBounds.getS_max())
-                                                , hsvBounds.getH_min(), hsvBounds.getH_max())
-                                        , hsvBounds.getV_min(), hsvBounds.getV_max())
-                            )
+                PImage hsvFiltered = intensityFilter(
+                        gaussianBlur(
+                                hsvFilter(cam.copy(), hsvBounds)
+                        )
                         , hsvBounds.getIntensity());
+
                 background(0);
                 image(hsvFiltered, WIDTH, 0);
                 PImage toDisplay = sobel(hsvFiltered);
@@ -146,6 +142,46 @@ public class VideoStream extends PApplet {
 
     public Quad getCapturedBoard(){
         return capturedBoard;
+    }
+
+    /**
+     * Filters img using the given HSV bounds.
+     * @param img
+     * @param bounds the HSV bounds
+     * @return The reference to the input image (the input is modified)
+     */
+    private PImage hsvFilter(PImage img, HSVBounds bounds) {
+
+        float minH = bounds.getH_min();
+        float maxH = bounds.getH_max();
+        float minS = bounds.getS_min();
+        float maxS = bounds.getS_max();
+        float minV = bounds.getV_min();
+        float maxV = bounds.getV_max();
+
+        img.loadPixels();
+
+        for (int i = 0; i < img.width * img.height; i++) {
+
+
+            int originalColor = img.pixels[i];
+            float s = saturation(originalColor);
+
+
+            if(minS <= s && s <= maxS){
+                float h = hue(originalColor);
+                if(minH <= h && h <= maxH){
+                    float v = brightness(originalColor);
+                    if(minV <= v && v <= maxV){
+                        img.pixels[i] = 0xFFFFFFFF;
+                        continue;
+                    }
+                }
+            }
+            img.pixels[i] = 0x0;
+        }
+        img.updatePixels();
+        return img;
     }
 
     /**
