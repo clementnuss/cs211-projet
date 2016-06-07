@@ -146,6 +146,7 @@ public class VideoStream extends PApplet {
             }
 
             if (newBoardValue) {
+                smoothedRotation = rotation;
                 PVector newRotation = from2Dto3Dtransformer.get3DRotations(capturedBoard.cornersAsList());
                 //            println("Got a rotation: ", boardRotation.x, boardRotation.y, boardRotation.z);
 
@@ -157,6 +158,7 @@ public class VideoStream extends PApplet {
 
                 newBoardValue = false;
             }
+
 
             // We want to (smoothly) update the position of the plate at a 20 FPS rate
             if ((System.currentTimeMillis() - lastSmoothRotationUpdate) >= 50) {

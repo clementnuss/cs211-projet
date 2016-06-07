@@ -109,9 +109,10 @@ public class SubScreen {
         scoreBoard.rect(0, 0, SCORE_WIDTH, SCORE_HEIGHT);
 
         scoreBoard.fill(0xFF000000);
-        scoreBoard.textSize(14);
+        scoreBoard.textSize(9.5f);
         scoreBoard.text("Total score: \n   -> " + ValueUtils.roundThreeDecimals(GAME.getScore()) +
-                        "\nVelocity: \n   -> " + ValueUtils.roundThreeDecimals(GAME.getMover().getVelocity().mag()),
+                        "\nVelocity: \n   -> " + ValueUtils.roundThreeDecimals(GAME.getMover().getVelocity().mag())+
+                        "\nLast score: \n    -> " + GAME.getLastChange(),
                 7, 7, SCORE_WIDTH - 7, SCORE_HEIGHT - 7);
 
         scoreBoard.endDraw();
