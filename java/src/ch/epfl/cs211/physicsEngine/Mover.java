@@ -94,7 +94,7 @@ public class Mover {
 
     private List<PVector> checkCylinders(List<PVector> cylinders) {
         boolean collisionOccured = false;
-        List<PVector> toRemove = new ArrayList<>();
+        List<PVector> toKeep = new ArrayList<>();
         /*
             Because corrections are additive among cylinders we take copies that will store all
             correction shifts computed using the original position of the ball.
@@ -110,7 +110,6 @@ public class Mover {
             if (distance <= SPHERE_TO_CYLINDER_DISTANCE) {
                 collisionOccured = true;
                 PVector cylinderToBall = PVector.sub(pos, cyl);
-                toRemove.add(cylinderBaseLocation);
 
                 /*
                     Ball entered cylinder, push it outwards in a radial fashion.
@@ -122,6 +121,8 @@ public class Mover {
                 PVector collisionNormal = new PVector(pos.x - cyl.x, 0, pos.z - cyl.z).normalize();
                 PVector updatedVel = PVector.mult(collisionNormal, 2f * velocity.dot(collisionNormal));
                 correctedVel.sub(updatedVel.x, 0, updatedVel.z);
+            } else {
+                toKeep.add(cylinderBaseLocation);
             }
         }
 
@@ -132,8 +133,7 @@ public class Mover {
             velocity = correctedVel.normalize().mult(magVel * 0.8f);
             GAME.incScore(magVel);
         }
-        cylinders.removeAll(toRemove);
-        return cylinders;
+        return toKeep;
     }
 
     public float getX() {
