@@ -167,7 +167,7 @@ public class Game extends PApplet {
         }
 
         PVector rotDiff = PVector.sub(absoluteRot,progressiveRot);
-        progressiveRot.add(rotDiff.mult(0.3f));
+        progressiveRot.add(rotDiff.mult(0.15f));
 
         plate.setRotation(progressiveRot);
         plate.display();
