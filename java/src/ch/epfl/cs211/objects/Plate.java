@@ -6,18 +6,16 @@
 package ch.epfl.cs211.objects;
 
 import ch.epfl.cs211.tools.Color;
-import ch.epfl.cs211.tools.ValueUtils;
 import processing.core.PVector;
 
-import static ch.epfl.cs211.Game.abs;
+import static ch.epfl.cs211.Game.*;
 import static ch.epfl.cs211.tools.ValueUtils.*;
-import static ch.epfl.cs211.Game.GAME;
-import static ch.epfl.cs211.Game.PI;
 
 public class Plate {
 
+    public final static float PLATE_THICKNESS = 20f;
+    public final static float PLATE_WIDTH = 500f;
     private final static float MAX_ANGLE = (float)(PI/6.0);
-
     /*  STEP_VALUE is the amount by which we increase / decrease
         the angle when the mouse is dragged
      */
@@ -25,15 +23,12 @@ public class Plate {
     private final static float ANGLE_VALUE = 0.02f;
     private final static float MIN_STEP_VALUE = 0.1f;
     private final static float MAX_STEP_VALUE = 0.5f;
-    public final static float PLATE_THICKNESS = 20f;
-    public final static float PLATE_WIDTH = 500f;
-
     private final int x;
     private final int y;
     private final int z;
+    private final int color;
     private float angleX, angleY, angleZ, sensitivity;
     private float savedAngleX, savedAngleY, savedAngleZ;
-    private final int color;
 
     public Plate(int x, int y, int z, int color){
         this.x = x;

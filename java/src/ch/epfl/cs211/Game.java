@@ -1,5 +1,6 @@
 package ch.epfl.cs211;
 
+import ch.epfl.cs211.VideoCapture.SynchronizedRotationValue;
 import ch.epfl.cs211.VideoCapture.VideoStream;
 import ch.epfl.cs211.display2D.HUD;
 import ch.epfl.cs211.display2D.SubScreen;
@@ -61,44 +62,38 @@ public class Game extends PApplet {
     private final static float SCORE_COEFFICIENT = 3f;
 
     public static float maxScore = 0f;
-
+    private final Deque<Float> scoresList;
     //Video capture
     private VideoStream videoCaptureManager;
-
     //2D
     private SubScreen subView;
     private HUD hudPlate, hudBall, hudMouse;
-
     //Physics
     private Plate plate;
     private Mover mover;
     private ClosedCylinder closedCylinder;
     private boolean modeHasChanged;
-
-    SynchronizedRotationValue syncRot;
-    PVector absoluteRot;
-    PVector progressiveRot;
-
+    private SynchronizedRotationValue syncRot;
+    private PVector absoluteRot;
+    private PVector progressiveRot;
     private List<PVector> obstacleList;
-
     //Game features
     private int oldWidth;
     private int oldHeight;
     private GameModes mode;
     private float score = 0f, prevScore = 0f, lastChange = 0f;
-    private Deque<Float> scoresList;
     private int scoreInterval = 0;
-
-    public static void main(String[] args) {
-
-        PApplet.runSketch(new String[]{"ch.epfl.cs211.Game"}, Game.GAME);
-
-    }
 
     private Game() {
         scoresList = new ArrayDeque<>();
         oldWidth = width;
         oldHeight = height;
+    }
+
+    public static void main(String[] args) {
+
+        PApplet.runSketch(new String[]{"ch.epfl.cs211.Game"}, Game.GAME);
+
     }
 
     public void settings() {
@@ -272,7 +267,7 @@ public class Game extends PApplet {
         }
     }
 
-    public boolean checkIfResized() {
+    private boolean checkIfResized() {
         if (oldHeight != height || oldWidth != width) {
             oldHeight = height;
             oldWidth = width;
