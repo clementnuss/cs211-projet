@@ -17,7 +17,7 @@ public class VideoStream extends PApplet {
 
     private final static int WIDTH = 640;
     private final static int HEIGHT = 480;
-    private static final float SMOOTHING_STEPS = 20;
+    private static final float SMOOTHING_STEPS =3;
 
     private boolean pause = false;
 
@@ -50,9 +50,9 @@ public class VideoStream extends PApplet {
     /*===============================================================
         Values for the Hough transform
       ===============================================================*/
-    private static float discretizationStepsPhi = 0.04f;
-    private static float discretizationStepsR = 2.2f;
-    private final static int MIN_VOTES = 130;
+    private static float discretizationStepsPhi = 0.02f;
+    private static float discretizationStepsR = 1.8f;
+    private final static int MIN_VOTES = 120;
     private final static int NEIGHBORHOOD_SIZE = 16;
     private final static int N_LINES = 6;
     private int phiDim;
@@ -218,45 +218,7 @@ public class VideoStream extends PApplet {
         return img;
     }
 
-    /**
-     * Turn black every pixel outside the thresholds
-     *
-     * @param img
-     * @param t1  Lower threshold
-     * @param t2  Upper threshold
-     * @return The reference to the input image (the input is modified)
-     */
-    private PImage saturationThreshold(PImage img, float t1, float t2) {
-        img.loadPixels();
 
-        for (int i = 0; i < img.width * img.height; i++) {
-            int originalColor = img.pixels[i];
-            float sat = saturation(originalColor);
-            img.pixels[i] = (t1 <= sat && sat <= t2) ? originalColor : 0x0;
-        }
-        img.updatePixels();
-        return img;
-    }
-
-    /**
-     * Filter the image based on its brightness. Every pixel
-     * whose brightness is between the lower threshold and the upper threshold is painted
-     * WHITE, otherwise it is painted BLACK.
-     *
-     * @param img
-     * @param t1  Lower threshold
-     * @param t2  Upper threshold
-     * @return A reference to the input image (the input is modified)
-     */
-    private PImage brightnessExtract(PImage img, float t1, float t2) {
-        img.loadPixels();
-        for (int i = 0; i < img.width * img.height; i++) {
-            float b = brightness(img.pixels[i]);
-            img.pixels[i] = (t1 < b && b < t2) ? 0xFFFFFFFF : 0x0;
-        }
-        img.updatePixels();
-        return img;
-    }
 
     /**
      * Turn black every pixel lower than the given threshold
@@ -274,27 +236,6 @@ public class VideoStream extends PApplet {
         return img;
     }
 
-    /**
-     * Turn black every pixel outside the thresholds
-     *
-     * @param img
-     * @param t1  Lower threshold
-     * @param t2  Upper threshold
-     * @return The reference to the input image (the input is modified)
-     */
-    private PImage hueThreshold(PImage img, float t1, float t2) {
-        img.loadPixels();
-        int originalColor;
-        float originalColorHue;
-
-        for (int i = 0; i < img.width * img.height; i++) {
-            originalColor = img.pixels[i];
-            originalColorHue = hue(originalColor);
-            img.pixels[i] = (t1 <= originalColorHue && originalColorHue <= t2) ? originalColor : 0x0;
-        }
-        img.updatePixels();
-        return img;
-    }
 
     /**
      * Perform separately a horizontal and vertical gaussian blur

@@ -133,7 +133,7 @@ public class Plate {
 
     public void setRotation(PVector rot){
         angleX = -rot.x;
-        angleY = -rot.y;
+        //angleY = -rot.y;
         angleZ = -rot.y;
     }
 }
