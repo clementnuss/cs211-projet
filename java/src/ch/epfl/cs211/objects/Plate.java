@@ -52,8 +52,9 @@ public class Plate {
         GAME.pushMatrix();
         GAME.translate(x, y, z);
         GAME.rotateX(angleX);
-        GAME.rotateZ(angleZ);
         GAME.rotateY(angleY);
+        GAME.rotateZ(angleZ);
+
         GAME.fill(color);
         GAME.box(PLATE_WIDTH, PLATE_THICKNESS, PLATE_WIDTH);
         GAME.popMatrix();
@@ -131,8 +132,8 @@ public class Plate {
     }
 
     public void setRotation(PVector rot){
-        angleX = rot.x;
-        //angleY = rot.y;
+        angleX = -rot.x;
+        angleY = -rot.y;
         angleZ = -rot.y;
     }
 }

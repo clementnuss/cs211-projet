@@ -65,7 +65,6 @@ public class Mover {
         GAME.translate(pos.x, pos.y, pos.z);
         GAME.sphere(SPHERE_RADIUS);
         GAME.popMatrix();
-
     }
 
     public void checkCollisions(List<PVector> cylinders) {

@@ -8,13 +8,13 @@ public class HSVBounds {
 
     HSVBounds() {
 
-        h_min = 86;
+        h_min = 65;
         h_max = 126;
-        s_min = 24;
+        s_min = 30;
         s_max = 255;
-        v_min = 81;
+        v_min = 30;
         v_max = 255;
-        intensity = 250;
+        intensity = 252.9f;
     }
 
     public float getH_min() {

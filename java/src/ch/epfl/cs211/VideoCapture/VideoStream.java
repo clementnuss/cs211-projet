@@ -17,7 +17,7 @@ public class VideoStream extends PApplet {
 
     private final static int WIDTH = 640;
     private final static int HEIGHT = 480;
-    private static final float SMOOTHING_STEPS = 5;
+    private static final float SMOOTHING_STEPS = 3;
 
     private boolean pause = false;
 
@@ -50,9 +50,9 @@ public class VideoStream extends PApplet {
     /*===============================================================
         Values for the Hough transform
       ===============================================================*/
-    private static float discretizationStepsPhi = 0.04f;
-    private static float discretizationStepsR = 2.2f;
-    private final static int MIN_VOTES = 130;
+    private static float discretizationStepsPhi = 0.02f;
+    private static float discretizationStepsR = 1.8f;
+    private final static int MIN_VOTES = 120;
     private final static int NEIGHBORHOOD_SIZE = 16;
     private final static int N_LINES = 6;
     private int phiDim;

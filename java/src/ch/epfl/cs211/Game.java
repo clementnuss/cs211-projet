@@ -146,8 +146,8 @@ public class Game extends PApplet {
     }
 
     private void drawRegularMode() {
-        camera(plate.getX(), plate.getY() - 500, plate.getZ() + 700,
-                plate.getX(), plate.getY(), plate.getZ(),
+        camera(plate.getX(), plate.getY() - 800, plate.getZ() +50,
+                plate.getX(), plate.getY(), plate.getZ()+49,
                 0, 1.0f, 0);
 
         //If the orientation of the plate was saved and modified we restore it

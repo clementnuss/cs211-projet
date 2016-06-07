@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Quad {
 
-    private final static float MAX_COS = 0.55f; //In radians. Roughly 60 degrees
+    private final static float MAX_COS = 0.85f;
     private final float QUAD_MAX_AREA = 250000;
     private final float QUAD_MIN_AREA = 40000;
 
