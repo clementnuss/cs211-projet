@@ -5,7 +5,7 @@ import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.core.PVector;
 import processing.event.KeyEvent;
-import processing.video.Capture;
+import processing.video.Movie;
 
 import java.util.*;
 
@@ -66,7 +66,7 @@ public class VideoStream extends PApplet {
         Values for the Quad selection
       ===============================================================*/
 
-    Capture cam;
+    Movie mov;
     Quad capturedBoard;
     QuadGraph qGraph;
 
@@ -75,6 +75,9 @@ public class VideoStream extends PApplet {
     }
 
     public void setup() {
+
+        mov = new Movie(this, "data/testvideo.mp4");
+        mov.loop();
 
         from2Dto3Dtransformer = new TwoDThreeD(WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -92,20 +95,6 @@ public class VideoStream extends PApplet {
             cosTable[theta] = (float) Math.cos(thetaRadians);
         }
 
-
-        String[] cameras = Capture.list();
-        if (cameras.length == 0) {
-            System.err.println("There are no cameras available for capture.");
-            exit();
-        } else {
-            println("Available cameras:");
-            for (String camera : cameras)
-                println(camera);
-
-            cam = new Capture(this, cameras[1]);
-            cam.start();
-            println("===========================================");
-        }
     }
 
 
@@ -113,8 +102,8 @@ public class VideoStream extends PApplet {
         if (pause) {
             System.out.println("The program is paused .. press p to start it again");
         } else {
-            if (cam.available()) {
-                cam.read();
+            if (mov.available()) {
+                mov.read();
 
                 //IMAGE TREATMENT PIPELINE
                 // 1. saturation threshold
@@ -128,7 +117,7 @@ public class VideoStream extends PApplet {
 
                 PImage hsvFiltered = intensityFilter(
                         gaussianBlur(
-                                hsvFilter(cam.copy(), hsvBounds)
+                                hsvFilter(mov.copy(), hsvBounds)
                         )
                         , hsvBounds.getIntensity());
 
@@ -136,13 +125,13 @@ public class VideoStream extends PApplet {
                 image(hsvFiltered, WIDTH, 0);
                 PImage toDisplay = sobel(hsvFiltered);
 
-                image(cam, 0, 0);
+                image(mov, 0, 0);
 
 
                 List<PVector> lines = hough(toDisplay, N_LINES);
 
                 if (lines != null && !lines.isEmpty()) {
-                    qGraph.build(lines, cam.width, cam.height);
+                    qGraph.build(lines, mov.width, mov.height);
 
                     List<Quad> quads = qGraph.getQuads(lines);
                     int i = qGraph.indexOfBestQuad(quads);
@@ -528,7 +517,7 @@ public class VideoStream extends PApplet {
             }
         }
         pg.endDraw();
-        image(cam, 0, 0);
+        image(mov, 0, 0);
         image(pg.get(), 0, 0);
         return resultingLines;
     }

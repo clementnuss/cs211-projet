@@ -12,6 +12,7 @@ import processing.core.PApplet;
 import processing.core.PVector;
 import processing.event.KeyEvent;
 import processing.event.MouseEvent;
+import processing.video.Movie;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -104,6 +105,10 @@ public class Game extends PApplet {
     public void setup() {
         stroke(Color.STROKE_COLOR);
         videoCaptureManager = new VideoStream();
+
+        Movie cam;
+        cam = new Movie(this, "testvideo.mp4");
+        cam.loop();
 
         String[] args = {"Image processing window"};
         PApplet.runSketch(args, videoCaptureManager);
