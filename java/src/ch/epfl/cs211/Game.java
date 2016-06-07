@@ -12,7 +12,6 @@ import processing.core.PApplet;
 import processing.core.PVector;
 import processing.event.KeyEvent;
 import processing.event.MouseEvent;
-import processing.video.Movie;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -76,6 +75,10 @@ public class Game extends PApplet {
     private ClosedCylinder closedCylinder;
     private boolean modeHasChanged;
 
+    SynchronizedRotationValue syncRot;
+    PVector absoluteRot;
+    PVector progressiveRot;
+
     private List<PVector> obstacleList;
 
     //Game features
@@ -103,12 +106,11 @@ public class Game extends PApplet {
     }
 
     public void setup() {
+        absoluteRot = new PVector(0,0,0);
+        progressiveRot = new PVector(0,0,0);
         stroke(Color.STROKE_COLOR);
-        videoCaptureManager = new VideoStream();
-
-        Movie cam;
-        cam = new Movie(this, "testvideo.mp4");
-        cam.loop();
+        syncRot = new SynchronizedRotationValue();
+        videoCaptureManager = new VideoStream(syncRot);
 
         String[] args = {"Image processing window"};
         PApplet.runSketch(args, videoCaptureManager);
@@ -158,7 +160,16 @@ public class Game extends PApplet {
         }
 
         plate.setRotation(videoCaptureManager.getRotation());
+        PVector rotFromVideoProcessing = syncRot.getRot();
 
+        if(!absoluteRot.equals(rotFromVideoProcessing)){
+            absoluteRot = rotFromVideoProcessing;
+        }
+
+        PVector rotDiff = PVector.sub(absoluteRot,progressiveRot);
+        progressiveRot.add(rotDiff.mult(0.3f));
+
+        plate.setRotation(progressiveRot);
         plate.display();
         mover.update();
         obstacleList = mover.checkCollisions(obstacleList);

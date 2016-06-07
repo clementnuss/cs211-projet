@@ -1,5 +1,6 @@
 package ch.epfl.cs211.VideoCapture;
 
+import ch.epfl.cs211.SynchronizedRotationValue;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PImage;
@@ -19,6 +20,7 @@ public class VideoStream extends PApplet {
     private final static int HEIGHT = 480;
     private static final float SMOOTHING_STEPS =3;
 
+    private final SynchronizedRotationValue syncRot;
     private boolean pause = false;
 
     // Rotation of the plate
@@ -69,6 +71,10 @@ public class VideoStream extends PApplet {
     Movie mov;
     Quad capturedBoard;
     QuadGraph qGraph;
+
+    public VideoStream(SynchronizedRotationValue r){
+        syncRot = r;
+    }
 
     public void settings() {
         size(WIDTH * 2, HEIGHT);
@@ -146,16 +152,9 @@ public class VideoStream extends PApplet {
             }
 
             if (newBoardValue) {
-                smoothedRotation = rotation;
                 PVector newRotation = from2Dto3Dtransformer.get3DRotations(capturedBoard.cornersAsList());
                 //            println("Got a rotation: ", boardRotation.x, boardRotation.y, boardRotation.z);
-
-                smoothingCoeffX = (newRotation.x - rotation.x) / SMOOTHING_STEPS;
-                smoothingCoeffY = (newRotation.y - rotation.y) / SMOOTHING_STEPS;
-
-                rotation = newRotation;
-                smoothSteps = 0;
-
+                syncRot.setRot(newRotation);
                 newBoardValue = false;
             }
 
