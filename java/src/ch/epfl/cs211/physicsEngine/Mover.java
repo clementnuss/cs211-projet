@@ -9,6 +9,7 @@ import ch.epfl.cs211.objects.Plate;
 import ch.epfl.cs211.tools.Color;
 import processing.core.PVector;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static ch.epfl.cs211.tools.ValueUtils.clamp;
@@ -68,9 +69,9 @@ public class Mover {
 
     }
 
-    public void checkCollisions(List<PVector> cylinders) {
+    public List<PVector> checkCollisions(List<PVector> cylinders) {
         checkEdges();
-        checkCylinders(cylinders);
+        return checkCylinders(cylinders);
     }
 
     private void checkEdges() {
@@ -91,9 +92,9 @@ public class Mover {
         }
     }
 
-    private void checkCylinders(List<PVector> cylinders) {
+    private List<PVector> checkCylinders(List<PVector> cylinders) {
         boolean collisionOccured = false;
-
+        List<PVector> toRemove = new ArrayList<>();
         /*
             Because corrections are additive among cylinders we take copies that will store all
             correction shifts computed using the original position of the ball.
@@ -109,6 +110,7 @@ public class Mover {
             if (distance <= SPHERE_TO_CYLINDER_DISTANCE) {
                 collisionOccured = true;
                 PVector cylinderToBall = PVector.sub(pos, cyl);
+                toRemove.add(cylinderBaseLocation);
 
                 /*
                     Ball entered cylinder, push it outwards in a radial fashion.
@@ -130,6 +132,8 @@ public class Mover {
             velocity = correctedVel.normalize().mult(magVel * 0.8f);
             GAME.incScore(magVel);
         }
+        cylinders.removeAll(toRemove);
+        return cylinders;
     }
 
     public float getX() {

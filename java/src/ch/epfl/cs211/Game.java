@@ -161,7 +161,7 @@ public class Game extends PApplet {
 
         plate.display();
         mover.update();
-        mover.checkCollisions(obstacleList);
+        obstacleList = mover.checkCollisions(obstacleList);
         if (scoreInterval < SCORE_UPDATE_INTERVAL)
             scoreInterval++;
         else {

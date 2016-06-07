@@ -17,7 +17,7 @@ public class VideoStream extends PApplet {
 
     private final static int WIDTH = 640;
     private final static int HEIGHT = 480;
-    private static final float SMOOTHING_STEPS = 5;
+    private static final float SMOOTHING_STEPS = 20;
 
     private boolean pause = false;
 
@@ -161,7 +161,7 @@ public class VideoStream extends PApplet {
 
 
             // We want to (smoothly) update the position of the plate at a 20 FPS rate
-            if ((System.currentTimeMillis() - lastSmoothRotationUpdate) >= 50) {
+            if ((System.currentTimeMillis() - lastSmoothRotationUpdate) >= 10) {
 
                 if (smoothSteps++ < SMOOTHING_STEPS) {
                     smoothedRotation.x += smoothingCoeffX;
@@ -371,7 +371,7 @@ public class VideoStream extends PApplet {
                 sum_v += sobelKernel[0] * brightness(img.pixels[(y - 1) * img.width + x]);
                 sum_v += sobelKernel[2] * brightness(img.pixels[(y + 1) * img.width + x]);
 
-                //Compute de gradient
+                //Compute the gradient
                 float sum = sqrt(pow(sum_h, 2) + pow(sum_v, 2));
                 if (sum > max) {
                     max = sum;
