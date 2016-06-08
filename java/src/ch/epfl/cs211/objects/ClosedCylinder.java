@@ -8,10 +8,8 @@ package ch.epfl.cs211.objects;
 import processing.core.PShape;
 import processing.core.PVector;
 
-import static java.lang.Math.PI;
-import static java.lang.Math.cos;
-import static java.lang.Math.sin;
 import static ch.epfl.cs211.Game.GAME;
+import static java.lang.Math.*;
 
 /**
  * Class representing a closed cylinder
@@ -43,8 +41,8 @@ public class ClosedCylinder {
 
         for (int i = 0; i < cylResolution + 1; i++) {
             angle = (float) ((2 * PI) / cylResolution) * i;
-            x[i] = (float) sin(angle) * cylRadius;
-            z[i] = (float) cos(angle) * cylRadius;
+            x[i] = (float) sin(angle) * ch.epfl.cs211.physicsEngine.Mover.CYLINDER_RADIUS;
+            z[i] = (float) cos(angle) * ch.epfl.cs211.physicsEngine.Mover.CYLINDER_RADIUS;
         }
 
         PShape bottomSurface = createDiskSurface(0);
@@ -55,12 +53,12 @@ public class ClosedCylinder {
 
 
         closedCylinder = GAME.createShape(PShape.GROUP);
-        closedCylinder.addChild(new OpenCylinder(cylRadius, cylHeight, cylResolution, color, false).getShape());
+        closedCylinder.addChild(new OpenCylinder(ch.epfl.cs211.physicsEngine.Mover.CYLINDER_RADIUS, cylHeight, cylResolution, color, false).getShape());
         closedCylinder.addChild(bottomSurface, 0);
         closedCylinder.addChild(topSurface, 1);
 
         closedCylinderStroked = GAME.createShape(PShape.GROUP);
-        closedCylinderStroked.addChild(new OpenCylinder(cylRadius, cylHeight, cylResolution, color, true).getShape());
+        closedCylinderStroked.addChild(new OpenCylinder(ch.epfl.cs211.physicsEngine.Mover.CYLINDER_RADIUS, cylHeight, cylResolution, color, true).getShape());
         closedCylinderStroked.addChild(bottomSurfaceForStroked, 0);
         closedCylinderStroked.addChild(topSurfaceForStroked, 1);
 

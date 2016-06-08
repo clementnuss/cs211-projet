@@ -1,5 +1,6 @@
 package ch.epfl.cs211.display2D;
 
+import ch.epfl.cs211.Game;
 import ch.epfl.cs211.objects.Plate;
 import ch.epfl.cs211.physicsEngine.Mover;
 import ch.epfl.cs211.tools.Color;
@@ -23,24 +24,21 @@ import static processing.core.PApplet.map;
 public class SubScreen {
 
     public final static int VISUALISATION_HEIGHT = 120;
-    public static int visualisationWidth;
-    public final static int VISUALISATION_OFFSET = 10;
-    public final static int TOP_HEIGHT = 100;
-    public final static int TOP_WIDTH = 100;
-    public final static int SCORE_WIDTH = 100;
-    public final static int SCORE_HEIGHT = 100;
-    public static int chartWidth;
-    public final static int CHART_HEIGHT = 100;
+    private final static int VISUALISATION_OFFSET = 10;
+    private final static int TOP_HEIGHT = 100;
+    private final static int TOP_WIDTH = 100;
+    private final static int SCORE_WIDTH = 100;
+    private final static int SCORE_HEIGHT = 100;
+    private final static int CHART_HEIGHT = 100;
     private final static int CHART_ELEM_WIDTH = 5;
     private final static int PLOT_MAX_ELEMENTS = 25; //Should be a number that divides CHART_ELEM_WIDTH
-
+    private static int visualisationWidth;
+    private static int chartWidth;
+    private final HScrollbar hScrollbar;
     private PGraphics topView;
     private PGraphics scoreBoard;
     private PGraphics scoreChart;
     private PGraphics backGroundView;
-
-    private HScrollbar hScrollbar;
-
     private float backGroundX;
     private float backGroundY;
     private float topViewX;
@@ -109,9 +107,10 @@ public class SubScreen {
         scoreBoard.rect(0, 0, SCORE_WIDTH, SCORE_HEIGHT);
 
         scoreBoard.fill(0xFF000000);
-        scoreBoard.textSize(14);
+        scoreBoard.textSize(9.5f);
         scoreBoard.text("Total score: \n   -> " + ValueUtils.roundThreeDecimals(GAME.getScore()) +
-                        "\nVelocity: \n   -> " + ValueUtils.roundThreeDecimals(GAME.getMover().getVelocity().mag()),
+                        "\nVelocity: \n   -> " + ValueUtils.roundThreeDecimals(GAME.getMover().getVelocity().mag())+
+                        "\nLast score: \n    -> " + GAME.getLastChange(),
                 7, 7, SCORE_WIDTH - 7, SCORE_HEIGHT - 7);
 
         scoreBoard.endDraw();
@@ -160,7 +159,7 @@ public class SubScreen {
         return Math.round(chartWidth / (elementWidth + 1));
     }
 
-    public void updateChart() {
+    private void updateChart() {
         elementWidth = (1.5f * hScrollbar.getPos() + 0.5f) * CHART_ELEM_WIDTH;
     }
 
@@ -170,8 +169,8 @@ public class SubScreen {
      */
     public void updateDimensions() {
         backGroundX = 0;
-        backGroundY = GAME.WINDOW_HEIGHT - VISUALISATION_HEIGHT;
-        visualisationWidth = GAME.WINDOW_WIDTH;
+        backGroundY = Game.WINDOW_HEIGHT - VISUALISATION_HEIGHT;
+        visualisationWidth = Game.WINDOW_WIDTH;
         chartWidth = visualisationWidth - TOP_WIDTH - SCORE_WIDTH - 4 * VISUALISATION_OFFSET;
         backGroundView = GAME.createGraphics(visualisationWidth, VISUALISATION_HEIGHT);
         topView = GAME.createGraphics(TOP_WIDTH, TOP_HEIGHT);

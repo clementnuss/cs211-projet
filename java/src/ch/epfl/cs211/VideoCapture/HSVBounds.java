@@ -4,49 +4,33 @@
  */
 package ch.epfl.cs211.VideoCapture;
 
-public class HSVBounds {
+class HSVBounds {
+
+    private float h_min, s_min, v_min,
+            h_max, s_max, v_max, intensity;
 
     HSVBounds() {
 
-        h_min = 50;
-        h_max = 102;
-        s_min = 63;
+        h_min = 65;
+        h_max = 126;
+        s_min = 30;
         s_max = 255;
-        v_min = 81;
+        v_min = 30;
         v_max = 255;
-        intensity = 250;
+        intensity = 252.9f;
     }
 
     public float getH_min() {
         return h_min;
     }
 
-    public float getS_min() {
-        return s_min;
-    }
-
-    public float getV_min() {
-        return v_min;
-    }
-
-    public float getH_max() {
-        return h_max;
-    }
-
-    public float getS_max() {
-        return s_max;
-    }
-
-    public float getV_max() {
-        return v_max;
-    }
-
-    public float getIntensity(){ return intensity; }
-
-
     public void setH_min(float h_min) {
         if (h_min >= 0 && h_min <= h_max)
             this.h_min = h_min;
+    }
+
+    public float getS_min() {
+        return s_min;
     }
 
     public void setS_min(float s_min) {
@@ -54,9 +38,17 @@ public class HSVBounds {
             this.s_min = s_min;
     }
 
+    public float getV_min() {
+        return v_min;
+    }
+
     public void setV_min(float v_min) {
         if (v_min >= 0 && v_min <= v_max)
             this.v_min = v_min;
+    }
+
+    public float getH_max() {
+        return h_max;
     }
 
     public void setH_max(float h_max) {
@@ -64,9 +56,17 @@ public class HSVBounds {
             this.h_max = h_max;
     }
 
+    public float getS_max() {
+        return s_max;
+    }
+
     public void setS_max(float s_max) {
         if (s_max <= 255 && s_max > s_min)
             this.s_max = s_max;
+    }
+
+    public float getV_max() {
+        return v_max;
     }
 
     public void setV_max(float v_max) {
@@ -74,13 +74,14 @@ public class HSVBounds {
             this.v_max = v_max;
     }
 
+    public float getIntensity() {
+        return intensity;
+    }
+
     public void set_intensity(float intensity){
         if(0 < intensity && intensity < 255)
             this.intensity = intensity;
     }
-
-    private float h_min, s_min, v_min,
-            h_max, s_max, v_max, intensity;
 
     public String toString() {
         return "Hue : [" + h_min + "," + h_max + "]\t" +

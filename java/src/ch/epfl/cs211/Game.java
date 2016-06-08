@@ -1,5 +1,6 @@
 package ch.epfl.cs211;
 
+import ch.epfl.cs211.VideoCapture.SynchronizedRotationValue;
 import ch.epfl.cs211.VideoCapture.VideoStream;
 import ch.epfl.cs211.display2D.HUD;
 import ch.epfl.cs211.display2D.SubScreen;
@@ -61,35 +62,27 @@ public class Game extends PApplet {
     private final static float SCORE_COEFFICIENT = 3f;
 
     public static float maxScore = 0f;
-
+    private final Deque<Float> scoresList;
     //Video capture
     private VideoStream videoCaptureManager;
-
     //2D
     private SubScreen subView;
     private HUD hudPlate, hudBall, hudMouse;
-
     //Physics
     private Plate plate;
     private Mover mover;
     private ClosedCylinder closedCylinder;
     private boolean modeHasChanged;
-
+    private SynchronizedRotationValue syncRot;
+    private PVector absoluteRot;
+    private PVector progressiveRot;
     private List<PVector> obstacleList;
-
     //Game features
     private int oldWidth;
     private int oldHeight;
     private GameModes mode;
     private float score = 0f, prevScore = 0f, lastChange = 0f;
-    private Deque<Float> scoresList;
     private int scoreInterval = 0;
-
-    public static void main(String[] args) {
-
-        PApplet.runSketch(new String[]{"ch.epfl.cs211.Game"}, Game.GAME);
-
-    }
 
     private Game() {
         scoresList = new ArrayDeque<>();
@@ -97,13 +90,22 @@ public class Game extends PApplet {
         oldHeight = height;
     }
 
+    public static void main(String[] args) {
+
+        PApplet.runSketch(new String[]{"ch.epfl.cs211.Game"}, Game.GAME);
+
+    }
+
     public void settings() {
         size(WINDOW_WIDTH, WINDOW_HEIGHT, P3D);
     }
 
     public void setup() {
+        absoluteRot = new PVector(0,0,0);
+        progressiveRot = new PVector(0,0,0);
         stroke(Color.STROKE_COLOR);
-        videoCaptureManager = new VideoStream();
+        syncRot = new SynchronizedRotationValue();
+        videoCaptureManager = new VideoStream(syncRot);
 
         String[] args = {"Image processing window"};
         PApplet.runSketch(args, videoCaptureManager);
@@ -141,8 +143,8 @@ public class Game extends PApplet {
     }
 
     private void drawRegularMode() {
-        camera(plate.getX(), plate.getY() - 500, plate.getZ() + 700,
-                plate.getX(), plate.getY(), plate.getZ(),
+        camera(plate.getX(), plate.getY() - 800, plate.getZ() +50,
+                plate.getX(), plate.getY(), plate.getZ()+49,
                 0, 1.0f, 0);
 
         //If the orientation of the plate was saved and modified we restore it
@@ -153,10 +155,19 @@ public class Game extends PApplet {
         }
 
         plate.setRotation(videoCaptureManager.getRotation());
+        PVector rotFromVideoProcessing = syncRot.getRot();
 
+        if(!absoluteRot.equals(rotFromVideoProcessing)){
+            absoluteRot = rotFromVideoProcessing;
+        }
+
+        PVector rotDiff = PVector.sub(absoluteRot,progressiveRot);
+        progressiveRot.add(rotDiff.mult(0.15f));
+
+        plate.setRotation(progressiveRot);
         plate.display();
         mover.update();
-        mover.checkCollisions(obstacleList);
+        obstacleList = mover.checkCollisions(obstacleList);
         if (scoreInterval < SCORE_UPDATE_INTERVAL)
             scoreInterval++;
         else {
@@ -256,7 +267,7 @@ public class Game extends PApplet {
         }
     }
 
-    public boolean checkIfResized() {
+    private boolean checkIfResized() {
         if (oldHeight != height || oldWidth != width) {
             oldHeight = height;
             oldWidth = width;

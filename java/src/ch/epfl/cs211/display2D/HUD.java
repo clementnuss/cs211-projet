@@ -9,8 +9,12 @@ import ch.epfl.cs211.Game;
 
 public class HUD {
 
-    private int x, y, width, height, z;
-    private int color;
+    private final int x;
+    private final int y;
+    private final int width;
+    private final int height;
+    private final int color;
+    private int z;
 
     /**
      *

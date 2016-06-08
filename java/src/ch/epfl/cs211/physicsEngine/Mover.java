@@ -9,6 +9,7 @@ import ch.epfl.cs211.objects.Plate;
 import ch.epfl.cs211.tools.Color;
 import processing.core.PVector;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static ch.epfl.cs211.tools.ValueUtils.clamp;
@@ -65,12 +66,11 @@ public class Mover {
         GAME.translate(pos.x, pos.y, pos.z);
         GAME.sphere(SPHERE_RADIUS);
         GAME.popMatrix();
-
     }
 
-    public void checkCollisions(List<PVector> cylinders) {
+    public List<PVector> checkCollisions(List<PVector> cylinders) {
         checkEdges();
-        checkCylinders(cylinders);
+        return checkCylinders(cylinders);
     }
 
     private void checkEdges() {
@@ -91,9 +91,9 @@ public class Mover {
         }
     }
 
-    private void checkCylinders(List<PVector> cylinders) {
+    private List<PVector> checkCylinders(List<PVector> cylinders) {
         boolean collisionOccured = false;
-
+        List<PVector> toKeep = new ArrayList<>();
         /*
             Because corrections are additive among cylinders we take copies that will store all
             correction shifts computed using the original position of the ball.
@@ -120,6 +120,8 @@ public class Mover {
                 PVector collisionNormal = new PVector(pos.x - cyl.x, 0, pos.z - cyl.z).normalize();
                 PVector updatedVel = PVector.mult(collisionNormal, 2f * velocity.dot(collisionNormal));
                 correctedVel.sub(updatedVel.x, 0, updatedVel.z);
+            } else {
+                toKeep.add(cylinderBaseLocation);
             }
         }
 
@@ -130,6 +132,7 @@ public class Mover {
             velocity = correctedVel.normalize().mult(magVel * 0.8f);
             GAME.incScore(magVel);
         }
+        return toKeep;
     }
 
     public float getX() {

@@ -5,7 +5,7 @@ import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.core.PVector;
 import processing.event.KeyEvent;
-import processing.video.Capture;
+import processing.video.Movie;
 
 import java.util.*;
 
@@ -17,64 +17,63 @@ public class VideoStream extends PApplet {
 
     private final static int WIDTH = 640;
     private final static int HEIGHT = 480;
-    private static final float SMOOTHING_STEPS = 5;
-
-    private boolean pause = false;
-
+    private static final float SMOOTHING_STEPS =3;
+    /*===============================================================
+        Values for the Hough transform
+      ===============================================================*/
+    private static final float discretizationStepsPhi = 0.01f;
+    private static final float discretizationStepsR = 1.8f;
+    private final static int MIN_VOTES = 120;
+    private final static int NEIGHBORHOOD_SIZE = 16;
+    private final static int N_LINES = 6;
+    private final SynchronizedRotationValue syncRot;
     // Rotation of the plate
-    private PVector smoothedRotation = new PVector(0, 0, 0), rotation = new PVector(0, 0, 0);
-    private long lastSmoothRotationUpdate = 0;
-    private float smoothingCoeffX, smoothingCoeffY;
-
-    private TwoDThreeD from2Dto3Dtransformer;
-    private boolean newBoardValue;
-    private int smoothSteps = 0;
-
-
+    private final PVector smoothedRotation = new PVector(0, 0, 0);
     // HSV bounds container
     private final HSVBounds hsvBounds = new HSVBounds();
+    private final float[] sobelKernel = {1f, 0f, -1f};
+    private final float[] gaussKernel = {0.3f, 0.4f, 0.3f};
 
     /*===============================================================
         Values for the Sobel operator
       ===============================================================*/
-
-    private final float[] sobelKernel = {1f, 0f, -1f};
-    private final float SOBEL_PERCENTAGE = 0.3f;
+    private boolean pause = false;
 
     /*===============================================================
         Values for the gauss operator
       ===============================================================*/
-
-    private final float[] gaussKernel = {0.3f, 0.4f, 0.3f};
-
-    /*===============================================================
-        Values for the Hough transform
-      ===============================================================*/
-    private static float discretizationStepsPhi = 0.04f;
-    private static float discretizationStepsR = 2.2f;
-    private final static int MIN_VOTES = 130;
-    private final static int NEIGHBORHOOD_SIZE = 16;
-    private final static int N_LINES = 6;
+    private PVector rotation = new PVector(0, 0, 0);
+    private long lastSmoothRotationUpdate = 0;
+    private float smoothingCoeffX, smoothingCoeffY;
+    private TwoDThreeD from2Dto3Dtransformer;
+    private boolean newBoardValue;
+    private int smoothSteps = 0;
     private int phiDim;
     private int rDim;
     private int rOffset;
     private float[] sinTable;
     private float[] cosTable;
-    Comparator<Integer> houghComparator;
 
      /*===============================================================
         Values for the Quad selection
       ===============================================================*/
 
-    Capture cam;
-    Quad capturedBoard;
-    QuadGraph qGraph;
+    private Movie mov;
+    private Quad capturedBoard;
+    private QuadGraph qGraph;
+
+    public VideoStream(SynchronizedRotationValue r){
+        syncRot = r;
+    }
 
     public void settings() {
         size(WIDTH * 2, HEIGHT);
     }
 
     public void setup() {
+
+        mov = new Movie(this, "java\\data\\testvideo.mp4");
+        mov.loop();
 
         from2Dto3Dtransformer = new TwoDThreeD(WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -92,20 +91,6 @@ public class VideoStream extends PApplet {
             cosTable[theta] = (float) Math.cos(thetaRadians);
         }
 
-
-        String[] cameras = Capture.list();
-        if (cameras.length == 0) {
-            System.err.println("There are no cameras available for capture.");
-            exit();
-        } else {
-            println("Available cameras:");
-            for (String camera : cameras)
-                println(camera);
-
-            cam = new Capture(this, cameras[1]);
-            cam.start();
-            println("===========================================");
-        }
     }
 
 
@@ -113,8 +98,8 @@ public class VideoStream extends PApplet {
         if (pause) {
             System.out.println("The program is paused .. press p to start it again");
         } else {
-            if (cam.available()) {
-                cam.read();
+            if (mov.available()) {
+                mov.read();
 
                 //IMAGE TREATMENT PIPELINE
                 // 1. saturation threshold
@@ -128,7 +113,7 @@ public class VideoStream extends PApplet {
 
                 PImage hsvFiltered = intensityFilter(
                         gaussianBlur(
-                                hsvFilter(cam.copy(), hsvBounds)
+                                hsvFilter(mov.copy(), hsvBounds)
                         )
                         , hsvBounds.getIntensity());
 
@@ -136,13 +121,13 @@ public class VideoStream extends PApplet {
                 image(hsvFiltered, WIDTH, 0);
                 PImage toDisplay = sobel(hsvFiltered);
 
-                image(cam, 0, 0);
+                image(mov, 0, 0);
 
 
                 List<PVector> lines = hough(toDisplay, N_LINES);
 
                 if (lines != null && !lines.isEmpty()) {
-                    qGraph.build(lines, cam.width, cam.height);
+                    qGraph.build(lines, mov.width, mov.height);
 
                     List<Quad> quads = qGraph.getQuads(lines);
                     int i = qGraph.indexOfBestQuad(quads);
@@ -159,32 +144,13 @@ public class VideoStream extends PApplet {
             if (newBoardValue) {
                 PVector newRotation = from2Dto3Dtransformer.get3DRotations(capturedBoard.cornersAsList());
                 //            println("Got a rotation: ", boardRotation.x, boardRotation.y, boardRotation.z);
-
-                smoothingCoeffX = (newRotation.x - rotation.x) / SMOOTHING_STEPS;
-                smoothingCoeffY = (newRotation.y - rotation.y) / SMOOTHING_STEPS;
-
-                rotation = newRotation;
-                smoothSteps = 0;
-
+                syncRot.setRot(newRotation);
                 newBoardValue = false;
             }
 
-            // We want to (smoothly) update the position of the plate at a 20 FPS rate
-            if ((System.currentTimeMillis() - lastSmoothRotationUpdate) >= 50) {
-
-                if (smoothSteps++ < SMOOTHING_STEPS) {
-                    smoothedRotation.x += smoothingCoeffX;
-                    smoothedRotation.y += smoothingCoeffY;
-                    lastSmoothRotationUpdate = System.currentTimeMillis();
-                }
-
-            }
         }
     }
 
-    public Quad getCapturedBoard() {
-        return capturedBoard;
-    }
 
     /**
      * Filters img using the given HSV bounds.
@@ -227,45 +193,7 @@ public class VideoStream extends PApplet {
         return img;
     }
 
-    /**
-     * Turn black every pixel outside the thresholds
-     *
-     * @param img
-     * @param t1  Lower threshold
-     * @param t2  Upper threshold
-     * @return The reference to the input image (the input is modified)
-     */
-    private PImage saturationThreshold(PImage img, float t1, float t2) {
-        img.loadPixels();
 
-        for (int i = 0; i < img.width * img.height; i++) {
-            int originalColor = img.pixels[i];
-            float sat = saturation(originalColor);
-            img.pixels[i] = (t1 <= sat && sat <= t2) ? originalColor : 0x0;
-        }
-        img.updatePixels();
-        return img;
-    }
-
-    /**
-     * Filter the image based on its brightness. Every pixel
-     * whose brightness is between the lower threshold and the upper threshold is painted
-     * WHITE, otherwise it is painted BLACK.
-     *
-     * @param img
-     * @param t1  Lower threshold
-     * @param t2  Upper threshold
-     * @return A reference to the input image (the input is modified)
-     */
-    private PImage brightnessExtract(PImage img, float t1, float t2) {
-        img.loadPixels();
-        for (int i = 0; i < img.width * img.height; i++) {
-            float b = brightness(img.pixels[i]);
-            img.pixels[i] = (t1 < b && b < t2) ? 0xFFFFFFFF : 0x0;
-        }
-        img.updatePixels();
-        return img;
-    }
 
     /**
      * Turn black every pixel lower than the given threshold
@@ -283,27 +211,6 @@ public class VideoStream extends PApplet {
         return img;
     }
 
-    /**
-     * Turn black every pixel outside the thresholds
-     *
-     * @param img
-     * @param t1  Lower threshold
-     * @param t2  Upper threshold
-     * @return The reference to the input image (the input is modified)
-     */
-    private PImage hueThreshold(PImage img, float t1, float t2) {
-        img.loadPixels();
-        int originalColor;
-        float originalColorHue;
-
-        for (int i = 0; i < img.width * img.height; i++) {
-            originalColor = img.pixels[i];
-            originalColorHue = hue(originalColor);
-            img.pixels[i] = (t1 <= originalColorHue && originalColorHue <= t2) ? originalColor : 0x0;
-        }
-        img.updatePixels();
-        return img;
-    }
 
     /**
      * Perform separately a horizontal and vertical gaussian blur
@@ -380,7 +287,7 @@ public class VideoStream extends PApplet {
                 sum_v += sobelKernel[0] * brightness(img.pixels[(y - 1) * img.width + x]);
                 sum_v += sobelKernel[2] * brightness(img.pixels[(y + 1) * img.width + x]);
 
-                //Compute de gradient
+                //Compute the gradient
                 float sum = sqrt(pow(sum_h, 2) + pow(sum_v, 2));
                 if (sum > max) {
                     max = sum;
@@ -391,6 +298,7 @@ public class VideoStream extends PApplet {
 
         for (int y = 2; y < img.height - 2; y++) {
             for (int x = 2; x < img.width - 2; x++) {
+                float SOBEL_PERCENTAGE = 0.3f;
                 if (buffer[y][x] > (max * SOBEL_PERCENTAGE))
                     result.pixels[y * img.width + x] = 0xFFFFFFFF;
                 else
@@ -413,13 +321,13 @@ public class VideoStream extends PApplet {
                                      LINE VOTING
           ============================================================*/
 
-        Set<Integer> bestCandidates = new HashSet<Integer>();
-        List<Integer> bestCandidatesFiltered = new ArrayList<Integer>();
+        Set<Integer> bestCandidates = new HashSet<>();
+        List<Integer> bestCandidatesFiltered = new ArrayList<>();
         List<PVector> resultingLines = new ArrayList<>(N_LINES);
 
         // our accumulator (with a 1 pix margin around)
         int[] accumulator = new int[(phiDim + 2) * (rDim + 2)];
-        houghComparator = new HoughComparator(accumulator);
+        Comparator<Integer> houghComparator = new HoughComparator(accumulator);
         for (int y = 0; y < edgeImg.height; y++) {
             for (int x = 0; x < edgeImg.width; x++) {
 
@@ -528,7 +436,7 @@ public class VideoStream extends PApplet {
             }
         }
         pg.endDraw();
-        image(cam, 0, 0);
+        image(mov, 0, 0);
         image(pg.get(), 0, 0);
         return resultingLines;
     }
