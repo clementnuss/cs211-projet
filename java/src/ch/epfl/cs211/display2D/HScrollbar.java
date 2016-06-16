@@ -1,18 +1,22 @@
 package ch.epfl.cs211.display2D;
 
+import processing.core.PApplet;
+
 import static ch.epfl.cs211.Game.GAME;
 
-public class HScrollbar {
-  float barWidth;  //Bar's width in pixels
-  float barHeight; //Bar's height in pixels
-  float xPosition;  //Bar's x position in pixels
-  float yPosition;  //Bar's y position in pixels
-  
-  float sliderPosition, newSliderPosition;    //Position of slider
-  float sliderPositionMin, sliderPositionMax; //Max and min values of slider
-  
-  boolean mouseOver;  //Is the mouse over the slider?
-  boolean locked;     //Is the mouse clicking and dragging the slider now?
+class HScrollbar {
+  private final float barWidth;  //Bar's width in pixels
+  private final float barHeight; //Bar's height in pixels
+  private float xPosition;  //Bar's x position in pixels
+  private float yPosition;  //Bar's y position in pixels
+
+  private float sliderPosition;
+  private float newSliderPosition;    //Position of slider
+  private float sliderPositionMin;
+  private float sliderPositionMax; //Max and min values of slider
+
+  private boolean mouseOver;  //Is the mouse over the slider?
+  private boolean locked;     //Is the mouse clicking and dragging the slider now?
 
   /**
    * @brief Creates a new horizontal scrollbar
@@ -40,12 +44,7 @@ public class HScrollbar {
    * @return A boolean indicating if the state of the scrollbar has changed
    */
   public boolean update() {
-    if (isMouseOver()) {
-      mouseOver = true;
-    }
-    else {
-      mouseOver = false;
-    }
+    mouseOver = isMouseOver();
     if (GAME.mousePressed && mouseOver) {
       locked = true;
     }
@@ -55,7 +54,7 @@ public class HScrollbar {
     if (locked) {
       newSliderPosition = constrain(GAME.mouseX - barHeight/2, sliderPositionMin, sliderPositionMax);
     }
-    if (GAME.abs(newSliderPosition - sliderPosition) > 1) {
+    if (PApplet.abs(newSliderPosition - sliderPosition) > 1) {
       sliderPosition = sliderPosition + (newSliderPosition - sliderPosition);
         return true;
     }
@@ -71,8 +70,8 @@ public class HScrollbar {
    * 
    * @return val clamped into the interval [minVal, maxVal]
    */
-  public float constrain(float val, float minVal, float maxVal) {
-    return GAME.min(GAME.max(val, minVal), maxVal);
+  private float constrain(float val, float minVal, float maxVal) {
+    return PApplet.min(PApplet.max(val, minVal), maxVal);
   }
 
   /**
@@ -80,7 +79,7 @@ public class HScrollbar {
    *
    * @return Whether the mouse is hovering the scrollbar
    */
-  public boolean isMouseOver() {
+  private boolean isMouseOver() {
     return (GAME.mouseX > xPosition && GAME.mouseX < xPosition+barWidth &&
             GAME.mouseY > yPosition && GAME.mouseY < yPosition+barHeight);
   }

@@ -1,31 +1,30 @@
 package ch.epfl.cs211.VideoCapture;
 
+import papaya.Mat;
+import papaya.SVD;
+import processing.core.PVector;
+
 import java.util.List;
 
-import processing.core.PVector;
-import papaya.*;
-
-public class TwoDThreeD {
+class TwoDThreeD {
   
   // default focal length, well suited for most webcams
-   float f = 700;
+  private final float f = 700;
   
   // intrisic camera matrix
-   float [][] K = {{f,0,0},
+  private final float[][] K = {{f, 0, 0},
                    {0,f,0},
                    {0,0,1}};
-  
-  // Real physical coordinates of the Lego board in mm
-  //float boardSize = 380.f; // large Duplo board
-   float boardSize = 255.f; // smaller Lego board
-  
   // the 3D coordinates of the physical board corners, clockwise
-   float [][] physicalCorners = {
+  private final float[][] physicalCorners = {
           {-128,-128,0,1},
           {128, -128,0,1},
           {128, 128, 0,1},
           {-128, 128, 0,1}
               };
+    // Real physical coordinates of the Lego board in mm
+    //float boardSize = 380.f; // large Duplo board
+    float boardSize = 255.f; // smaller Lego board
   
   public TwoDThreeD(int width, int height) {
     
@@ -65,9 +64,9 @@ public class TwoDThreeD {
         return rotationFromMatrix(rotationMatrix);
   
   }
-    
-    
-   public double[][] solveExtrinsicMatrix(List<PVector> points2D) {
+
+
+    private double[][] solveExtrinsicMatrix(List<PVector> points2D) {
   
     // p ~= K · [R|t] · P
     // with P the (3D) corners of the physical board, p the (2D) 
@@ -148,8 +147,8 @@ public class TwoDThreeD {
       return E;
 
   }
-    
-   public PVector rotationFromMatrix(float[][]  mat) {
+
+    private PVector rotationFromMatrix(float[][] mat) {
 
     // Assuming rotation order is around x,y,z
     PVector rot = new PVector();
