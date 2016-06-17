@@ -8,13 +8,14 @@ import processing.video.*;
 
 import java.util.*;
 
-public class VideoStream extends PApplet {
+class VideoStream extends PApplet {
 
     private final static int WIDTH = 640;
     private final static int HEIGHT = 480;
     private static final float SMOOTHING_STEPS =3;
 
     private final SynchronizedRotationValue syncRot;
+    String dataPath;
     private boolean pause = false;
 
     // Rotation of the plate
@@ -66,8 +67,9 @@ public class VideoStream extends PApplet {
     Quad capturedBoard;
     QuadGraph qGraph;
 
-    public VideoStream(SynchronizedRotationValue r){
+    public VideoStream(SynchronizedRotationValue r, String gamePath){
         syncRot = r;
+        dataPath = gamePath;
     }
 
     public void settings() {
@@ -76,7 +78,11 @@ public class VideoStream extends PApplet {
 
     public void setup() {
 
-        mov = Game.GAME.mov;
+        println("Inner's dataPath: \t\"" + dataPath("") + "\"\n");
+        println("Game's dataPath: \t\"" + dataPath + "\"\n");
+
+      
+        mov = new Movie(this, "testvideo.mp4");
         mov.loop();
 
         from2Dto3Dtransformer = new TwoDThreeD(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
@@ -340,7 +346,7 @@ public class VideoStream extends PApplet {
 
         Set<Integer> bestCandidates = new HashSet<Integer>();
         List<Integer> bestCandidatesFiltered = new ArrayList<Integer>();
-        List<PVector> resultingLines = new ArrayList<>(N_LINES);
+        List<PVector> resultingLines = new ArrayList(N_LINES);
 
         // our accumulator (with a 1 pix margin around)
         int[] accumulator = new int[(phiDim + 2) * (rDim + 2)];

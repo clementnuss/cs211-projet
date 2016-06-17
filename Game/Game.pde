@@ -57,7 +57,6 @@ public class Game extends PApplet {
 
     //Video capture
     private VideoStream videoCaptureManager;
-    Movie mov;
 
     //2D
     private SubScreen subView;
@@ -80,13 +79,19 @@ public class Game extends PApplet {
     private int oldHeight;
     private GameModes mode;
     private float score = 0f, prevScore = 0f, lastChange = 0f;
-    private Deque<Float> scoresList;
+    public Deque<Float> scoresList;
     private int scoreInterval = 0;
 
-    public Game() {
-        scoresList = new ArrayDeque();
-        oldWidth = width;
-        oldHeight = height;
+    private Game(){
+      scoresList = new ArrayDeque();
+      oldWidth = width;
+      oldHeight = height;
+    }
+    
+   public static void main(String[] args) {
+
+        PApplet.runSketch(new String[]{"ch.epfl.cs211.Game"}, GAME);
+
     }
 
     public void settings() {
@@ -100,7 +105,8 @@ public class Game extends PApplet {
         progressiveRot = new PVector(0,0,0);
         stroke(Color.STROKE_COLOR);
         syncRot = new SynchronizedRotationValue();
-        videoCaptureManager = new VideoStream(syncRot);
+        println(this.dataPath());
+        videoCaptureManager = new VideoStream(syncRot, this.dataPath(""));
                
 
         String[] args = {"Image processing window"};
@@ -120,7 +126,7 @@ public class Game extends PApplet {
     public void draw() {
 
         if (checkIfResized())
-            //subView.updateDimensions();
+            subView.updateDimensions();
 
         background(210);
         ambientLight(80, 80, 80);

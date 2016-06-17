@@ -47,7 +47,7 @@ public class SubScreen {
 
     public SubScreen() {
         hScrollbar = new HScrollbar(0, 0, 400, 8);
-        //updateDimensions();
+        updateDimensions();
     }
 
     public void draw() {
@@ -123,7 +123,7 @@ public class SubScreen {
         scoreChart.rect(0, 0, chartWidth, CHART_HEIGHT);
         int i = 0;
 
-        for (float scoreAtTime : Game.GAME.getScoresList()) {
+        for (float scoreAtTime : Game.GAME.scoresList) {
             drawBar(scoreAtTime, 1 + (elementWidth + 1) * i++);
         }
 
