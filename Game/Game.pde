@@ -98,14 +98,11 @@ public class Game extends PApplet {
         size(WINDOW_WIDTH, WINDOW_HEIGHT, P3D);
     }
 
-    public void setup() {
-        //mov = new Movie(this, "testvideo.mp4");
-        
+    public void setup() {        
         absoluteRot = new PVector(0,0,0);
         progressiveRot = new PVector(0,0,0);
         stroke(Color.STROKE_COLOR);
         syncRot = new SynchronizedRotationValue();
-        println(this.dataPath());
         videoCaptureManager = new VideoStream(syncRot, this.dataPath(""));
                
 

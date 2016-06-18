@@ -1,6 +1,5 @@
 package ch.epfl.cs211;
 
-import ch.epfl.cs211.VideoCapture.SynchronizedRotationValue;
 import ch.epfl.cs211.VideoCapture.VideoStream;
 import ch.epfl.cs211.display2D.HUD;
 import ch.epfl.cs211.display2D.SubScreen;
@@ -63,6 +62,9 @@ public class Game extends PApplet {
 
     public static float maxScore = 0f;
     private final Deque<Float> scoresList;
+    SynchronizedRotationValue syncRot;
+    PVector absoluteRot;
+    PVector progressiveRot;
     //Video capture
     private VideoStream videoCaptureManager;
     //2D
@@ -73,9 +75,6 @@ public class Game extends PApplet {
     private Mover mover;
     private ClosedCylinder closedCylinder;
     private boolean modeHasChanged;
-    private SynchronizedRotationValue syncRot;
-    private PVector absoluteRot;
-    private PVector progressiveRot;
     private List<PVector> obstacleList;
     //Game features
     private int oldWidth;
@@ -267,10 +266,11 @@ public class Game extends PApplet {
         }
     }
 
-    private boolean checkIfResized() {
+    public boolean checkIfResized() {
         if (oldHeight != height || oldWidth != width) {
             oldHeight = height;
             oldWidth = width;
+            System.out.println("Detected screen resize");
             return true;
         }
         return false;

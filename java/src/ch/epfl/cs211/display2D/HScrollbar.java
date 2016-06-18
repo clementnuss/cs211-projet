@@ -4,19 +4,17 @@ import processing.core.PApplet;
 
 import static ch.epfl.cs211.Game.GAME;
 
-class HScrollbar {
-  private final float barWidth;  //Bar's width in pixels
-  private final float barHeight; //Bar's height in pixels
-  private float xPosition;  //Bar's x position in pixels
-  private float yPosition;  //Bar's y position in pixels
+public class HScrollbar {
+  final float barWidth;  //Bar's width in pixels
+  final float barHeight; //Bar's height in pixels
+  float xPosition;  //Bar's x position in pixels
+  float yPosition;  //Bar's y position in pixels
 
-  private float sliderPosition;
-  private float newSliderPosition;    //Position of slider
-  private float sliderPositionMin;
-  private float sliderPositionMax; //Max and min values of slider
+  float sliderPosition, newSliderPosition;    //Position of slider
+  float sliderPositionMin, sliderPositionMax; //Max and min values of slider
 
-  private boolean mouseOver;  //Is the mouse over the slider?
-  private boolean locked;     //Is the mouse clicking and dragging the slider now?
+  boolean mouseOver;  //Is the mouse over the slider?
+  boolean locked;     //Is the mouse clicking and dragging the slider now?
 
   /**
    * @brief Creates a new horizontal scrollbar
@@ -70,7 +68,7 @@ class HScrollbar {
    * 
    * @return val clamped into the interval [minVal, maxVal]
    */
-  private float constrain(float val, float minVal, float maxVal) {
+  public float constrain(float val, float minVal, float maxVal) {
     return PApplet.min(PApplet.max(val, minVal), maxVal);
   }
 
@@ -79,7 +77,7 @@ class HScrollbar {
    *
    * @return Whether the mouse is hovering the scrollbar
    */
-  private boolean isMouseOver() {
+  public boolean isMouseOver() {
     return (GAME.mouseX > xPosition && GAME.mouseX < xPosition+barWidth &&
             GAME.mouseY > yPosition && GAME.mouseY < yPosition+barHeight);
   }

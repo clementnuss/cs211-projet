@@ -8,9 +8,11 @@ import java.util.Arrays;
 import java.util.List;
 
 
-class Quad {
+public class Quad {
 
     private final static float MAX_COS = 0.85f;
+    private final float QUAD_MAX_AREA = 250000;
+    private final float QUAD_MIN_AREA = 40000;
 
     private final float area;
     private final boolean nonFlat;
@@ -48,8 +50,6 @@ class Quad {
         float cos4 = Math.abs(v14.dot(v21) / (v14_mag * v21_mag));
 
         area = Math.abs(0.5f * (i1 + i2 + i3 + i4));
-        float QUAD_MIN_AREA = 40000;
-        float QUAD_MAX_AREA = 250000;
         hasValidArea = (QUAD_MIN_AREA < area && area < QUAD_MAX_AREA);
         isConvex = (i1 > 0 && i2 > 0 && i3 > 0 && i4 > 0)
                 || (i1 < 0 && i2 < 0 && i3 < 0 && i4 < 0);

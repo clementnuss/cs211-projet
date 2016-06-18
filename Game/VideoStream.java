@@ -4,9 +4,6 @@ import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.core.PVector;
 import processing.event.KeyEvent;
-import processing.video.*;
-
-import java.util.*;
 
 class VideoStream extends PApplet {
 
@@ -82,7 +79,7 @@ class VideoStream extends PApplet {
         println("Game's dataPath: \t\"" + dataPath + "\"\n");
 
       
-        mov = new Movie(this, "testvideo.mp4");
+        mov = new Movie(this, "C:\\Users\\Leandro\\OneDrive\\Coding\\Processing\\cs211-projet\\Game\\data\\testvideo.mp4");
         mov.loop();
 
         from2Dto3Dtransformer = new TwoDThreeD(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);

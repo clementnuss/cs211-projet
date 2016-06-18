@@ -6,7 +6,7 @@ import processing.core.PVector;
 import java.util.*;
 
 
-class QuadGraph {
+public class QuadGraph {
 
     private static final List<int[]> cycles = new ArrayList<>();
     private static int[][] graph;
@@ -122,9 +122,9 @@ class QuadGraph {
     private  List<int[]> findCycles() {
 
         cycles.clear();
-        for (int[] aGraph : graph) {
-            for (int anAGraph : aGraph) {
-                findNewCycles(new int[]{anAGraph});
+        for (int i = 0; i < graph.length; i++) {
+            for (int j = 0; j < graph[i].length; j++) {
+                findNewCycles(new int[]{graph[i][j]});
             }
         }
         return cycles;
@@ -135,12 +135,12 @@ class QuadGraph {
         int x;
         int[] sub = new int[path.length + 1];
 
-        for (int[] aGraph : graph)
+        for (int i = 0; i < graph.length; i++)
             for (int y = 0; y <= 1; y++)
-                if (aGraph[y] == n)
+                if (graph[i][y] == n)
                 //  edge refers to our current node
                 {
-                    x = aGraph[(y + 1) % 2];
+                    x = graph[i][(y + 1) % 2];
                     if (!visited(x, path))
                     //  neighbor node not on path yet
                     {

@@ -1,6 +1,5 @@
 package ch.epfl.cs211.display2D;
 
-import ch.epfl.cs211.Game;
 import ch.epfl.cs211.objects.Plate;
 import ch.epfl.cs211.physicsEngine.Mover;
 import ch.epfl.cs211.tools.Color;
@@ -24,16 +23,16 @@ import static processing.core.PApplet.map;
 public class SubScreen {
 
     public final static int VISUALISATION_HEIGHT = 120;
-    private final static int VISUALISATION_OFFSET = 10;
-    private final static int TOP_HEIGHT = 100;
-    private final static int TOP_WIDTH = 100;
-    private final static int SCORE_WIDTH = 100;
-    private final static int SCORE_HEIGHT = 100;
-    private final static int CHART_HEIGHT = 100;
+    public final static int VISUALISATION_OFFSET = 10;
+    public final static int TOP_HEIGHT = 100;
+    public final static int TOP_WIDTH = 100;
+    public final static int SCORE_WIDTH = 100;
+    public final static int SCORE_HEIGHT = 100;
+    public final static int CHART_HEIGHT = 100;
     private final static int CHART_ELEM_WIDTH = 5;
     private final static int PLOT_MAX_ELEMENTS = 25; //Should be a number that divides CHART_ELEM_WIDTH
-    private static int visualisationWidth;
-    private static int chartWidth;
+    public static int visualisationWidth;
+    public static int chartWidth;
     private final HScrollbar hScrollbar;
     private PGraphics topView;
     private PGraphics scoreBoard;
@@ -159,7 +158,7 @@ public class SubScreen {
         return Math.round(chartWidth / (elementWidth + 1));
     }
 
-    private void updateChart() {
+    public void updateChart() {
         elementWidth = (1.5f * hScrollbar.getPos() + 0.5f) * CHART_ELEM_WIDTH;
     }
 
@@ -169,8 +168,9 @@ public class SubScreen {
      */
     public void updateDimensions() {
         backGroundX = 0;
-        backGroundY = Game.WINDOW_HEIGHT - VISUALISATION_HEIGHT;
-        visualisationWidth = Game.WINDOW_WIDTH;
+        backGroundY = GAME.height - VISUALISATION_HEIGHT;
+        visualisationWidth = GAME.width;
+        System.out.println("vis width is: " + visualisationWidth);
         chartWidth = visualisationWidth - TOP_WIDTH - SCORE_WIDTH - 4 * VISUALISATION_OFFSET;
         backGroundView = GAME.createGraphics(visualisationWidth, VISUALISATION_HEIGHT);
         topView = GAME.createGraphics(TOP_WIDTH, TOP_HEIGHT);

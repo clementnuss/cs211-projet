@@ -1,5 +1,6 @@
 package ch.epfl.cs211.VideoCapture;
 
+import ch.epfl.cs211.SynchronizedRotationValue;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PImage;
@@ -21,7 +22,7 @@ public class VideoStream extends PApplet {
     /*===============================================================
         Values for the Hough transform
       ===============================================================*/
-    private static final float discretizationStepsPhi = 0.01f;
+    private static final float discretizationStepsPhi = 0.02f;
     private static final float discretizationStepsR = 1.8f;
     private final static int MIN_VOTES = 120;
     private final static int NEIGHBORHOOD_SIZE = 16;
@@ -32,16 +33,21 @@ public class VideoStream extends PApplet {
     // HSV bounds container
     private final HSVBounds hsvBounds = new HSVBounds();
     private final float[] sobelKernel = {1f, 0f, -1f};
-    private final float[] gaussKernel = {0.3f, 0.4f, 0.3f};
+    private final float SOBEL_PERCENTAGE = 0.3f;
 
     /*===============================================================
         Values for the Sobel operator
       ===============================================================*/
-    private boolean pause = false;
+    private final float[] gaussKernel = {0.3f, 0.4f, 0.3f};
+    Comparator<Integer> houghComparator;
 
     /*===============================================================
         Values for the gauss operator
       ===============================================================*/
+    Movie mov;
+    Quad capturedBoard;
+    QuadGraph qGraph;
+    private boolean pause = false;
     private PVector rotation = new PVector(0, 0, 0);
     private long lastSmoothRotationUpdate = 0;
     private float smoothingCoeffX, smoothingCoeffY;
@@ -50,17 +56,13 @@ public class VideoStream extends PApplet {
     private int smoothSteps = 0;
     private int phiDim;
     private int rDim;
-    private int rOffset;
-    private float[] sinTable;
-    private float[] cosTable;
 
      /*===============================================================
         Values for the Quad selection
       ===============================================================*/
-
-    private Movie mov;
-    private Quad capturedBoard;
-    private QuadGraph qGraph;
+     private int rOffset;
+    private float[] sinTable;
+    private float[] cosTable;
 
     public VideoStream(SynchronizedRotationValue r){
         syncRot = r;
@@ -148,9 +150,23 @@ public class VideoStream extends PApplet {
                 newBoardValue = false;
             }
 
+
+            // We want to (smoothly) update the position of the plate at a 20 FPS rate
+            if ((System.currentTimeMillis() - lastSmoothRotationUpdate) >= 10) {
+
+                if (smoothSteps++ < SMOOTHING_STEPS) {
+                    smoothedRotation.x += smoothingCoeffX;
+                    smoothedRotation.y += smoothingCoeffY;
+                    lastSmoothRotationUpdate = System.currentTimeMillis();
+                }
+
+            }
         }
     }
 
+    public Quad getCapturedBoard() {
+        return capturedBoard;
+    }
 
     /**
      * Filters img using the given HSV bounds.
@@ -298,7 +314,6 @@ public class VideoStream extends PApplet {
 
         for (int y = 2; y < img.height - 2; y++) {
             for (int x = 2; x < img.width - 2; x++) {
-                float SOBEL_PERCENTAGE = 0.3f;
                 if (buffer[y][x] > (max * SOBEL_PERCENTAGE))
                     result.pixels[y * img.width + x] = 0xFFFFFFFF;
                 else
@@ -327,7 +342,7 @@ public class VideoStream extends PApplet {
 
         // our accumulator (with a 1 pix margin around)
         int[] accumulator = new int[(phiDim + 2) * (rDim + 2)];
-        Comparator<Integer> houghComparator = new HoughComparator(accumulator);
+        houghComparator = new HoughComparator(accumulator);
         for (int y = 0; y < edgeImg.height; y++) {
             for (int x = 0; x < edgeImg.width; x++) {
 

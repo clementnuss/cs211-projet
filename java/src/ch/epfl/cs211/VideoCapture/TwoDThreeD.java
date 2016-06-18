@@ -6,17 +6,17 @@ import processing.core.PVector;
 
 import java.util.List;
 
-class TwoDThreeD {
+public class TwoDThreeD {
   
   // default focal length, well suited for most webcams
-  private final float f = 700;
+  final float f = 700;
   
   // intrisic camera matrix
-  private final float[][] K = {{f, 0, 0},
+  final float[][] K = {{f, 0, 0},
                    {0,f,0},
                    {0,0,1}};
   // the 3D coordinates of the physical board corners, clockwise
-  private final float[][] physicalCorners = {
+  final float[][] physicalCorners = {
           {-128,-128,0,1},
           {128, -128,0,1},
           {128, 128, 0,1},
@@ -66,7 +66,7 @@ class TwoDThreeD {
   }
 
 
-    private double[][] solveExtrinsicMatrix(List<PVector> points2D) {
+  public double[][] solveExtrinsicMatrix(List<PVector> points2D) {
   
     // p ~= K · [R|t] · P
     // with P the (3D) corners of the physical board, p the (2D) 
@@ -148,7 +148,7 @@ class TwoDThreeD {
 
   }
 
-    private PVector rotationFromMatrix(float[][] mat) {
+  public PVector rotationFromMatrix(float[][] mat) {
 
     // Assuming rotation order is around x,y,z
     PVector rot = new PVector();

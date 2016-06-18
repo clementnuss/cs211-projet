@@ -4,7 +4,7 @@
  */
 package ch.epfl.cs211.VideoCapture;
 
-class HSVBounds {
+public class HSVBounds {
 
     private float h_min, s_min, v_min,
             h_max, s_max, v_max, intensity;

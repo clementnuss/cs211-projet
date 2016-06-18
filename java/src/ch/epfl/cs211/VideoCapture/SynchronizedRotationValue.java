@@ -16,11 +16,11 @@ public class SynchronizedRotationValue {
         rot = new PVector(0,0,0);
     }
 
-    public synchronized PVector getRot() {
+    public PVector getRot() {
         return rot.copy();
     }
 
-    public synchronized void setRot(PVector r){
+    public void setRot(PVector r) {
         rot.x = r.x;
         rot.y = r.y;
         rot.z = r.z;
