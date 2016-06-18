@@ -3,17 +3,12 @@
  *  Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
  *
  */
-package ch.epfl.cs211.display2D;
 
-import ch.epfl.cs211.Game;
 
 public class HUD {
 
-    private final int x;
-    private final int y;
-    private final int width;
-    private final int height;
-    private final int color;
+    private int x, y, width, height, z;
+    private int color;
 
     /**
      *

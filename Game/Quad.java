@@ -1,17 +1,22 @@
 
 
+import processing.core.PApplet;
 import processing.core.PVector;
+import java.util.Arrays;
+import java.util.List;
+
 
 public class Quad {
 
-    private final static float MAX_COS = 0.55f; //In radians. Roughly 60 degrees
-    private final float QUAD_MAX_AREA = 150000;
-    private final float QUAD_MIN_AREA = 15000;
+    private final static float MAX_COS = 0.85f;
+    private final float QUAD_MAX_AREA = 250000;
+    private final float QUAD_MIN_AREA = 40000;
 
     private final float area;
     private final boolean nonFlat;
     private final boolean isConvex;
     private final boolean hasValidArea;
+    private final PApplet parentWindow;
 
     public PVector c1() {
         return c1;
@@ -29,9 +34,14 @@ public class Quad {
         return c4;
     }
 
+    public List<PVector> cornersAsList(){
+        return Arrays.asList(c1,c2,c3,c4);
+    }
+
     private final PVector c1,c2,c3,c4;
 
-    public Quad(PVector c1, PVector c2, PVector c3, PVector c4) {
+    public Quad(PVector c1, PVector c2, PVector c3, PVector c4, PApplet parentWindow) {
+        this.parentWindow = parentWindow;
         this.c1 = c1;
         this.c2 = c2;
         this.c3 = c3;
@@ -58,7 +68,7 @@ public class Quad {
         float cos3 = Math.abs(v43.dot(v14) / (v43_mag * v14_mag));
         float cos4 = Math.abs(v14.dot(v21) / (v14_mag * v21_mag));
 
-        area = Math.abs(0.5f * (i1 + i3));
+        area = Math.abs(0.5f * (i1 + i2 + i3 + i4));
         hasValidArea = (QUAD_MIN_AREA < area && area < QUAD_MAX_AREA);
         isConvex = (i1 > 0 && i2 > 0 && i3 > 0 && i4 > 0)
                 || (i1 < 0 && i2 < 0 && i3 < 0 && i4 < 0);
@@ -82,15 +92,15 @@ public class Quad {
     }
 
     public void drawSurface(){
-        QuadDetection.INST.fill(QuadDetection.INST.color(250, 102, 7));
-        QuadDetection.INST.quad(c1.x, c1.y, c2.x, c2.y, c3.x, c3.y, c4.x, c4.y);
+        parentWindow.fill(parentWindow.color(250, 102, 7));
+        parentWindow.quad(c1.x, c1.y, c2.x, c2.y, c3.x, c3.y, c4.x, c4.y);
     }
 
     public void drawCorners(){
-      QuadDetection.INST.fill(255, 128, 0);  
-      QuadDetection.INST.ellipse(c1.x, c1.y, 10, 10);
-      QuadDetection.INST.ellipse(c2.x, c2.y, 10, 10 );
-      QuadDetection.INST.ellipse(c3.x, c3.y, 10, 10);
-      QuadDetection.INST.ellipse(c4.x, c4.y, 10, 10);
-  }
+        parentWindow.fill(255, 128, 0);
+        parentWindow.ellipse(c1.x, c1.y, 10, 10);
+        parentWindow.ellipse(c2.x, c2.y, 10, 10);
+        parentWindow.ellipse(c3.x, c3.y, 10, 10);
+        parentWindow.ellipse(c4.x, c4.y, 10, 10);
+    }
 }

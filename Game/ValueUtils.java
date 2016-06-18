@@ -3,7 +3,6 @@
  *  Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
  *
  */
-package ch.epfl.cs211.tools;
 
 import java.text.DecimalFormat;
 

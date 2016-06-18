@@ -2,19 +2,14 @@
  * Visual Computing project (CS211) - 2016
  * Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
  */
-package ch.epfl.cs211.physicsEngine;
 
 
-import ch.epfl.cs211.objects.Plate;
-import ch.epfl.cs211.tools.Color;
 import processing.core.PVector;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static ch.epfl.cs211.tools.ValueUtils.clamp;
 import static processing.core.PApplet.sin;
-import static ch.epfl.cs211.Game.GAME;
 
 public class Mover {
 
@@ -22,7 +17,7 @@ public class Mover {
     public final static float CYLINDER_RADIUS = 25f;
     public final static float GROUND_OFFSET = -Plate.PLATE_THICKNESS/2 - SPHERE_RADIUS;
     public final static float SPHERE_TO_CYLINDER_DISTANCE = SPHERE_RADIUS + CYLINDER_RADIUS;
-    private final static float GRAVITY_SCALAR = 9.81f / GAME.frameRate;
+    private final static float GRAVITY_SCALAR = 9.81f / Game.GAME.frameRate;
     private final static float FRICTION_FACTOR = 0.02f;
 
     private final PVector pos;
@@ -57,15 +52,15 @@ public class Mover {
 
     public void display() {
 
-        GAME.noStroke();
-        GAME.fill(Color.BALL_COLOR);
-        GAME.pushMatrix();
-        GAME.rotateX(plate.getAngleX());
-        GAME.rotateY(plate.getAngleY());
-        GAME.rotateZ(plate.getAngleZ());
-        GAME.translate(pos.x, pos.y, pos.z);
-        GAME.sphere(SPHERE_RADIUS);
-        GAME.popMatrix();
+        Game.GAME.noStroke();
+        Game.GAME.fill(Color.BALL_COLOR);
+        Game.GAME.pushMatrix();
+        Game.GAME.rotateX(plate.getAngleX());
+        Game.GAME.rotateY(plate.getAngleY());
+        Game.GAME.rotateZ(plate.getAngleZ());
+        Game.GAME.translate(pos.x, pos.y, pos.z);
+        Game.GAME.sphere(SPHERE_RADIUS);
+        Game.GAME.popMatrix();
     }
 
     public List<PVector> checkCollisions(List<PVector> cylinders) {
@@ -80,14 +75,14 @@ public class Mover {
         float lowerBoundZ = plate.getZ() - bound;
 
         if (pos.x > upperBoundX || pos.x < lowerBoundX) {
-            pos.x = clamp(pos.x, lowerBoundX, upperBoundX);
+            pos.x = ValueUtils.clamp(pos.x, lowerBoundX, upperBoundX);
             velocity.x = velocity.x * -0.8f;
-            GAME.decScore(velocity.mag());
+            Game.GAME.decScore(velocity.mag());
         }
         if (pos.z > upperBoundZ || pos.z < lowerBoundZ) {
-            pos.z = clamp(pos.z, -bound, bound);
+            pos.z = ValueUtils.clamp(pos.z, -bound, bound);
             velocity.z = velocity.z * -0.8f;
-            GAME.decScore(velocity.mag());
+            Game.GAME.decScore(velocity.mag());
         }
     }
 
@@ -130,7 +125,7 @@ public class Mover {
             pos.x = correctedPos.x;
             pos.z = correctedPos.z;
             velocity = correctedVel.normalize().mult(magVel * 0.8f);
-            GAME.incScore(magVel);
+            Game.GAME.incScore(magVel);
         }
         return toKeep;
     }

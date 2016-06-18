@@ -1,15 +1,29 @@
+import processing.video.*;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.core.PVector;
-
+import processing.event.KeyEvent;
 import java.util.*;
 
+class VideoStream extends PApplet {
 
-public class QuadDetection extends PApplet {
+    private final static int WIDTH = 640;
+    private final static int HEIGHT = 480;
+    private static final float SMOOTHING_STEPS =3;
 
-    private final static int WIDTH = 560;
-    private final static int HEIGHT = 420;
+    private final SynchronizedRotationValue syncRot;
+    private boolean pause = false;
+
+    // Rotation of the plate
+    private PVector smoothedRotation = new PVector(0, 0, 0), rotation = new PVector(0, 0, 0);
+    private long lastSmoothRotationUpdate = 0;
+    private float smoothingCoeffX, smoothingCoeffY;
+
+    private TwoDThreeD from2Dto3Dtransformer;
+    private boolean newBoardValue;
+    private int smoothSteps = 0;
+
 
     // HSV bounds container
     private final HSVBounds hsvBounds = new HSVBounds();
@@ -19,20 +33,20 @@ public class QuadDetection extends PApplet {
       ===============================================================*/
 
     private final float[] sobelKernel = {1f, 0f, -1f};
-    private final static float SOBEL_PERCENTAGE = 0.3f;
+    private final float SOBEL_PERCENTAGE = 0.3f;
 
     /*===============================================================
-        Values for the Gaussian operator
+        Values for the gauss operator
       ===============================================================*/
 
-    private final float[] gaussKernel = {0.33f, 0.33f, 0.33f};
+    private final float[] gaussKernel = {0.3f, 0.4f, 0.3f};
 
     /*===============================================================
         Values for the Hough transform
       ===============================================================*/
-    private static float discretizationStepsPhi = 0.04f;
-    private static float discretizationStepsR = 2.5f;
-    private final static int MIN_VOTES = 160;
+    private static float discretizationStepsPhi = 0.02f;
+    private static float discretizationStepsR = 1.8f;
+    private final static int MIN_VOTES = 120;
     private final static int NEIGHBORHOOD_SIZE = 16;
     private final static int N_LINES = 6;
     private int phiDim;
@@ -46,17 +60,26 @@ public class QuadDetection extends PApplet {
         Values for the Quad selection
       ===============================================================*/
 
-    public static final QuadDetection INST = new QuadDetection();
-    PImage img;
+    Movie mov;
+    Quad capturedBoard;
+    QuadGraph qGraph;
+
+    public VideoStream(SynchronizedRotationValue r){
+        syncRot = r;
+    }
 
     public void settings() {
-        size(2 * WIDTH + 200, HEIGHT);
+        size(WIDTH * 2, HEIGHT);
     }
 
     public void setup() {
-        img = loadImage("images/board4.jpg");
-        img.resize(WIDTH, HEIGHT);
 
+        mov = new Movie(this, Game.VIDEO_PATH);
+        mov.loop();
+
+        from2Dto3Dtransformer = new TwoDThreeD(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
+
+        qGraph = new QuadGraph(this);
         // dimensions of the accumulator
         phiDim = (int) (Math.PI / discretizationStepsPhi);
         rDim = (int) ((Math.hypot(WIDTH, HEIGHT) * 2 + 1) / discretizationStepsR);
@@ -69,98 +92,130 @@ public class QuadDetection extends PApplet {
             sinTable[theta] = (float) Math.sin(thetaRadians);
             cosTable[theta] = (float) Math.cos(thetaRadians);
         }
-        noLoop();
+
     }
+
 
     public void draw() {
+        if (pause) {
+            System.out.println("The program is paused .. press p to start it again");
+        } else {
+            if (mov.available()) {
+                mov.read();
 
-        //IMAGE TREATMENT PIPELINE
-        // 1. saturation threshold
-        // 2. hue threshold
-        // 3. brightness B/W extraction
-        // 4. Gaussian blurring
-        // 5. intensity filtering
-        // 6. Sobel
-        // 7. Hough
-        // 8. Quad selection
+                //IMAGE TREATMENT PIPELINE
+                // 1. saturation threshold
+                // 2. hue threshold
+                // 3. brightness B/W extraction
+                // 4. Gaussian blurring
+                // 5. intensity filtering
+                // 6. Sobel
+                // 7. Hough
+                // 8. Quad selection
 
-        PImage hsvFiltered =
-                intensityFilter(
+                PImage hsvFiltered = intensityFilter(
                         gaussianBlur(
-                                brightnessExtract(
-                                        hueThreshold(
-                                                saturationThreshold(img.copy(), hsvBounds.getS_min(), hsvBounds.getS_max())
-                                                , hsvBounds.getH_min(), hsvBounds.getH_max())
-                                        , hsvBounds.getV_min(), hsvBounds.getV_max())
+                                hsvFilter(mov.copy(), hsvBounds)
                         )
                         , hsvBounds.getIntensity());
-        background(0);
-        PImage toDisplay = sobel(hsvFiltered);
 
-        image(toDisplay, 200 + WIDTH, 0);
-       
-        List<PVector> lines = hough(toDisplay, N_LINES);
+                background(0);
+                image(hsvFiltered, WIDTH, 0);
+                PImage toDisplay = sobel(hsvFiltered);
 
-        if (lines != null && !lines.isEmpty()) {
-            QuadGraph.build(lines, WIDTH, HEIGHT);
+                image(mov, 0, 0);
 
-            List<Quad> quads = QuadGraph.getQuads(lines);
-            int i = QuadGraph.indexOfBestQuad(quads);
-            if (i != -1) {
-              fill(255, 128, 0);  
 
-              ellipse(quads.get(i).c1().x, quads.get(i).c1().y, 10, 10);
-              ellipse(quads.get(i).c2().x, quads.get(i).c2().y, 10, 10 );
-              ellipse(quads.get(i).c3().x, quads.get(i).c3().y, 10, 10);
-              ellipse(quads.get(i).c4().x, quads.get(i).c4().y, 10, 10);
+                List<PVector> lines = hough(toDisplay, N_LINES);
+
+                if (lines != null && !lines.isEmpty()) {
+                    qGraph.build(lines, mov.width, mov.height);
+
+                    List<Quad> quads = qGraph.getQuads(lines);
+                    int i = qGraph.indexOfBestQuad(quads);
+                    if (i != -1) {
+                        capturedBoard = quads.get(i);
+                        capturedBoard.drawSurface();
+                        capturedBoard.drawCorners();
+                        newBoardValue = true;
+                    }
+                }
+
+            }
+
+            if (newBoardValue) {
+                PVector newRotation = from2Dto3Dtransformer.get3DRotations(capturedBoard.cornersAsList());
+                //            println("Got a rotation: ", boardRotation.x, boardRotation.y, boardRotation.z);
+                syncRot.setRot(newRotation);
+                newBoardValue = false;
+            }
+
+
+            // We want to (smoothly) update the position of the plate at a 20 FPS rate
+            if ((System.currentTimeMillis() - lastSmoothRotationUpdate) >= 10) {
+
+                if (smoothSteps++ < SMOOTHING_STEPS) {
+                    smoothedRotation.x += smoothingCoeffX;
+                    smoothedRotation.y += smoothingCoeffY;
+                    lastSmoothRotationUpdate = System.currentTimeMillis();
+                }
+
             }
         }
+    }
 
+    public Quad getCapturedBoard() {
+        return capturedBoard;
     }
 
     /**
-     * Turn black every pixel outside the thresholds
-     * @param img
-     * @param t1 Lower threshold
-     * @param t2 Upper threshold
-     * @return The reference to the input image (the input is modified)
-     */
-    private PImage saturationThreshold(PImage img, float t1, float t2) {
-        img.loadPixels();
-
-        for (int i = 0; i < img.width * img.height; i++) {
-            int originalColor = img.pixels[i];
-            float sat = saturation(originalColor);
-            img.pixels[i] = (t1 <= sat && sat <= t2) ? originalColor : 0x0;
-        }
-        img.updatePixels();
-        return img;
-    }
-
-    /**
-     * Filter the image based on its brightness. Every pixel
-     * whose brightness is between the lower threshold and the upper threshold is painted
-     * WHITE, otherwise it is painted BLACK.
+     * Filters img using the given HSV bounds.
      *
      * @param img
-     * @param t1  Lower threshold
-     * @param t2  Upper threshold
-     * @return A reference to the input image (the input is modified)
+     * @param bounds the HSV bounds
+     * @return The reference to the input image (the input is modified)
      */
-    private PImage brightnessExtract(PImage img, float t1, float t2) {
+    private PImage hsvFilter(PImage img, HSVBounds bounds) {
+
+        float minH = bounds.getH_min();
+        float maxH = bounds.getH_max();
+        float minS = bounds.getS_min();
+        float maxS = bounds.getS_max();
+        float minV = bounds.getV_min();
+        float maxV = bounds.getV_max();
+
         img.loadPixels();
+
         for (int i = 0; i < img.width * img.height; i++) {
-            float b = brightness(img.pixels[i]);
-            img.pixels[i] = (t1 < b && b < t2) ? 0xFFFFFFFF : 0x0;
+
+
+            int originalColor = img.pixels[i];
+            float s = saturation(originalColor);
+
+
+            if (minS <= s && s <= maxS) {
+                float h = hue(originalColor);
+                if (minH <= h && h <= maxH) {
+                    float v = brightness(originalColor);
+                    if (minV <= v && v <= maxV) {
+                        img.pixels[i] = 0xFFFFFFFF;
+                        continue;
+                    }
+                }
+            }
+            img.pixels[i] = 0x0;
         }
         img.updatePixels();
         return img;
     }
+
+
 
     /**
      * Turn black every pixel lower than the given threshold
+     *
      * @param img
-     * @param t Threshold
+     * @param t   Threshold
      * @return The reference to the input image (the input is modified)
      */
     private PImage intensityFilter(PImage img, float t) {
@@ -172,29 +227,10 @@ public class QuadDetection extends PApplet {
         return img;
     }
 
-    /**
-     * Turn black every pixel outside the thresholds
-     * @param img
-     * @param t1 Lower threshold
-     * @param t2 Upper threshold
-     * @return The reference to the input image (the input is modified)
-     */
-    private PImage hueThreshold(PImage img, float t1, float t2) {
-        img.loadPixels();
-        int originalColor;
-        float originalColorHue;
-
-        for (int i = 0; i < img.width * img.height; i++) {
-            originalColor = img.pixels[i];
-            originalColorHue = hue(originalColor);
-            img.pixels[i] = (t1 <= originalColorHue && originalColorHue <= t2) ? originalColor : 0x0;
-        }
-        img.updatePixels();
-        return img;
-    }
 
     /**
      * Perform separately a horizontal and vertical gaussian blur
+     *
      * @param img
      * @return The reference to the input image (the input is modified)
      */
@@ -204,6 +240,7 @@ public class QuadDetection extends PApplet {
 
     /**
      * Perform a gaussian blur along one direction
+     *
      * @param img
      * @param performHorizontally
      * @return The reference to the input image (the input is modified)
@@ -238,6 +275,7 @@ public class QuadDetection extends PApplet {
 
     /**
      * Perform the sobel operator
+     *
      * @param img
      * @return A new PImage containing the result of the sobel operator
      */
@@ -265,7 +303,7 @@ public class QuadDetection extends PApplet {
                 sum_v += sobelKernel[0] * brightness(img.pixels[(y - 1) * img.width + x]);
                 sum_v += sobelKernel[2] * brightness(img.pixels[(y + 1) * img.width + x]);
 
-                //Compute de gradient
+                //Compute the gradient
                 float sum = sqrt(pow(sum_h, 2) + pow(sum_v, 2));
                 if (sum > max) {
                     max = sum;
@@ -287,9 +325,10 @@ public class QuadDetection extends PApplet {
 
     /**
      * Perform a Hough transform
+     *
      * @param edgeImg A sobel-transformed image
-     * @param nLines The number of lines to pick amoung the best returned by the transform
-     * @return  A list of lines in polar coordinates
+     * @param nLines  The number of lines to pick amoung the best returned by the transform
+     * @return A list of lines in polar coordinates
      */
     private List<PVector> hough(PImage edgeImg, int nLines) {
 
@@ -355,6 +394,7 @@ public class QuadDetection extends PApplet {
 
         Collections.sort(bestCandidatesFiltered, houghComparator);
 
+        /*
         PImage houghImg = createImage(rDim + 2, phiDim + 2, ALPHA);
         for (int i = 0; i < accumulator.length; i++) {
             houghImg.pixels[i] = color(min(255, accumulator[i]));
@@ -363,7 +403,7 @@ public class QuadDetection extends PApplet {
         // You may want to resize the accumulator to make it easier to see:
         houghImg.resize(200, HEIGHT);
         houghImg.updatePixels();
-
+*/
         PGraphics pg = createGraphics(edgeImg.width, edgeImg.height);
         pg.beginDraw();
 
@@ -411,9 +451,83 @@ public class QuadDetection extends PApplet {
             }
         }
         pg.endDraw();
-        image(img, 0, 0);
+        image(mov, 0, 0);
         image(pg.get(), 0, 0);
-        image(houghImg, WIDTH, 0);
         return resultingLines;
+    }
+
+    public void keyPressed(KeyEvent event) {
+        switch (event.getKey()) {
+            //Pause the webcam
+            case 'p':
+                if (pause)
+                    loop();
+                else
+                    noLoop();
+
+                pause = !pause;
+                System.out.println("The program is paused, press p to resume it");
+                break;
+
+            //Sets the hue threshold
+            case 'q':
+                hsvBounds.setH_min(hsvBounds.getH_min() - 3);
+                break;
+            case 'w':
+                hsvBounds.setH_min(hsvBounds.getH_min() + 3);
+                break;
+            case 'a':
+                hsvBounds.setH_max(hsvBounds.getH_max() - 3);
+                break;
+            case 's':
+                hsvBounds.setH_max(hsvBounds.getH_max() + 3);
+                break;
+
+            // Sets the saturation threshold
+            case 'e':
+                hsvBounds.setS_min(hsvBounds.getS_min() - 3);
+                break;
+            case 'r':
+                hsvBounds.setS_min(hsvBounds.getS_min() + 3);
+                break;
+            case 'd':
+                hsvBounds.setS_max(hsvBounds.getS_max() - 3);
+                break;
+            case 'f':
+                hsvBounds.setS_max(hsvBounds.getS_max() + 3);
+                break;
+
+            // Sets the value threshold
+            case 't':
+                hsvBounds.setV_min(hsvBounds.getV_min() - 3);
+                break;
+            case 'z':
+                hsvBounds.setV_min(hsvBounds.getV_min() + 3);
+                break;
+            case 'g':
+                hsvBounds.setV_max(hsvBounds.getV_max() - 3);
+                break;
+            case 'h':
+                hsvBounds.setV_max(hsvBounds.getV_max() + 3);
+                break;
+            case 'u':
+                hsvBounds.set_intensity(hsvBounds.getIntensity() - 1);
+                break;
+            case 'i':
+                hsvBounds.set_intensity(hsvBounds.getIntensity() + 1);
+                break;
+            case 'j':
+                hsvBounds.set_intensity(hsvBounds.getIntensity() - 0.05f);
+                break;
+            case 'k':
+                hsvBounds.set_intensity(hsvBounds.getIntensity() + 0.05f);
+                break;
+        }
+
+        println(hsvBounds);
+    }
+
+    public PVector getRotation() {
+        return smoothedRotation;
     }
 }

@@ -1,13 +1,14 @@
 /**
- * Visual Computing project (CS211) - 2016
- * Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
+ *  Visual Computing project (CS211) - 2016
+ *  Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
+ *
  */
-package ch.epfl.cs211.objects;
 
-import ch.epfl.cs211.Game;
 import processing.core.PShape;
 
-import static java.lang.Math.*;
+import static java.lang.Math.PI;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
 
 class OpenCylinder {
 
@@ -29,7 +30,7 @@ class OpenCylinder {
         cylinder.beginShape(PShape.QUAD_STRIP);
         cylinder.fill(color);
         cylinder.strokeWeight(2);
-        if (withStroke)
+        if(withStroke)
             cylinder.stroke(0);
         else
             cylinder.noStroke();

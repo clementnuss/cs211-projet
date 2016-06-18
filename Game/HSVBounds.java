@@ -7,13 +7,13 @@ public class HSVBounds {
 
     HSVBounds() {
 
-        h_min = 91;
-        h_max = 141;
-        s_min = 62;
+        h_min = 65;
+        h_max = 126;
+        s_min = 30;
         s_max = 255;
         v_min = 30;
-        v_max = 184;
-        intensity = 195;
+        v_max = 255;
+        intensity = 252.9f;
     }
 
     public float getH_min() {
@@ -59,7 +59,7 @@ public class HSVBounds {
     }
 
     public void setH_max(float h_max) {
-        if (h_max <= 255 && h_max > h_min)
+        if (h_max <= 360 && h_max > h_min)
             this.h_max = h_max;
     }
 

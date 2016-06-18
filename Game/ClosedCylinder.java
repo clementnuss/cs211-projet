@@ -3,13 +3,12 @@
  *  Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
  *
  */
-package ch.epfl.cs211.objects;
-
 import processing.core.PShape;
 import processing.core.PVector;
 
-import static ch.epfl.cs211.Game.GAME;
-import static java.lang.Math.*;
+import static java.lang.Math.PI;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
 
 /**
  * Class representing a closed cylinder
@@ -52,12 +51,12 @@ public class ClosedCylinder {
 
 
 
-        closedCylinder = GAME.createShape(PShape.GROUP);
+        closedCylinder = Game.GAME.createShape(PShape.GROUP);
         closedCylinder.addChild(new OpenCylinder(cylRadius, cylHeight, cylResolution, color, false).getShape());
         closedCylinder.addChild(bottomSurface, 0);
         closedCylinder.addChild(topSurface, 1);
 
-        closedCylinderStroked = GAME.createShape(PShape.GROUP);
+        closedCylinderStroked = Game.GAME.createShape(PShape.GROUP);
         closedCylinderStroked.addChild(new OpenCylinder(cylRadius, cylHeight, cylResolution, color, true).getShape());
         closedCylinderStroked.addChild(bottomSurfaceForStroked, 0);
         closedCylinderStroked.addChild(topSurfaceForStroked, 1);
@@ -65,17 +64,17 @@ public class ClosedCylinder {
     }
 
     public void display(PVector pos, boolean withStroke) {
-        GAME.pushMatrix();
-        GAME.translate(pos.x, pos.y , pos.z);
+        Game.GAME.pushMatrix();
+        Game.GAME.translate(pos.x, pos.y , pos.z);
         if(withStroke)
-            GAME.shape(closedCylinderStroked);
+            Game.GAME.shape(closedCylinderStroked);
         else{
-            GAME.shape(closedCylinder);}
-        GAME.popMatrix();
+            Game.GAME.shape(closedCylinder);}
+        Game.GAME.popMatrix();
     }
 
     private PShape createDiskSurface(float heightCoord){
-        PShape surface = GAME.createShape();
+        PShape surface = Game.GAME.createShape();
         surface.beginShape(PShape.TRIANGLE_FAN);
         surface.fill(color);
         surface.noStroke();

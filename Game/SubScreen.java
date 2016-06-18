@@ -1,14 +1,7 @@
-package ch.epfl.cs211.display2D;
 
-import ch.epfl.cs211.objects.Plate;
-import ch.epfl.cs211.physicsEngine.Mover;
-import ch.epfl.cs211.tools.Color;
-import ch.epfl.cs211.tools.ValueUtils;
 import processing.core.PGraphics;
 import processing.core.PVector;
 
-import static ch.epfl.cs211.Game.GAME;
-import static ch.epfl.cs211.Game.maxScore;
 import static processing.core.PApplet.map;
 
 
@@ -23,21 +16,24 @@ import static processing.core.PApplet.map;
 public class SubScreen {
 
     public final static int VISUALISATION_HEIGHT = 120;
+    public static int visualisationWidth;
     public final static int VISUALISATION_OFFSET = 10;
     public final static int TOP_HEIGHT = 100;
     public final static int TOP_WIDTH = 100;
     public final static int SCORE_WIDTH = 100;
     public final static int SCORE_HEIGHT = 100;
+    public static int chartWidth;
     public final static int CHART_HEIGHT = 100;
     private final static int CHART_ELEM_WIDTH = 5;
     private final static int PLOT_MAX_ELEMENTS = 25; //Should be a number that divides CHART_ELEM_WIDTH
-    public static int visualisationWidth;
-    public static int chartWidth;
-    private final HScrollbar hScrollbar;
+
     private PGraphics topView;
     private PGraphics scoreBoard;
     private PGraphics scoreChart;
     private PGraphics backGroundView;
+
+    private HScrollbar hScrollbar;
+
     private float backGroundX;
     private float backGroundY;
     private float topViewX;
@@ -55,7 +51,7 @@ public class SubScreen {
     }
 
     public void draw() {
-        GAME.noLights();
+        Game.GAME.noLights();
         drawBackgroundView();
         drawTopView();
         drawScoreView();
@@ -69,7 +65,7 @@ public class SubScreen {
         backGroundView.noStroke();
         backGroundView.rect(0, 0, visualisationWidth, VISUALISATION_HEIGHT);
         backGroundView.endDraw();
-        GAME.image(backGroundView, backGroundX, backGroundY);
+        Game.GAME.image(backGroundView, backGroundX, backGroundY);
     }
 
     private void drawTopView() {
@@ -77,12 +73,12 @@ public class SubScreen {
         topView.fill(Color.SUBSCREEN_TOPVIEW_COLOR);
         topView.noStroke();
         topView.rect(0, 0, TOP_WIDTH, TOP_HEIGHT);
-        float plateBound = GAME.getMover().getBound();
+        float plateBound = Game.GAME.getMover().getBound();
 
         float sphereRadius = map(Mover.SPHERE_RADIUS, 0, Plate.PLATE_WIDTH, 0, TOP_HEIGHT);
         float cylRadius = map(Mover.CYLINDER_RADIUS, 0, Plate.PLATE_WIDTH, 0, TOP_HEIGHT);
 
-        PVector pos = GAME.getMover().getPosition();
+        PVector pos = Game.GAME.getMover().getPosition();
         float px = map(pos.x, -plateBound, plateBound, sphereRadius, TOP_WIDTH - sphereRadius);
         float py = map(pos.z, -plateBound, plateBound, sphereRadius, TOP_HEIGHT - sphereRadius);
 
@@ -90,14 +86,14 @@ public class SubScreen {
         topView.ellipse(px, py, 2 * sphereRadius, 2 * sphereRadius);
 
         topView.fill(Color.CYLINDER_COLOR);
-        for (PVector cyl : GAME.getObstacleList()) {
+        for (PVector cyl : Game.GAME.getObstacleList()) {
             px = map(cyl.x, -plateBound, plateBound, cylRadius, TOP_WIDTH - cylRadius);
             py = map(cyl.z, -plateBound, plateBound, cylRadius, TOP_HEIGHT - cylRadius);
             topView.ellipse(px, py, 2 * cylRadius, 2 * cylRadius);
         }
 
         topView.endDraw();
-        GAME.image(topView, topViewX, topViewY);
+        Game.GAME.image(topView, topViewX, topViewY);
     }
 
     private void drawScoreView() {
@@ -107,13 +103,13 @@ public class SubScreen {
 
         scoreBoard.fill(0xFF000000);
         scoreBoard.textSize(9.5f);
-        scoreBoard.text("Total score: \n   -> " + ValueUtils.roundThreeDecimals(GAME.getScore()) +
-                        "\nVelocity: \n   -> " + ValueUtils.roundThreeDecimals(GAME.getMover().getVelocity().mag())+
-                        "\nLast score: \n    -> " + GAME.getLastChange(),
+        scoreBoard.text("Total score: \n   -> " + ValueUtils.roundThreeDecimals(Game.GAME.getScore()) +
+                        "\nVelocity: \n   -> " + ValueUtils.roundThreeDecimals(Game.GAME.getMover().getVelocity().mag())+
+                        "\nLast score: \n    -> " + Game.GAME.getLastChange(),
                 7, 7, SCORE_WIDTH - 7, SCORE_HEIGHT - 7);
 
         scoreBoard.endDraw();
-        GAME.image(scoreBoard, scoreBoardX, scoreBoardY);
+        Game.GAME.image(scoreBoard, scoreBoardX, scoreBoardY);
     }
 
     private void drawChartView() {
@@ -127,18 +123,18 @@ public class SubScreen {
         scoreChart.rect(0, 0, chartWidth, CHART_HEIGHT);
         int i = 0;
 
-        for (float scoreAtTime : GAME.getScoresList()) {
+        for (float scoreAtTime : Game.GAME.scoresList) {
             drawBar(scoreAtTime, 1 + (elementWidth + 1) * i++);
         }
 
         scoreChart.endDraw();
-        GAME.image(scoreChart, scoreChartX, scoreChartY);
+        Game.GAME.image(scoreChart, scoreChartX, scoreChartY);
     }
 
     private void drawBar(float score, float pos) {
         float elementHeight = CHART_HEIGHT / PLOT_MAX_ELEMENTS;
         scoreChart.fill(Color.SUBSCREEN_CHART_ELEMENT_COLOR);
-        int nElems = Math.round((score / maxScore) * PLOT_MAX_ELEMENTS);
+        int nElems = Math.round((score / Game.GAME.maxScore) * PLOT_MAX_ELEMENTS);
         for (int y = 1; y <= nElems; y++) {
             scoreChart.rect(pos, CHART_HEIGHT - (y * (elementHeight)), elementWidth, elementHeight - 1);
         }
@@ -168,14 +164,13 @@ public class SubScreen {
      */
     public void updateDimensions() {
         backGroundX = 0;
-        backGroundY = GAME.height - VISUALISATION_HEIGHT;
-        visualisationWidth = GAME.width;
-        System.out.println("vis width is: " + visualisationWidth);
+        backGroundY = Game.GAME.height - VISUALISATION_HEIGHT;
+        visualisationWidth = Game.GAME.width;
         chartWidth = visualisationWidth - TOP_WIDTH - SCORE_WIDTH - 4 * VISUALISATION_OFFSET;
-        backGroundView = GAME.createGraphics(visualisationWidth, VISUALISATION_HEIGHT);
-        topView = GAME.createGraphics(TOP_WIDTH, TOP_HEIGHT);
-        scoreBoard = GAME.createGraphics(SCORE_WIDTH, SCORE_HEIGHT);
-        scoreChart = GAME.createGraphics(chartWidth, CHART_HEIGHT);
+        backGroundView = Game.GAME.createGraphics(visualisationWidth, VISUALISATION_HEIGHT);
+        topView = Game.GAME.createGraphics(TOP_WIDTH, TOP_HEIGHT);
+        scoreBoard = Game.GAME.createGraphics(SCORE_WIDTH, SCORE_HEIGHT);
+        scoreChart = Game.GAME.createGraphics(chartWidth, CHART_HEIGHT);
 
         topViewX = backGroundX + VISUALISATION_OFFSET;
         topViewY = backGroundY + VISUALISATION_OFFSET;

@@ -1,7 +1,7 @@
 package ch.epfl.cs211.VideoCapture;
 
-class HoughComparator implements java.util.Comparator<Integer> {
-    private final int[] accumulator;
+public class HoughComparator implements java.util.Comparator<Integer> {
+    final int[] accumulator;
 
     public HoughComparator(int[] accumulator) {
         this.accumulator = accumulator;

@@ -1,53 +1,43 @@
-package ch.epfl.cs211;
-
-import ch.epfl.cs211.VideoCapture.VideoStream;
-import ch.epfl.cs211.display2D.HUD;
-import ch.epfl.cs211.display2D.SubScreen;
-import ch.epfl.cs211.objects.ClosedCylinder;
-import ch.epfl.cs211.objects.GameModes;
-import ch.epfl.cs211.objects.Plate;
-import ch.epfl.cs211.physicsEngine.Mover;
-import ch.epfl.cs211.tools.Color;
 import processing.core.PApplet;
 import processing.core.PVector;
 import processing.event.KeyEvent;
 import processing.event.MouseEvent;
 
+import java.util.Comparator;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
-import static ch.epfl.cs211.tools.ValueUtils.roundThreeDecimals;
+
+// Imports for the java files
+import papaya.*;
+import processing.video.*;
 
 
 /**
- * <p>
  * Visual Computing project (CS211) - 2016
  * Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
- * <p>
- * <p>
- * PROCESSING 3D AXIS
- * <p>
- * <p>
- * ¬ -Z
- * /
- * /
- * /
- * -------------> X
- * |
- * |
- * |
- * |
- * V  Y
  */
-
-/**
- * Classe singleton représentant l'application principale du jeu
- */
+ 
 public class Game extends PApplet {
-
-    public static final String VIDEO_PATH = "java\\data\\testvideo.mp4";
+  
+    /** =============================================================================================================================¬
+    *   =============================================================================================================================||
+    *                                                                                                                                ||
+    *                                 PLEASE MODIFY HERE THE PATH TO THE TEST VIDEO TO YOUR CONVENIENCE                              ||
+    *                                                                                                                                ||
+    *   vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv||
+    */
+    public static final String VIDEO_PATH = "C:\\Users\\Leandro\\OneDrive\\Coding\\Processing\\cs211-projet\\Game\\data\\testvideo.mp4";
+    /** 
+    *  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^||              
+    *                                                                                                                                ||
+    *                                 PLEASE MODIFY HERE THE PATH TO THE TEST VIDEO TO YOUR CONVENIENCE                              ||
+    *                                                                                                                                ||
+    *   =============================================================================================================================||
+    *   =============================================================================================================================||
+    */
 
     //Game instance
     public static final Game GAME = new Game();
@@ -63,37 +53,43 @@ public class Game extends PApplet {
     private final static float SCORE_COEFFICIENT = 3f;
 
     public static float maxScore = 0f;
-    private final Deque<Float> scoresList;
-    SynchronizedRotationValue syncRot;
-    PVector absoluteRot;
-    PVector progressiveRot;
+
     //Video capture
     private VideoStream videoCaptureManager;
+
     //2D
     private SubScreen subView;
     private HUD hudPlate, hudBall, hudMouse;
+
     //Physics
     private Plate plate;
     private Mover mover;
     private ClosedCylinder closedCylinder;
     private boolean modeHasChanged;
+
+    SynchronizedRotationValue syncRot;
+    PVector absoluteRot;
+    PVector progressiveRot;
+
     private List<PVector> obstacleList;
+
     //Game features
     private int oldWidth;
     private int oldHeight;
     private GameModes mode;
     private float score = 0f, prevScore = 0f, lastChange = 0f;
+    public Deque<Float> scoresList;
     private int scoreInterval = 0;
 
-    private Game() {
-        scoresList = new ArrayDeque<>();
-        oldWidth = width;
-        oldHeight = height;
+    private Game(){
+      scoresList = new ArrayDeque();
+      oldWidth = width;
+      oldHeight = height;
     }
+    
+   public static void main(String[] args) {
 
-    public static void main(String[] args) {
-
-        PApplet.runSketch(new String[]{"ch.epfl.cs211.Game"}, Game.GAME);
+        PApplet.runSketch(new String[]{"ch.epfl.cs211.Game"}, GAME);
 
     }
 
@@ -101,12 +97,13 @@ public class Game extends PApplet {
         size(WINDOW_WIDTH, WINDOW_HEIGHT, P3D);
     }
 
-    public void setup() {
+    public void setup() {        
         absoluteRot = new PVector(0,0,0);
         progressiveRot = new PVector(0,0,0);
         stroke(Color.STROKE_COLOR);
         syncRot = new SynchronizedRotationValue();
         videoCaptureManager = new VideoStream(syncRot);
+               
 
         String[] args = {"Image processing window"};
         PApplet.runSketch(args, videoCaptureManager);
@@ -119,7 +116,7 @@ public class Game extends PApplet {
         mover = new Mover(plate);
         closedCylinder = new ClosedCylinder(Mover.CYLINDER_RADIUS, 75, 30, Color.CYLINDER_COLOR);
         mode = GameModes.REGULAR;
-        obstacleList = new ArrayList<>();
+        obstacleList = new ArrayList();
     }
 
     public void draw() {
@@ -193,12 +190,12 @@ public class Game extends PApplet {
                 "\nSensitivity: " + plate.getSensitivity() +
                 "\nScore: " + score);
 
-        hudBall.display("Ball x= " + roundThreeDecimals(mover.getX()) +
-                "\nBall y= " + roundThreeDecimals(mover.getY()) +
-                "\nBall z= " + roundThreeDecimals(mover.getZ()) +
-                "\nVel x= " + roundThreeDecimals(mover.getVelocity().x) +
-                "\nVel y= " + roundThreeDecimals(mover.getVelocity().y) +
-                "\nVel z= " + roundThreeDecimals(mover.getVelocity().z));
+        hudBall.display("Ball x= " + ValueUtils.roundThreeDecimals(mover.getX()) +
+                "\nBall y= " + ValueUtils.roundThreeDecimals(mover.getY()) +
+                "\nBall z= " + ValueUtils.roundThreeDecimals(mover.getZ()) +
+                "\nVel x= " + ValueUtils.roundThreeDecimals(mover.getVelocity().x) +
+                "\nVel y= " + ValueUtils.roundThreeDecimals(mover.getVelocity().y) +
+                "\nVel z= " + ValueUtils.roundThreeDecimals(mover.getVelocity().z));
     }
 
     private void drawShiftedMode() {
@@ -268,7 +265,7 @@ public class Game extends PApplet {
         }
     }
 
-    private boolean checkIfResized() {
+    public boolean checkIfResized() {
         if (oldHeight != height || oldWidth != width) {
             oldHeight = height;
             oldWidth = width;

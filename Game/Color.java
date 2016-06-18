@@ -3,8 +3,6 @@
  *  Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
  *
  */
-package ch.epfl.cs211.tools;
-
 /**
  * Utility class to store colors for the game
  */
@@ -21,4 +19,3 @@ public class Color {
     public final static int SUBSCREEN_CHART_ELEMENT_COLOR = 0xff788888;
 
 }
-
