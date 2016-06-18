@@ -164,8 +164,8 @@ public class SubScreen {
      */
     public void updateDimensions() {
         backGroundX = 0;
-        backGroundY = Game.GAME.WINDOW_HEIGHT - VISUALISATION_HEIGHT;
-        visualisationWidth = Game.GAME.WINDOW_WIDTH;
+        backGroundY = Game.GAME.height - VISUALISATION_HEIGHT;
+        visualisationWidth = Game.GAME.width;
         chartWidth = visualisationWidth - TOP_WIDTH - SCORE_WIDTH - 4 * VISUALISATION_OFFSET;
         backGroundView = Game.GAME.createGraphics(visualisationWidth, VISUALISATION_HEIGHT);
         topView = Game.GAME.createGraphics(TOP_WIDTH, TOP_HEIGHT);

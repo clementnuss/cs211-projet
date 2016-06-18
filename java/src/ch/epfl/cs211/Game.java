@@ -47,6 +47,8 @@ import static ch.epfl.cs211.tools.ValueUtils.roundThreeDecimals;
  */
 public class Game extends PApplet {
 
+    public static final String VIDEO_PATH = "java\\data\\testvideo.mp4";
+
     //Game instance
     public static final Game GAME = new Game();
 
@@ -266,11 +268,10 @@ public class Game extends PApplet {
         }
     }
 
-    public boolean checkIfResized() {
+    private boolean checkIfResized() {
         if (oldHeight != height || oldWidth != width) {
             oldHeight = height;
             oldWidth = width;
-            System.out.println("Detected screen resize");
             return true;
         }
         return false;

@@ -1,5 +1,6 @@
 package ch.epfl.cs211.VideoCapture;
 
+import ch.epfl.cs211.Game;
 import ch.epfl.cs211.SynchronizedRotationValue;
 import processing.core.PApplet;
 import processing.core.PGraphics;
@@ -74,7 +75,7 @@ public class VideoStream extends PApplet {
 
     public void setup() {
 
-        mov = new Movie(this, "java\\data\\testvideo.mp4");
+        mov = new Movie(this, Game.VIDEO_PATH);
         mov.loop();
 
         from2Dto3Dtransformer = new TwoDThreeD(WINDOW_WIDTH, WINDOW_HEIGHT);

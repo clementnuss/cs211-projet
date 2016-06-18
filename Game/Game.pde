@@ -3,6 +3,7 @@ import processing.core.PVector;
 import processing.event.KeyEvent;
 import processing.event.MouseEvent;
 
+import java.util.Comparator;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -15,30 +16,28 @@ import processing.video.*;
 
 
 /**
- * <p>
  * Visual Computing project (CS211) - 2016
  * Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
- * <p>
- * <p>
- * PROCESSING 3D AXIS
- * <p>
- * <p>
- * ¬ -Z
- * /
- * /
- * /
- * -------------> X
- * |
- * |
- * |
- * |
- * V  Y
  */
-
-/**
- * Classe singleton représentant l'application principale du jeu
- */
+ 
 public class Game extends PApplet {
+  
+    /** =============================================================================================================================¬
+    *   =============================================================================================================================||
+    *                                                                                                                                ||
+    *                                 PLEASE MODIFY HERE THE PATH TO THE TEST VIDEO TO YOUR CONVENIENCE                              ||
+    *                                                                                                                                ||
+    *   vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv||
+    */
+    public static final String VIDEO_PATH = "C:\\Users\\Leandro\\OneDrive\\Coding\\Processing\\cs211-projet\\Game\\data\\testvideo.mp4";
+    /** 
+    *  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^||              
+    *                                                                                                                                ||
+    *                                 PLEASE MODIFY HERE THE PATH TO THE TEST VIDEO TO YOUR CONVENIENCE                              ||
+    *                                                                                                                                ||
+    *   =============================================================================================================================||
+    *   =============================================================================================================================||
+    */
 
     //Game instance
     public static final Game GAME = new Game();
@@ -103,7 +102,7 @@ public class Game extends PApplet {
         progressiveRot = new PVector(0,0,0);
         stroke(Color.STROKE_COLOR);
         syncRot = new SynchronizedRotationValue();
-        videoCaptureManager = new VideoStream(syncRot, this.dataPath(""));
+        videoCaptureManager = new VideoStream(syncRot);
                
 
         String[] args = {"Image processing window"};

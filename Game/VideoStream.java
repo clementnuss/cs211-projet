@@ -1,9 +1,10 @@
-
+import processing.video.*;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.core.PVector;
 import processing.event.KeyEvent;
+import java.util.*;
 
 class VideoStream extends PApplet {
 
@@ -12,7 +13,6 @@ class VideoStream extends PApplet {
     private static final float SMOOTHING_STEPS =3;
 
     private final SynchronizedRotationValue syncRot;
-    String dataPath;
     private boolean pause = false;
 
     // Rotation of the plate
@@ -64,9 +64,8 @@ class VideoStream extends PApplet {
     Quad capturedBoard;
     QuadGraph qGraph;
 
-    public VideoStream(SynchronizedRotationValue r, String gamePath){
+    public VideoStream(SynchronizedRotationValue r){
         syncRot = r;
-        dataPath = gamePath;
     }
 
     public void settings() {
@@ -75,11 +74,7 @@ class VideoStream extends PApplet {
 
     public void setup() {
 
-        println("Inner's dataPath: \t\"" + dataPath("") + "\"\n");
-        println("Game's dataPath: \t\"" + dataPath + "\"\n");
-
-      
-        mov = new Movie(this, "C:\\Users\\Leandro\\OneDrive\\Coding\\Processing\\cs211-projet\\Game\\data\\testvideo.mp4");
+        mov = new Movie(this, Game.VIDEO_PATH);
         mov.loop();
 
         from2Dto3Dtransformer = new TwoDThreeD(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
