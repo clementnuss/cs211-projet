@@ -155,7 +155,7 @@ public class Game extends PApplet {
             modeHasChanged = false;
         }
 
-        plate.setRotation(videoCaptureManager.getRotation());
+
         PVector rotFromVideoProcessing = syncRot.getRot();
 
         if(!absoluteRot.equals(rotFromVideoProcessing)){
