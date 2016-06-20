@@ -51,12 +51,12 @@ public class ClosedCylinder {
 
 
 
-        closedCylinder = Game.GAME.createShape(PShape.GROUP);
+        closedCylinder = TangibleGame.GAME.createShape(PShape.GROUP);
         closedCylinder.addChild(new OpenCylinder(cylRadius, cylHeight, cylResolution, color, false).getShape());
         closedCylinder.addChild(bottomSurface, 0);
         closedCylinder.addChild(topSurface, 1);
 
-        closedCylinderStroked = Game.GAME.createShape(PShape.GROUP);
+        closedCylinderStroked = TangibleGame.GAME.createShape(PShape.GROUP);
         closedCylinderStroked.addChild(new OpenCylinder(cylRadius, cylHeight, cylResolution, color, true).getShape());
         closedCylinderStroked.addChild(bottomSurfaceForStroked, 0);
         closedCylinderStroked.addChild(topSurfaceForStroked, 1);
@@ -64,17 +64,17 @@ public class ClosedCylinder {
     }
 
     public void display(PVector pos, boolean withStroke) {
-        Game.GAME.pushMatrix();
-        Game.GAME.translate(pos.x, pos.y , pos.z);
+        TangibleGame.GAME.pushMatrix();
+        TangibleGame.GAME.translate(pos.x, pos.y , pos.z);
         if(withStroke)
-            Game.GAME.shape(closedCylinderStroked);
+            TangibleGame.GAME.shape(closedCylinderStroked);
         else{
-            Game.GAME.shape(closedCylinder);}
-        Game.GAME.popMatrix();
+            TangibleGame.GAME.shape(closedCylinder);}
+        TangibleGame.GAME.popMatrix();
     }
 
     private PShape createDiskSurface(float heightCoord){
-        PShape surface = Game.GAME.createShape();
+        PShape surface = TangibleGame.GAME.createShape();
         surface.beginShape(PShape.TRIANGLE_FAN);
         surface.fill(color);
         surface.noStroke();

@@ -4,7 +4,6 @@ import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.core.PVector;
 import processing.event.KeyEvent;
-
 import java.util.*;
 
 class VideoStream extends PApplet {
@@ -68,7 +67,7 @@ class VideoStream extends PApplet {
 
     public void setup() {
 
-        mov = new Movie(this, Game.VIDEO_PATH);
+        mov = new Movie(this, TangibleGame.VIDEO_PATH);
         mov.loop();
 
         from2Dto3Dtransformer = new TwoDThreeD(WIDTH, HEIGHT);

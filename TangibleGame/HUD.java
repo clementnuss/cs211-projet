@@ -31,9 +31,9 @@ public class HUD {
      * @param text  the text to be drawn in the HUD
      */
     public void display(String text) {
-        Game.GAME.textSize(14);
-        Game.GAME.fill(color);
-        Game.GAME.text(text, x, y, width, height);  // Specify a z-axis value
+        TangibleGame.GAME.textSize(14);
+        TangibleGame.GAME.fill(color);
+        TangibleGame.GAME.text(text, x, y, width, height);  // Specify a z-axis value
     }
 
 }

@@ -26,7 +26,7 @@ class OpenCylinder {
             z[i] = (float) cos(angle) * cylRadius;
         }
 
-        cylinder = Game.GAME.createShape();
+        cylinder = TangibleGame.GAME.createShape();
         cylinder.beginShape(PShape.QUAD_STRIP);
         cylinder.fill(color);
         cylinder.strokeWeight(2);
@@ -44,7 +44,7 @@ class OpenCylinder {
     }
 
     public void display() {
-        Game.GAME.shape(cylinder);
+        TangibleGame.GAME.shape(cylinder);
     }
 
 

@@ -43,16 +43,16 @@ public class HScrollbar {
     else {
       mouseOver = false;
     }
-    if (Game.GAME.mousePressed && mouseOver) {
+    if (TangibleGame.GAME.mousePressed && mouseOver) {
       locked = true;
     }
-    if (!Game.GAME.mousePressed) {
+    if (!TangibleGame.GAME.mousePressed) {
       locked = false;
     }
     if (locked) {
-      newSliderPosition = constrain(Game.GAME.mouseX - barHeight/2, sliderPositionMin, sliderPositionMax);
+      newSliderPosition = constrain(TangibleGame.GAME.mouseX - barHeight/2, sliderPositionMin, sliderPositionMax);
     }
-    if (Game.GAME.abs(newSliderPosition - sliderPosition) > 1) {
+    if (TangibleGame.GAME.abs(newSliderPosition - sliderPosition) > 1) {
       sliderPosition = sliderPosition + (newSliderPosition - sliderPosition);
         return true;
     }
@@ -69,7 +69,7 @@ public class HScrollbar {
    * @return val clamped into the interval [minVal, maxVal]
    */
   public float constrain(float val, float minVal, float maxVal) {
-    return Game.GAME.min(Game.GAME.max(val, minVal), maxVal);
+    return TangibleGame.GAME.min(TangibleGame.GAME.max(val, minVal), maxVal);
   }
 
   /**
@@ -78,24 +78,24 @@ public class HScrollbar {
    * @return Whether the mouse is hovering the scrollbar
    */
   public boolean isMouseOver() {
-    return (Game.GAME.mouseX > xPosition && Game.GAME.mouseX < xPosition+barWidth &&
-            Game.GAME.mouseY > yPosition && Game.GAME.mouseY < yPosition+barHeight);
+    return (TangibleGame.GAME.mouseX > xPosition && TangibleGame.GAME.mouseX < xPosition+barWidth &&
+            TangibleGame.GAME.mouseY > yPosition && TangibleGame.GAME.mouseY < yPosition+barHeight);
   }
 
   /**
    * @brief Draws the scrollbar in its current state
    */ 
   public void draw() {
-      Game.GAME.noStroke();
-      Game.GAME.fill(204);
-      Game.GAME.rect(xPosition, yPosition, barWidth, barHeight);
+      TangibleGame.GAME.noStroke();
+      TangibleGame.GAME.fill(204);
+      TangibleGame.GAME.rect(xPosition, yPosition, barWidth, barHeight);
     if (mouseOver || locked) {
-        Game.GAME.fill(0, 0, 0);
+        TangibleGame.GAME.fill(0, 0, 0);
     }
     else {
-        Game.GAME.fill(102, 102, 102);
+        TangibleGame.GAME.fill(102, 102, 102);
     }
-      Game.GAME.rect(sliderPosition, yPosition, barHeight, barHeight);
+      TangibleGame.GAME.rect(sliderPosition, yPosition, barHeight, barHeight);
   }
 
   /**

@@ -17,7 +17,7 @@ public class Mover {
     public final static float CYLINDER_RADIUS = 25f;
     public final static float GROUND_OFFSET = -Plate.PLATE_THICKNESS/2 - SPHERE_RADIUS;
     public final static float SPHERE_TO_CYLINDER_DISTANCE = SPHERE_RADIUS + CYLINDER_RADIUS;
-    private final static float GRAVITY_SCALAR = 9.81f / Game.GAME.frameRate;
+    private final static float GRAVITY_SCALAR = 9.81f / TangibleGame.GAME.frameRate;
     private final static float FRICTION_FACTOR = 0.02f;
 
     private final PVector pos;
@@ -52,15 +52,15 @@ public class Mover {
 
     public void display() {
 
-        Game.GAME.noStroke();
-        Game.GAME.fill(Color.BALL_COLOR);
-        Game.GAME.pushMatrix();
-        Game.GAME.rotateX(plate.getAngleX());
-        Game.GAME.rotateY(plate.getAngleY());
-        Game.GAME.rotateZ(plate.getAngleZ());
-        Game.GAME.translate(pos.x, pos.y, pos.z);
-        Game.GAME.sphere(SPHERE_RADIUS);
-        Game.GAME.popMatrix();
+        TangibleGame.GAME.noStroke();
+        TangibleGame.GAME.fill(Color.BALL_COLOR);
+        TangibleGame.GAME.pushMatrix();
+        TangibleGame.GAME.rotateX(plate.getAngleX());
+        TangibleGame.GAME.rotateY(plate.getAngleY());
+        TangibleGame.GAME.rotateZ(plate.getAngleZ());
+        TangibleGame.GAME.translate(pos.x, pos.y, pos.z);
+        TangibleGame.GAME.sphere(SPHERE_RADIUS);
+        TangibleGame.GAME.popMatrix();
     }
 
     public List<PVector> checkCollisions(List<PVector> cylinders) {
@@ -77,12 +77,12 @@ public class Mover {
         if (pos.x > upperBoundX || pos.x < lowerBoundX) {
             pos.x = ValueUtils.clamp(pos.x, lowerBoundX, upperBoundX);
             velocity.x = velocity.x * -0.8f;
-            Game.GAME.decScore(velocity.mag());
+            TangibleGame.GAME.decScore(velocity.mag());
         }
         if (pos.z > upperBoundZ || pos.z < lowerBoundZ) {
             pos.z = ValueUtils.clamp(pos.z, -bound, bound);
             velocity.z = velocity.z * -0.8f;
-            Game.GAME.decScore(velocity.mag());
+            TangibleGame.GAME.decScore(velocity.mag());
         }
     }
 
@@ -125,7 +125,7 @@ public class Mover {
             pos.x = correctedPos.x;
             pos.z = correctedPos.z;
             velocity = correctedVel.normalize().mult(magVel * 0.8f);
-            Game.GAME.incScore(magVel);
+            TangibleGame.GAME.incScore(magVel);
         }
         return toKeep;
     }
