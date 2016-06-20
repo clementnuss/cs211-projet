@@ -28,7 +28,7 @@ public class TangibleGame extends PApplet {
     *                                                                                                                                ||
     *   vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv||
     */
-    public static final String VIDEO_PATH = "C:\\Users\\Leandro\\OneDrive\\Coding\\Processing\\cs211-projet\\Game\\data\\testvideo.mp4";
+    public static final String VIDEO_PATH = "C:\\Users\\Leandro\\OneDrive\\Coding\\Processing\\cs211-projet\\TangibleGame\\data\\testvideo.mp4";
     /** 
     *  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^||              
     *                                                                                                                                ||
