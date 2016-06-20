@@ -4,25 +4,19 @@ import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.core.PVector;
 import processing.event.KeyEvent;
+
 import java.util.*;
 
 class VideoStream extends PApplet {
 
     private final static int WIDTH = 640;
     private final static int HEIGHT = 480;
-    private static final float SMOOTHING_STEPS =3;
 
     private final SynchronizedRotationValue syncRot;
     private boolean pause = false;
 
-    // Rotation of the plate
-    private PVector smoothedRotation = new PVector(0, 0, 0), rotation = new PVector(0, 0, 0);
-    private long lastSmoothRotationUpdate = 0;
-    private float smoothingCoeffX, smoothingCoeffY;
-
     private TwoDThreeD from2Dto3Dtransformer;
     private boolean newBoardValue;
-    private int smoothSteps = 0;
 
 
     // HSV bounds container
@@ -69,7 +63,7 @@ class VideoStream extends PApplet {
     }
 
     public void settings() {
-        size(WIDTH * 2, HEIGHT);
+        size(WIDTH, HEIGHT);
     }
 
     public void setup() {
@@ -77,7 +71,7 @@ class VideoStream extends PApplet {
         mov = new Movie(this, Game.VIDEO_PATH);
         mov.loop();
 
-        from2Dto3Dtransformer = new TwoDThreeD(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
+        from2Dto3Dtransformer = new TwoDThreeD(WIDTH, HEIGHT);
 
         qGraph = new QuadGraph(this);
         // dimensions of the accumulator
@@ -145,28 +139,14 @@ class VideoStream extends PApplet {
 
             if (newBoardValue) {
                 PVector newRotation = from2Dto3Dtransformer.get3DRotations(capturedBoard.cornersAsList());
-                //            println("Got a rotation: ", boardRotation.x, boardRotation.y, boardRotation.z);
+                //println("Got a rotation: ", boardRotation.x, boardRotation.y, boardRotation.z);
                 syncRot.setRot(newRotation);
                 newBoardValue = false;
             }
 
-
-            // We want to (smoothly) update the position of the plate at a 20 FPS rate
-            if ((System.currentTimeMillis() - lastSmoothRotationUpdate) >= 10) {
-
-                if (smoothSteps++ < SMOOTHING_STEPS) {
-                    smoothedRotation.x += smoothingCoeffX;
-                    smoothedRotation.y += smoothingCoeffY;
-                    lastSmoothRotationUpdate = System.currentTimeMillis();
-                }
-
-            }
         }
     }
 
-    public Quad getCapturedBoard() {
-        return capturedBoard;
-    }
 
     /**
      * Filters img using the given HSV bounds.
@@ -457,6 +437,7 @@ class VideoStream extends PApplet {
     }
 
     public void keyPressed(KeyEvent event) {
+      /*
         switch (event.getKey()) {
             //Pause the webcam
             case 'p':
@@ -525,9 +506,6 @@ class VideoStream extends PApplet {
         }
 
         println(hsvBounds);
-    }
-
-    public PVector getRotation() {
-        return smoothedRotation;
+        */
     }
 }

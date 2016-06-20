@@ -11,15 +11,11 @@ import processing.video.Movie;
 
 import java.util.*;
 
-import static ch.epfl.cs211.Game.WINDOW_HEIGHT;
-import static ch.epfl.cs211.Game.WINDOW_WIDTH;
-
 
 public class VideoStream extends PApplet {
 
     private final static int WIDTH = 640;
     private final static int HEIGHT = 480;
-    private static final float SMOOTHING_STEPS =3;
     /*===============================================================
         Values for the Hough transform
       ===============================================================*/
@@ -29,8 +25,6 @@ public class VideoStream extends PApplet {
     private final static int NEIGHBORHOOD_SIZE = 16;
     private final static int N_LINES = 6;
     private final SynchronizedRotationValue syncRot;
-    // Rotation of the plate
-    private final PVector smoothedRotation = new PVector(0, 0, 0);
     // HSV bounds container
     private final HSVBounds hsvBounds = new HSVBounds();
     private final float[] sobelKernel = {1f, 0f, -1f};
@@ -49,12 +43,8 @@ public class VideoStream extends PApplet {
     Quad capturedBoard;
     QuadGraph qGraph;
     private boolean pause = false;
-    private PVector rotation = new PVector(0, 0, 0);
-    private long lastSmoothRotationUpdate = 0;
-    private float smoothingCoeffX, smoothingCoeffY;
     private TwoDThreeD from2Dto3Dtransformer;
     private boolean newBoardValue;
-    private int smoothSteps = 0;
     private int phiDim;
     private int rDim;
 
@@ -70,7 +60,7 @@ public class VideoStream extends PApplet {
     }
 
     public void settings() {
-        size(WIDTH * 2, HEIGHT);
+        size(WIDTH, HEIGHT);
     }
 
     public void setup() {
@@ -78,7 +68,7 @@ public class VideoStream extends PApplet {
         mov = new Movie(this, Game.VIDEO_PATH);
         mov.loop();
 
-        from2Dto3Dtransformer = new TwoDThreeD(WINDOW_WIDTH, WINDOW_HEIGHT);
+        from2Dto3Dtransformer = new TwoDThreeD(640, 480);
 
         qGraph = new QuadGraph(this);
         // dimensions of the accumulator
@@ -121,7 +111,6 @@ public class VideoStream extends PApplet {
                         , hsvBounds.getIntensity());
 
                 background(0);
-                image(hsvFiltered, WIDTH, 0);
                 PImage toDisplay = sobel(hsvFiltered);
 
                 image(mov, 0, 0);
@@ -146,28 +135,13 @@ public class VideoStream extends PApplet {
 
             if (newBoardValue) {
                 PVector newRotation = from2Dto3Dtransformer.get3DRotations(capturedBoard.cornersAsList());
-                //            println("Got a rotation: ", boardRotation.x, boardRotation.y, boardRotation.z);
+                //println("Got a rotation: ", boardRotation.x, boardRotation.y, boardRotation.z);
                 syncRot.setRot(newRotation);
                 newBoardValue = false;
-            }
-
-
-            // We want to (smoothly) update the position of the plate at a 20 FPS rate
-            if ((System.currentTimeMillis() - lastSmoothRotationUpdate) >= 10) {
-
-                if (smoothSteps++ < SMOOTHING_STEPS) {
-                    smoothedRotation.x += smoothingCoeffX;
-                    smoothedRotation.y += smoothingCoeffY;
-                    lastSmoothRotationUpdate = System.currentTimeMillis();
-                }
-
             }
         }
     }
 
-    public Quad getCapturedBoard() {
-        return capturedBoard;
-    }
 
     /**
      * Filters img using the given HSV bounds.
@@ -461,10 +435,13 @@ public class VideoStream extends PApplet {
         switch (event.getKey()) {
             //Pause the webcam
             case 'p':
-                if (pause)
+                if (pause) {
                     loop();
-                else
+                    mov.play();
+                } else {
                     noLoop();
+                    mov.pause();
+                }
 
                 pause = !pause;
                 System.out.println("The program is paused, press p to resume it");
@@ -526,9 +503,5 @@ public class VideoStream extends PApplet {
         }
 
         println(hsvBounds);
-    }
-
-    public PVector getRotation() {
-        return smoothedRotation;
     }
 }

@@ -9,10 +9,9 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
-
-// Imports for the java files
 import papaya.*;
 import processing.video.*;
+
 
 
 /**
@@ -152,7 +151,6 @@ public class Game extends PApplet {
             modeHasChanged = false;
         }
 
-        plate.setRotation(videoCaptureManager.getRotation());
         PVector rotFromVideoProcessing = syncRot.getRot();
 
         if(!absoluteRot.equals(rotFromVideoProcessing)){
