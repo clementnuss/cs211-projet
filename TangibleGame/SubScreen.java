@@ -51,7 +51,7 @@ public class SubScreen {
     }
 
     public void draw() {
-        Game.GAME.noLights();
+        TangibleGame.GAME.noLights();
         drawBackgroundView();
         drawTopView();
         drawScoreView();
@@ -65,7 +65,7 @@ public class SubScreen {
         backGroundView.noStroke();
         backGroundView.rect(0, 0, visualisationWidth, VISUALISATION_HEIGHT);
         backGroundView.endDraw();
-        Game.GAME.image(backGroundView, backGroundX, backGroundY);
+        TangibleGame.GAME.image(backGroundView, backGroundX, backGroundY);
     }
 
     private void drawTopView() {
@@ -73,12 +73,12 @@ public class SubScreen {
         topView.fill(Color.SUBSCREEN_TOPVIEW_COLOR);
         topView.noStroke();
         topView.rect(0, 0, TOP_WIDTH, TOP_HEIGHT);
-        float plateBound = Game.GAME.getMover().getBound();
+        float plateBound =TangibleGame.GAME.getMover().getBound();
 
         float sphereRadius = map(Mover.SPHERE_RADIUS, 0, Plate.PLATE_WIDTH, 0, TOP_HEIGHT);
         float cylRadius = map(Mover.CYLINDER_RADIUS, 0, Plate.PLATE_WIDTH, 0, TOP_HEIGHT);
 
-        PVector pos = Game.GAME.getMover().getPosition();
+        PVector pos = TangibleGame.GAME.getMover().getPosition();
         float px = map(pos.x, -plateBound, plateBound, sphereRadius, TOP_WIDTH - sphereRadius);
         float py = map(pos.z, -plateBound, plateBound, sphereRadius, TOP_HEIGHT - sphereRadius);
 
@@ -86,14 +86,14 @@ public class SubScreen {
         topView.ellipse(px, py, 2 * sphereRadius, 2 * sphereRadius);
 
         topView.fill(Color.CYLINDER_COLOR);
-        for (PVector cyl : Game.GAME.getObstacleList()) {
+        for (PVector cyl : TangibleGame.GAME.getObstacleList()) {
             px = map(cyl.x, -plateBound, plateBound, cylRadius, TOP_WIDTH - cylRadius);
             py = map(cyl.z, -plateBound, plateBound, cylRadius, TOP_HEIGHT - cylRadius);
             topView.ellipse(px, py, 2 * cylRadius, 2 * cylRadius);
         }
 
         topView.endDraw();
-        Game.GAME.image(topView, topViewX, topViewY);
+        TangibleGame.GAME.image(topView, topViewX, topViewY);
     }
 
     private void drawScoreView() {
@@ -103,13 +103,13 @@ public class SubScreen {
 
         scoreBoard.fill(0xFF000000);
         scoreBoard.textSize(9.5f);
-        scoreBoard.text("Total score: \n   -> " + ValueUtils.roundThreeDecimals(Game.GAME.getScore()) +
-                        "\nVelocity: \n   -> " + ValueUtils.roundThreeDecimals(Game.GAME.getMover().getVelocity().mag())+
-                        "\nLast score: \n    -> " + Game.GAME.getLastChange(),
+        scoreBoard.text("Total score: \n   -> " + ValueUtils.roundThreeDecimals(TangibleGame.GAME.getScore()) +
+                        "\nVelocity: \n   -> " + ValueUtils.roundThreeDecimals(TangibleGame.GAME.getMover().getVelocity().mag())+
+                        "\nLast score: \n    -> " + TangibleGame.GAME.getLastChange(),
                 7, 7, SCORE_WIDTH - 7, SCORE_HEIGHT - 7);
 
         scoreBoard.endDraw();
-        Game.GAME.image(scoreBoard, scoreBoardX, scoreBoardY);
+        TangibleGame.GAME.image(scoreBoard, scoreBoardX, scoreBoardY);
     }
 
     private void drawChartView() {
@@ -123,18 +123,18 @@ public class SubScreen {
         scoreChart.rect(0, 0, chartWidth, CHART_HEIGHT);
         int i = 0;
 
-        for (float scoreAtTime : Game.GAME.scoresList) {
+        for (float scoreAtTime : TangibleGame.GAME.scoresList) {
             drawBar(scoreAtTime, 1 + (elementWidth + 1) * i++);
         }
 
         scoreChart.endDraw();
-        Game.GAME.image(scoreChart, scoreChartX, scoreChartY);
+        TangibleGame.GAME.image(scoreChart, scoreChartX, scoreChartY);
     }
 
     private void drawBar(float score, float pos) {
         float elementHeight = CHART_HEIGHT / PLOT_MAX_ELEMENTS;
         scoreChart.fill(Color.SUBSCREEN_CHART_ELEMENT_COLOR);
-        int nElems = Math.round((score / Game.GAME.maxScore) * PLOT_MAX_ELEMENTS);
+        int nElems = Math.round((score / TangibleGame.GAME.maxScore) * PLOT_MAX_ELEMENTS);
         for (int y = 1; y <= nElems; y++) {
             scoreChart.rect(pos, CHART_HEIGHT - (y * (elementHeight)), elementWidth, elementHeight - 1);
         }
@@ -164,13 +164,13 @@ public class SubScreen {
      */
     public void updateDimensions() {
         backGroundX = 0;
-        backGroundY = Game.GAME.height - VISUALISATION_HEIGHT;
-        visualisationWidth = Game.GAME.width;
+        backGroundY = TangibleGame.GAME.height - VISUALISATION_HEIGHT;
+        visualisationWidth = TangibleGame.GAME.width;
         chartWidth = visualisationWidth - TOP_WIDTH - SCORE_WIDTH - 4 * VISUALISATION_OFFSET;
-        backGroundView = Game.GAME.createGraphics(visualisationWidth, VISUALISATION_HEIGHT);
-        topView = Game.GAME.createGraphics(TOP_WIDTH, TOP_HEIGHT);
-        scoreBoard = Game.GAME.createGraphics(SCORE_WIDTH, SCORE_HEIGHT);
-        scoreChart = Game.GAME.createGraphics(chartWidth, CHART_HEIGHT);
+        backGroundView = TangibleGame.GAME.createGraphics(visualisationWidth, VISUALISATION_HEIGHT);
+        topView = TangibleGame.GAME.createGraphics(TOP_WIDTH, TOP_HEIGHT);
+        scoreBoard = TangibleGame.GAME.createGraphics(SCORE_WIDTH, SCORE_HEIGHT);
+        scoreChart = TangibleGame.GAME.createGraphics(chartWidth, CHART_HEIGHT);
 
         topViewX = backGroundX + VISUALISATION_OFFSET;
         topViewY = backGroundY + VISUALISATION_OFFSET;

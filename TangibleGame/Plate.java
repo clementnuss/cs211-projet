@@ -8,7 +8,7 @@ import processing.core.PVector;
 
 public class Plate {
 
-    private final static float MAX_ANGLE = (float)(Game.GAME.PI/6.0);
+    private final static float MAX_ANGLE = (float)(TangibleGame.GAME.PI/6.0);
 
     /*  STEP_VALUE is the amount by which we increase / decrease
         the angle when the mouse is dragged
@@ -39,26 +39,26 @@ public class Plate {
     }
 
     public void display(){
-        Game.GAME.stroke(Color.STROKE_COLOR);
-        Game.GAME.strokeWeight(2f);
-        Game.GAME.pushMatrix();
-        Game.GAME.translate(x, y, z);
-        Game.GAME.rotateX(angleX);
-        Game.GAME.rotateY(angleY);
-        Game.GAME.rotateZ(angleZ);
+        TangibleGame.GAME.stroke(Color.STROKE_COLOR);
+        TangibleGame.GAME.strokeWeight(2f);
+        TangibleGame.GAME.pushMatrix();
+        TangibleGame.GAME.translate(x, y, z);
+        TangibleGame.GAME.rotateX(angleX);
+        TangibleGame.GAME.rotateY(angleY);
+        TangibleGame.GAME.rotateZ(angleZ);
 
-        Game.GAME.fill(color);
-        Game.GAME.box(PLATE_WIDTH, PLATE_THICKNESS, PLATE_WIDTH);
-        Game.GAME.popMatrix();
+        TangibleGame.GAME.fill(color);
+        TangibleGame.GAME.box(PLATE_WIDTH, PLATE_THICKNESS, PLATE_WIDTH);
+        TangibleGame.GAME.popMatrix();
     }
 
     public void updateAngle(){
 
-        int deltaX = Game.GAME.mouseX - Game.GAME.pmouseX;
-        int deltaY = Game.GAME.mouseY - Game.GAME.pmouseY;
+        int deltaX = TangibleGame.GAME.mouseX - TangibleGame.GAME.pmouseX;
+        int deltaY = TangibleGame.GAME.mouseY - TangibleGame.GAME.pmouseY;
 
-        float amountX = Game.GAME.abs(deltaX * sensitivity * ANGLE_VALUE);
-        float amountY = Game.GAME.abs(deltaY * sensitivity * ANGLE_VALUE);
+        float amountX = TangibleGame.GAME.abs(deltaX * sensitivity * ANGLE_VALUE);
+        float amountY = TangibleGame.GAME.abs(deltaY * sensitivity * ANGLE_VALUE);
 
         if(deltaX > 0){
             angleZ = ValueUtils.maxClamp(angleZ + amountX, MAX_ANGLE);
@@ -106,7 +106,7 @@ public class Plate {
     }
 
     public void setVertical(){
-        angleX = -Game.GAME.PI/2f;
+        angleX = -TangibleGame.GAME.PI/2f;
         angleY = 0;
         angleZ = 0;
     }

@@ -19,7 +19,7 @@ import processing.video.*;
  * Authors : Clément Nussbaumer, Leandro Kieliger, Louis Rossier
  */
  
-public class Game extends PApplet {
+public class TangibleGame extends PApplet {
   
     /** =============================================================================================================================¬
     *   =============================================================================================================================||
@@ -39,7 +39,7 @@ public class Game extends PApplet {
     */
 
     //Game instance
-    public static final Game GAME = new Game();
+    public static final TangibleGame GAME = new TangibleGame();
 
     //Game constants
     public final static int WINDOW_WIDTH = 1024;
@@ -80,7 +80,7 @@ public class Game extends PApplet {
     public Deque<Float> scoresList;
     private int scoreInterval = 0;
 
-    private Game(){
+    private TangibleGame(){
       scoresList = new ArrayDeque();
       oldWidth = width;
       oldHeight = height;
